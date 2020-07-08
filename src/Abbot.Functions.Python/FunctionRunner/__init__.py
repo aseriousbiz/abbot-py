@@ -26,7 +26,6 @@ class InterpreterError(Exception):
 
 def run_code(code, command):
     try:
-        response = "no response was previded"
         script_locals = {"command": command}
         exec(code, globals(), script_locals)
         return script_locals['response']
@@ -34,7 +33,12 @@ def run_code(code, command):
         description = "{}: {}".format(e.__class__.__name__, e.args[0])
         err = InterpreterError("SyntaxError", description, e.lineno, 0)
         raise err
-
+    except KeyError as e:
+        if not script_locals.get('response'):
+            err = InterpreterError("NoResponseError", "You must set a value called 'response' in your script.", 0, 0)
+            raise err
+        else:
+            pass
     except Exception as e:
         exc_type, exc_value, exc_tb = sys.exc_info()
         tb = traceback.TracebackException(exc_type, exc_value, exc_tb)
@@ -78,7 +82,10 @@ def main(req: func.HttpRequest) -> func.HttpResponse:
                 status_code=500
             )
     else:
+        msg = "There was no command entered..."
+        response = json.dumps([msg])
         return func.HttpResponse(
-             "You didn't enter a command...",
-             status_code=200
+            body=response,
+            mimetype="text/json",
+            status_code=200
         )
