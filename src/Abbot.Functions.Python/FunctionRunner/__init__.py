@@ -55,34 +55,14 @@ def run_code(code, command):
 
 def main(req: func.HttpRequest) -> func.HttpResponse:
     logging.info("In the Python Function Runner")
-    logging.info(dir(req))
-    logging.info("json:")
-    logging.info(req.get_json())
-    logging.info("body")
-    logging.info(req.get_body())
-    logging.info("params")
-    logging.info(req.params)
-
     req_body = req.get_json()
     code = req_body.get('Code')
     command = req_body.get('Arguments')
 
-
-    if not command:
-        try:
-            req_body = req.get_json()
-        except ValueError:
-            pass
-        else:
-            command = req_body.get('command')
-            code = req_body.get('code')
-
     if command:
         try:
             result = run_code(code, command)
-            logging.info("responding with: ")
             response = json.dumps([result])
-            logging.info(response)
             return func.HttpResponse(
                 body=response,
                 mimetype="text/json",
@@ -90,8 +70,10 @@ def main(req: func.HttpRequest) -> func.HttpResponse:
             )
         except InterpreterError as e:
             logging.info(json.dumps(e, cls=ExceptionEncoder))
+            exception = e
+            response = json.dumps([e], cls=ExceptionEncoder)
             return func.HttpResponse(
-                body=json.dumps(e, cls=ExceptionEncoder),
+                body=response,
                 mimetype="text/json",
                 status_code=500
             )
