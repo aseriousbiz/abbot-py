@@ -42,16 +42,15 @@ def run_code(code, command):
     except Exception as e:
         exc_type, exc_value, exc_tb = sys.exc_info()
         tb = traceback.TracebackException(exc_type, exc_value, exc_tb)
-
         try:
-            line_number = tb.lineno
+            line_number = e.lineno
         except:
-            line_number = 0
+            line_number = -1
 
         try:
             offset = tb.offset
         except:
-            offset = 0
+            offset = -1
 
         err = InterpreterError(str(e.__class__.__name__), str(exc_value), line_number, offset)
         raise err
