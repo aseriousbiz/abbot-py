@@ -43,7 +43,7 @@ def run_code(code, command):
         exc_type, exc_value, exc_tb = sys.exc_info()
         tb = traceback.TracebackException(exc_type, exc_value, exc_tb)
         try:
-            line_number = e.lineno
+            line_number = tb.lineno
         except:
             line_number = -1
 
