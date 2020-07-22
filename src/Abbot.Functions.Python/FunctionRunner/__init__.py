@@ -4,7 +4,10 @@ import json
 import traceback
 
 import azure.functions as func
+from dotenv import load_dotenv
 
+# We overrided some sensitive environment variables to make sure people can't abuse them. 
+load_dotenv(override=True)
 
 class ExceptionEncoder(json.JSONEncoder):
     def default(self, o):
