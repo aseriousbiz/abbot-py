@@ -2,12 +2,10 @@ import sys
 import logging
 import json
 import traceback
+import os # used to block environ access
 
 import azure.functions as func
-from dotenv import load_dotenv
 
-# We overrided some sensitive environment variables to make sure people can't abuse them. 
-load_dotenv(override=True)
 
 class ExceptionEncoder(json.JSONEncoder):
     def default(self, o):
@@ -29,8 +27,12 @@ class InterpreterError(Exception):
 
 def run_code(code, command):
     try:
+        ___env = os.environ
+        os.environ = {}
+        os.environb = None
         script_locals = {"command": command}
         exec(code, globals(), script_locals)
+        os.environ = ___env
         return script_locals['response']
     except SyntaxError as e:
         description = "{}: {}".format(e.__class__.__name__, e.args[0])
