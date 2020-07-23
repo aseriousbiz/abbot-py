@@ -25,14 +25,14 @@ class InterpreterError(Exception):
         return "{} at line {}, character {}".format(self.description, self.lineStart, self.spanStart)
 
 
-def run_code(code, command):
+def run_code(code, arguments):
     try:
-        ___env = os.environ
-        os.environ = {}
-        os.environb = None
-        script_locals = {"command": command}
+        os_copy = os
+        sys.modules['os'] = None
+        script_locals = {"args": arguments}
         exec(code, globals(), script_locals)
-        os.environ = ___env
+        sys.modules['os'] = os_copy
+        
         return script_locals['response']
     except SyntaxError as e:
         description = "{}: {}".format(e.__class__.__name__, e.args[0])
@@ -67,29 +67,20 @@ def main(req: func.HttpRequest) -> func.HttpResponse:
     code = req_body.get('Code')
     command = req_body.get('Arguments')
 
-    if command:
-        try:
-            result = run_code(code, command)
-            response = json.dumps([result])
-            return func.HttpResponse(
-                body=response,
-                mimetype="text/json",
-                status_code=200
-            )
-        except InterpreterError as e:
-            logging.info(json.dumps(e, cls=ExceptionEncoder))
-            exception = e
-            response = json.dumps([e], cls=ExceptionEncoder)
-            return func.HttpResponse(
-                body=response,
-                mimetype="text/json",
-                status_code=500
-            )
-    else:
-        msg = "There was no command entered..."
-        response = json.dumps([msg])
+    try:
+        result = run_code(code, command)
+        response = json.dumps([result])
         return func.HttpResponse(
             body=response,
             mimetype="text/json",
             status_code=200
+        )
+    except InterpreterError as e:
+        logging.info(json.dumps(e, cls=ExceptionEncoder))
+        exception = e
+        response = json.dumps([e], cls=ExceptionEncoder)
+        return func.HttpResponse(
+            body=response,
+            mimetype="text/json",
+            status_code=500
         )
