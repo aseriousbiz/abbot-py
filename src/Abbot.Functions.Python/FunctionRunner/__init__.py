@@ -25,12 +25,12 @@ class InterpreterError(Exception):
         return "{} at line {}, character {}".format(self.description, self.lineStart, self.spanStart)
 
 
-def run_code(code, command):
+def run_code(code, arguments):
     try:
         ___env = os.environ
         os.environ = {}
         os.environb = None
-        script_locals = {"command": command}
+        script_locals = {"args": arguments}
         exec(code, globals(), script_locals)
         os.environ = ___env
         return script_locals['response']
