@@ -67,29 +67,20 @@ def main(req: func.HttpRequest) -> func.HttpResponse:
     code = req_body.get('Code')
     command = req_body.get('Arguments')
 
-    if command:
-        try:
-            result = run_code(code, command)
-            response = json.dumps([result])
-            return func.HttpResponse(
-                body=response,
-                mimetype="text/json",
-                status_code=200
-            )
-        except InterpreterError as e:
-            logging.info(json.dumps(e, cls=ExceptionEncoder))
-            exception = e
-            response = json.dumps([e], cls=ExceptionEncoder)
-            return func.HttpResponse(
-                body=response,
-                mimetype="text/json",
-                status_code=500
-            )
-    else:
-        msg = "There was no command entered..."
-        response = json.dumps([msg])
+    try:
+        result = run_code(code, command)
+        response = json.dumps([result])
         return func.HttpResponse(
             body=response,
             mimetype="text/json",
             status_code=200
+        )
+    except InterpreterError as e:
+        logging.info(json.dumps(e, cls=ExceptionEncoder))
+        exception = e
+        response = json.dumps([e], cls=ExceptionEncoder)
+        return func.HttpResponse(
+            body=response,
+            mimetype="text/json",
+            status_code=500
         )
