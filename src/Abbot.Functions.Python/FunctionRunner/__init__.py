@@ -27,12 +27,12 @@ class InterpreterError(Exception):
 
 def run_code(code, arguments):
     try:
-        ___env = os.environ
-        os.environ = {}
-        os.environb = None
+        os_copy = os
+        sys.modules['os'] = None
         script_locals = {"args": arguments}
         exec(code, globals(), script_locals)
-        os.environ = ___env
+        sys.modules['os'] = os_copy
+        
         return script_locals['response']
     except SyntaxError as e:
         description = "{}: {}".format(e.__class__.__name__, e.args[0])
