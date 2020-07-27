@@ -5,7 +5,7 @@ import traceback
 import os # used to block environ access
 
 import azure.functions as func
-
+from __app__.FunctionRunner import storage 
 
 class ExceptionEncoder(json.JSONEncoder):
     def default(self, o):
@@ -27,6 +27,9 @@ class InterpreterError(Exception):
 
 def run_code(code, arguments):
     try:
+        # Instantiate a brain for persistence
+
+
         os_copy = os
         sys.modules['os'] = None
         script_locals = {"args": arguments}
@@ -66,6 +69,10 @@ def main(req: func.HttpRequest) -> func.HttpResponse:
     req_body = req.get_json()
     code = req_body.get('Code')
     command = req_body.get('Arguments')
+    logging.info("Request:")
+    for item in req.headers.items():
+        logging.info(item)
+    logging.info("End request")
 
     try:
         result = run_code(code, command)
