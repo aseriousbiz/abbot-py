@@ -25,15 +25,15 @@ class InterpreterError(Exception):
         return "{} at line {}, character {}".format(self.description, self.lineStart, self.spanStart)
 
 
-def run_code(code, arguments):
+def run_code(code, arguments, skill_id, user_id):
     try:
         # Instantiate a brain for persistence
-
+        brain = storage.Brain(skill_id, user_id, '')
 
         os_copy = os
         sys.modules['os'] = None
-        script_locals = {"args": arguments}
-        exec(code, globals(), script_locals)
+        script_locals = {"args": arguments, "brain": brain}
+        exec(code, script_locals, script_locals)
         sys.modules['os'] = os_copy
         
         return script_locals['response']
@@ -67,15 +67,19 @@ def run_code(code, arguments):
 def main(req: func.HttpRequest) -> func.HttpResponse:
     logging.info("In the Python Function Runner")
     req_body = req.get_json()
+    logging.info(req_body)
     code = req_body.get('Code')
     command = req_body.get('Arguments')
+    skill_id = req_body.get('SkillId')
+    user_id = req_body.get('UserId')
+
     logging.info("Request:")
     for item in req.headers.items():
         logging.info(item)
     logging.info("End request")
 
     try:
-        result = run_code(code, command)
+        result = run_code(code, command, skill_id, user_id)
         response = json.dumps([result])
         return func.HttpResponse(
             body=response,
