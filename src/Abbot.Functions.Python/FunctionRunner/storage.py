@@ -1,5 +1,6 @@
 import os
 import requests
+import logging
 
 class Brain(object):
     def __init__(self, skill_id, user_id, request_token):
@@ -8,20 +9,21 @@ class Brain(object):
         self.request_uri = os.environ.get('UserSkillApiUriFormatString', 'https://localhost:4979/api/skill/{0}/data/{1}')
         self.request_header = {'X-Abbot-SkillApiToken': request_token}
 
-    def make_uri(self, key, id):
-        return self.request_uri.format(key, id)
+    def make_uri(self, key):
+        return self.request_uri.format(self.skill_id, key)
 
     def read(self, key):
-        uri = self.make_uri(key, self.user_id)
-        return requests.get(uri, headers=self.request_header)
+        uri = self.make_uri(key)
+        response = requests.get(uri, headers=self.request_header)
+        if response.status_code == 200:
+            return response.json()
+        else:
+            return response.json()
 
     def write(self, key, value):
-        uri = self.make_uri(key, self.user_id)
-        return requests.post(uri, headers=self.request_header, params={"Value": value})
-
-    def update(self, key, value):
-        # Is this needed? 
-        self.write(key, value)
+        uri = self.make_uri(key)
+        logging.info("URI: " + uri)
+        return requests.post(uri, headers=self.request_header, params={"value": value})
 
     def search(self, term):
         raise NotImplementedError
@@ -30,7 +32,7 @@ class Brain(object):
         raise NotImplementedError
     
     def delete(self, key):
-        uri = self.make_uri(key, self.user_id)
+        uri = self.make_uri(key)
         return requests.delete(uri, headers=self.request_header)
 
     def test(self, key):
