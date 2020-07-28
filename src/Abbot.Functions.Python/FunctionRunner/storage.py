@@ -24,20 +24,19 @@ class Brain(object):
         if response.status_code == 200:
             output = response.json()
             return output.get("value")
+        elif response.status_code == 404:
+            return None
         else:
-            return response.json()
+            return "Failed with a status of {}".format(response.status_code)
 
     def write(self, key, value):
         uri = self.make_uri(key)
-        logging.info("URI: " + uri)
         data = {"value": value}
         result = requests.post(uri, headers=self.request_header, json=data)
         if result.status_code == 200:
             logging.info(result.json())
             return result.json()
         else:
-            logging.info(result.reason)
-            logging.info(dir(result))
             raise Exception
 
     def search(self, term):
