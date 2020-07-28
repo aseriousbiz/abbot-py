@@ -34,7 +34,6 @@ class Brain(object):
         data = {"value": value}
         result = requests.post(uri, headers=self.request_header, json=data)
         if result.status_code == 200:
-            logging.info(result.json())
             return result.json()
         else:
             raise Exception

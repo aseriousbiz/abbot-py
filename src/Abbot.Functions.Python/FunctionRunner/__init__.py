@@ -72,18 +72,14 @@ def run_code(code, arguments, skill_id, user_id, api_token):
 def main(req: func.HttpRequest) -> func.HttpResponse:
     logging.info("In the Python Function Runner")
 
-    logging.info("Request:")
-    for item in req.headers.items():
-        logging.info(item)
-    logging.info("End request")
-
-    api_token = req.headers.get('x-abbot-skillapitoken')
     req_body = req.get_json()
-    logging.info(req_body)
     code = req_body.get('Code')
     command = req_body.get('Arguments')
     skill_id = req_body.get('SkillId')
     user_id = req_body.get('UserId')
+
+    # The token is necessary for using the data API
+    api_token = req.headers.get('x-abbot-skillapitoken')
 
     try:
         result = run_code(code, command, skill_id, user_id, api_token)
