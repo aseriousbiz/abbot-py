@@ -25,10 +25,10 @@ class InterpreterError(Exception):
         return "{} at line {}, character {}".format(self.description, self.lineStart, self.spanStart)
 
 
-def run_code(code, arguments, skill_id, user_id):
+def run_code(code, arguments, skill_id, user_id, api_token):
     try:
         # Instantiate a brain for persistence
-        brain = storage.Brain(skill_id, user_id, '')
+        brain = storage.Brain(skill_id, user_id, api_token)
 
         os_copy = os
         sys.modules['os'] = None
@@ -66,6 +66,13 @@ def run_code(code, arguments, skill_id, user_id):
 
 def main(req: func.HttpRequest) -> func.HttpResponse:
     logging.info("In the Python Function Runner")
+
+    logging.info("Request:")
+    for item in req.headers.items():
+        logging.info(item)
+    logging.info("End request")
+
+    api_token = req.headers.get('x-abbot-skillapitoken')
     req_body = req.get_json()
     logging.info(req_body)
     code = req_body.get('Code')
@@ -73,13 +80,8 @@ def main(req: func.HttpRequest) -> func.HttpResponse:
     skill_id = req_body.get('SkillId')
     user_id = req_body.get('UserId')
 
-    logging.info("Request:")
-    for item in req.headers.items():
-        logging.info(item)
-    logging.info("End request")
-
     try:
-        result = run_code(code, command, skill_id, user_id)
+        result = run_code(code, command, skill_id, user_id, api_token)
         response = json.dumps([result])
         return func.HttpResponse(
             body=response,

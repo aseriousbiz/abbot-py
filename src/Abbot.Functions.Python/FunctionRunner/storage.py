@@ -1,13 +1,19 @@
 import os
 import requests
+import hmac
+import hashlib
 import logging
 
 class Brain(object):
-    def __init__(self, skill_id, user_id, request_token):
+    def __init__(self, skill_id, user_id, api_token):
         self.skill_id = skill_id
         self.user_id = user_id
         self.request_uri = os.environ.get('UserSkillApiUriFormatString', 'https://localhost:4979/api/skill/{0}/data/{1}')
-        self.request_header = {'X-Abbot-SkillApiToken': request_token}
+        self.request_header = {
+                'Content-Type': 'application/json',
+                'X-Abbot-SkillApiToken': api_token, 
+                'X-Abbot-PlatformUserId': str(user_id)
+            }
 
     def make_uri(self, key):
         return self.request_uri.format(self.skill_id, key)
@@ -23,7 +29,15 @@ class Brain(object):
     def write(self, key, value):
         uri = self.make_uri(key)
         logging.info("URI: " + uri)
-        return requests.post(uri, headers=self.request_header, params={"value": value})
+        data = {"value": value}
+        result = requests.post(uri, headers=self.request_header, json=data)
+        if result.status_code == 200:
+            logging.info(result.json())
+            return result.json()
+        else:
+            logging.info(result.reason)
+            logging.info(dir(result))
+            raise Exception
 
     def search(self, term):
         raise NotImplementedError
