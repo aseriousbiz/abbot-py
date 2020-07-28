@@ -1,7 +1,5 @@
 import os
 import requests
-import hmac
-import hashlib
 import logging
 
 class Brain(object):
