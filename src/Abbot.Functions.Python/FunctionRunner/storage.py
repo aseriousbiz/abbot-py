@@ -22,7 +22,8 @@ class Brain(object):
         uri = self.make_uri(key)
         response = requests.get(uri, headers=self.request_header)
         if response.status_code == 200:
-            return response.json()
+            output = response.json()
+            return output.get("value")
         else:
             return response.json()
 
