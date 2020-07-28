@@ -30,10 +30,15 @@ def run_code(code, arguments, skill_id, user_id, api_token):
         # Instantiate a brain for persistence
         brain = storage.Brain(skill_id, user_id, api_token)
 
+        # Remove `os` from `sys` so users cannot use the module.
         os_copy = os
         sys.modules['os'] = None
         script_locals = {"args": arguments, "brain": brain}
+
+        # Run the code
         exec(code, script_locals, script_locals)
+
+        # Restore `os` so our code can use it if necessary.
         sys.modules['os'] = os_copy
         
         return script_locals['response']
