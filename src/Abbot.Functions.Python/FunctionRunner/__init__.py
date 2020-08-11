@@ -72,14 +72,20 @@ def run_code(code, arguments, skill_id, user_id, api_token):
 def main(req: func.HttpRequest) -> func.HttpResponse:
     logging.info("In the Python Function Runner")
 
-    req_body = req.get_json()
-    code = req_body.get('Code')
-    command = req_body.get('Arguments')
-    skill_id = req_body.get('SkillId')
-    user_id = req_body.get('UserId')
+    try:
+        req_body = req.get_json()
+        code = req_body.get('Code')
+        command = req_body.get('Arguments')
+        skill_id = req_body.get('SkillId')
+        user_id = req_body.get('UserId')
 
-    # The token is necessary for using the data API
-    api_token = req.headers.get('x-abbot-skillapitoken')
+        # The token is necessary for using the data API
+        api_token = req.headers.get('x-abbot-skillapitoken')
+    except:
+        return func.HttpResponse(
+            body="Not a valid request",
+            status_code=500
+        )
 
     try:
         result = run_code(code, command, skill_id, user_id, api_token)
