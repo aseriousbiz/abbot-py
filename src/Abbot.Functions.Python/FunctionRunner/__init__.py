@@ -71,6 +71,12 @@ def run_code(code, arguments, skill_id, user_id, api_token):
 
 def main(req: func.HttpRequest) -> func.HttpResponse:
     logging.info("In the Python Function Runner")
+    if req.method == "GET":
+        return func.HttpResponse(
+            body=json.dumps(["Ok!"]),
+            mimetype="text/json",
+            status_code=200
+        )
 
     try:
         req_body = req.get_json()
@@ -81,9 +87,13 @@ def main(req: func.HttpRequest) -> func.HttpResponse:
 
         # The token is necessary for using the data API
         api_token = req.headers.get('x-abbot-skillapitoken')
-    except:
+    except Exception as e:
+        logging.info(json.dumps(e, cls=ExceptionEncoder))
+        exception = e
+        response = json.dumps([e], cls=ExceptionEncoder)
         return func.HttpResponse(
-            body="Not a valid request",
+            body=json.dumps(["Not a valid request"]),
+            mimetype="text/json",
             status_code=500
         )
 
