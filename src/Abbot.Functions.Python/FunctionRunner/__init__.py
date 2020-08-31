@@ -6,6 +6,7 @@ import os # used to block environ access
 
 import azure.functions as func
 from __app__.FunctionRunner import storage 
+from __app__.FunctionRunner import secrets
 
 class ExceptionEncoder(json.JSONEncoder):
     def default(self, o):
@@ -29,11 +30,12 @@ def run_code(code, arguments, skill_id, user_id, api_token):
     try:
         # Instantiate a brain for persistence
         brain = storage.Brain(skill_id, user_id, api_token)
+        secret_vault = secrets.Secrets(skill_id, user_id, api_token)
 
         # Remove `os` from `sys` so users cannot use the module.
         os_copy = os
         sys.modules['os'] = None
-        script_locals = {"args": arguments, "brain": brain}
+        script_locals = {"args": arguments, "brain": brain, "secrets": secret_vault}
 
         # Run the code
         exec(code, script_locals, script_locals)
