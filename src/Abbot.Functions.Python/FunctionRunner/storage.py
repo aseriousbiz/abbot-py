@@ -3,14 +3,15 @@ import requests
 import logging
 
 class Brain(object):
-    def __init__(self, skill_id, user_id, api_token):
+    def __init__(self, skill_id, user_id, api_token, timestamp):
         self.skill_id = skill_id
         self.user_id = user_id
         self.request_uri = os.environ.get('UserSkillApiUriFormatString', 'https://localhost:4979/api/skill/{0}/data/{1}')
         self.request_header = {
                 'Content-Type': 'application/json',
                 'X-Abbot-SkillApiToken': api_token, 
-                'X-Abbot-PlatformUserId': str(user_id)
+                'X-Abbot-PlatformUserId': str(user_id),
+                'X-Abbot-Timestamp': str(timestamp)
             }
 
     def make_uri(self, key):
@@ -34,6 +35,8 @@ class Brain(object):
         if result.status_code == 200:
             return result.json()
         else:
+            logging.info("Couldn't write to the brain. ")
+            logging.info(result.json())
             raise Exception
 
     def search(self, term):

@@ -4,7 +4,7 @@ import requests
 
 
 class Secrets(object):
-    def __init__(self, skill_id, user_id, api_token):
+    def __init__(self, skill_id, user_id, api_token, timestamp):
         self.skill_id = skill_id
         self.user_id = user_id
         uri_base = os.environ.get('UserSkillApiUriFormatString', 'https://localhost:4979/api/skill/{0}/data/{1}')
@@ -12,7 +12,8 @@ class Secrets(object):
         self.request_header = {
                 'Content-Type': 'application/json',
                 'X-Abbot-SkillApiToken': api_token, 
-                'X-Abbot-PlatformUserId': str(user_id)
+                'X-Abbot-PlatformUserId': str(user_id),
+                'X-Abbot-Timestamp': str(timestamp)
             }
 
     def make_uri(self, key):
@@ -26,6 +27,8 @@ class Secrets(object):
             output = response.json()
             return output.get("value")
         elif response.status_code == 404:
+            logging.info("Requested a secret from: " + uri)
+            logging.warning("The secret with key '{}' could not be found.".format(key))
             return None
         else:
             return "Failed with a status of {}".format(response.status_code)

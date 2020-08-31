@@ -26,11 +26,11 @@ class InterpreterError(Exception):
         return "{} at line {}, character {}".format(self.description, self.lineStart, self.spanStart)
 
 
-def run_code(code, arguments, skill_id, user_id, api_token):
+def run_code(code, arguments, skill_id, user_id, api_token, timestamp):
     try:
         # Instantiate a brain for persistence
-        brain = storage.Brain(skill_id, user_id, api_token)
-        secret_vault = secrets.Secrets(skill_id, user_id, api_token)
+        brain = storage.Brain(skill_id, user_id, api_token, timestamp)
+        secret_vault = secrets.Secrets(skill_id, user_id, api_token, timestamp)
 
         # Remove `os` from `sys` so users cannot use the module.
         os_copy = os
@@ -86,6 +86,7 @@ def main(req: func.HttpRequest) -> func.HttpResponse:
         command = req_body.get('Arguments')
         skill_id = req_body.get('SkillId')
         user_id = req_body.get('UserId')
+        timestamp = req_body.get('Timestamp')
 
         # The token is necessary for using the data API
         api_token = req.headers.get('x-abbot-skillapitoken')
@@ -100,7 +101,7 @@ def main(req: func.HttpRequest) -> func.HttpResponse:
         )
 
     try:
-        result = run_code(code, command, skill_id, user_id, api_token)
+        result = run_code(code, command, skill_id, user_id, api_token, timestamp)
         response = json.dumps([result])
         return func.HttpResponse(
             body=response,
