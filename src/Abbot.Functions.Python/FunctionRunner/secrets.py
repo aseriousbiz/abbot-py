@@ -21,14 +21,11 @@ class Secrets(object):
 
     def read(self, key):
         uri = self.make_uri(key)
-        print(uri)
         response = requests.get(uri, headers=self.request_header)
         if response.status_code == 200:
             output = response.json()
-            return output.get("value")
+            return output.get("secret")
         elif response.status_code == 404:
-            logging.info("Requested a secret from: " + uri)
-            logging.warning("The secret with key '{}' could not be found.".format(key))
             return None
         else:
             return "Failed with a status of {}".format(response.status_code)
