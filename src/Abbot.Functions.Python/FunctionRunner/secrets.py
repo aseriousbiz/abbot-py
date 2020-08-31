@@ -1,0 +1,40 @@
+import os
+import logging
+import requests
+
+
+class Secrets(object):
+    def __init__(self, skill_id, user_id, api_token):
+        self.skill_id = skill_id
+        self.user_id = user_id
+        uri_base = os.environ.get('UserSkillApiUriFormatString', 'https://localhost:4979/api/skill/{0}/data/{1}')
+        self.request_uri = uri_base.replace('/data/', '/secret/')
+        self.request_header = {
+                'Content-Type': 'application/json',
+                'X-Abbot-SkillApiToken': api_token, 
+                'X-Abbot-PlatformUserId': str(user_id)
+            }
+
+    def make_uri(self, key):
+        return self.request_uri.format(self.skill_id, key)
+
+    def read(self, key):
+        uri = self.make_uri(key)
+        print(uri)
+        response = requests.get(uri, headers=self.request_header)
+        if response.status_code == 200:
+            output = response.json()
+            return output.get("value")
+        elif response.status_code == 404:
+            return None
+        else:
+            return "Failed with a status of {}".format(response.status_code)
+    
+    def test(self, key):
+        return "You requested a secret called '{}'.".format(key)
+    
+    def __str__(self):
+        return "Secret store for {} skill.".format(self.skill)
+
+    def __repr__(self):
+        return "Secret store for {} skill.".format(self.skill)
