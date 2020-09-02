@@ -5,8 +5,7 @@ import traceback
 import os # used to block environ access
 
 import azure.functions as func
-from __app__.FunctionRunner import storage 
-from __app__.FunctionRunner import secrets
+from __app__.FunctionRunner import bot as _bot
 
 class ExceptionEncoder(json.JSONEncoder):
     def default(self, o):
@@ -26,31 +25,32 @@ class InterpreterError(Exception):
         return "{} at line {}, character {}".format(self.description, self.lineStart, self.spanStart)
 
 
-def run_code(code, arguments, skill_id, user_id, api_token, timestamp):
+def run_code(req, api_token):
     try:
-        # Instantiate a brain for persistence
-        brain = storage.Brain(skill_id, user_id, api_token, timestamp)
-        secret_vault = secrets.Secrets(skill_id, user_id, api_token, timestamp)
+        # Instantiate a bot object
+        bot = _bot.Bot(req, api_token)
+        code = req.get('Code')
 
         # Remove `os` from `sys` so users cannot use the module.
         os_copy = os
         sys.modules['os'] = None
-        script_locals = {"args": arguments, "brain": brain, "secrets": secret_vault}
+        script_locals = {"bot": bot, "__ScriptResponse__": None}
 
         # Run the code
         exec(code, script_locals, script_locals)
 
         # Restore `os` so our code can use it if necessary.
         sys.modules['os'] = os_copy
-        
-        return script_locals['response']
+        logging.info("Script Locals:")
+        logging.info(script_locals)
+        return script_locals['__ScriptResponse__']
     except SyntaxError as e:
         description = "{}: {}".format(e.__class__.__name__, e.args[0])
         err = InterpreterError("SyntaxError", description, e.lineno, 0)
         raise err
     except KeyError as e:
-        if not script_locals.get('response'):
-            err = InterpreterError("NoResponseError", "You must set a value called 'response' in your script.", 0, 0)
+        if not script_locals.get('__ScriptResponse__') or script_locals.get('__ScriptResponse__') is None:
+            err = InterpreterError("NoResponseError", "You must call `bot.reply(<output>)` with your output.", 0, 0)
             raise err
         else:
             pass
@@ -82,12 +82,6 @@ def main(req: func.HttpRequest) -> func.HttpResponse:
 
     try:
         req_body = req.get_json()
-        code = req_body.get('Code')
-        command = req_body.get('Arguments')
-        skill_id = req_body.get('SkillId')
-        user_id = req_body.get('UserId')
-        timestamp = req_body.get('Timestamp')
-
         # The token is necessary for using the data API
         api_token = req.headers.get('x-abbot-skillapitoken')
     except Exception as e:
@@ -101,7 +95,7 @@ def main(req: func.HttpRequest) -> func.HttpResponse:
         )
 
     try:
-        result = run_code(code, command, skill_id, user_id, api_token, timestamp)
+        result = run_code(req_body, api_token)
         response = json.dumps([result])
         return func.HttpResponse(
             body=response,
