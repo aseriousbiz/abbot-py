@@ -3,8 +3,6 @@ import logging
 
 class ExceptionEncoder(json.JSONEncoder):
     def default(self, o):
-        logging.warning("FUCK YEAH BITCHES")
-        logging.warning(o)
         if o.__dict__: 
             return o.__dict__
         else:

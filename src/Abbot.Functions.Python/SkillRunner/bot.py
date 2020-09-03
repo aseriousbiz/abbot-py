@@ -4,9 +4,9 @@ import sys
 import logging
 import traceback
 
-from __app__.FunctionRunner import storage 
-from __app__.FunctionRunner import secrets
-from __app__.FunctionRunner import exceptions
+from __app__.SkillRunner import storage 
+from __app__.SkillRunner import secrets
+from __app__.SkillRunner import exceptions
 
 class Bot(object):
     def __init__(self, req, api_token):
