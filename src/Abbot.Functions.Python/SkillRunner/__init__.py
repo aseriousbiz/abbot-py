@@ -15,13 +15,11 @@ def run_code(req, api_token):
         bot = _bot.Bot(req, api_token)
         bot.run_user_script()
         return bot.__ScriptResponse__
-        logging.warning("hi there")
     except Exception as e:
         raise e
     
 
 def main(req: func.HttpRequest) -> func.HttpResponse:
-    logging.info("In the Python Function Runner")
     if req.method == "GET":
         return func.HttpResponse(
             body=json.dumps(["Ok!"]),
@@ -34,7 +32,6 @@ def main(req: func.HttpRequest) -> func.HttpResponse:
         # The token is necessary for using the data API
         api_token = req.headers.get('x-abbot-skillapitoken')
     except Exception as e:
-        logging.info(json.dumps(e, cls=exceptions.ExceptionEncoder))
         exception = e
         response = json.dumps([e], cls=exceptions.ExceptionEncoder)
         return func.HttpResponse(
@@ -61,7 +58,6 @@ def main(req: func.HttpRequest) -> func.HttpResponse:
         )
     except Exception as e: 
         response = json.dumps([{ "errorId": type(e).__name__, "description": str(e) }])
-        logging.warning(response)
         return func.HttpResponse(
             body=response,
             mimetype="text/json",

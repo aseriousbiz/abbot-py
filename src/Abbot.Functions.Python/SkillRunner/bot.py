@@ -35,9 +35,8 @@ class Bot(object):
 
             # Restore `os` so our code can use it if necessary.
             sys.modules['os'] = os_copy
-
             out = script_locals.get('bot')
-            # logging.info(dir(out))
+            
             return out.__ScriptResponse__
         except SyntaxError as e:
             description = "{}: {}".format(e.__class__.__name__, e.args[0])
