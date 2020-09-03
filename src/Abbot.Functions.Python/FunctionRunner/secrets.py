@@ -1,7 +1,11 @@
 import os
 import logging
 import requests
+import json
+from cryptography.fernet import Fernet
 
+global key
+key = Fernet.generate_key()
 
 class Secrets(object):
     def __init__(self, skill_id, user_id, api_token, timestamp):
@@ -9,16 +13,26 @@ class Secrets(object):
         self.user_id = user_id
         uri_base = os.environ.get('UserSkillApiUriFormatString', 'https://localhost:4979/api/skill/{0}/data/{1}')
         self.request_uri = uri_base.replace('/data/', '/secret/')
-        self._request_header = {
+        
+        
+        header_obj = {
                 'Content-Type': 'application/json',
                 'X-Abbot-SkillApiToken': api_token, 
                 'X-Abbot-PlatformUserId': str(user_id),
                 'X-Abbot-Timestamp': str(timestamp)
             }
+        
+        # In order to prevent users from accessing sensitive data, we encrypt it using Fernet, 
+        # then decrypt in the accessors. 
+        obj = json.dumps(header_obj).encode('utf-8')
+        cipher = Fernet(key)
+        self._request_header = cipher.encrypt(obj)
 
     @property
     def request_header(self):
-        return None
+        cipher = Fernet(key)
+        obj = cipher.decrypt(self._request_header)
+        return json.loads(obj)
 
     @request_header.setter
     def request_header(self, value):
@@ -29,7 +43,7 @@ class Secrets(object):
 
     def read(self, key):
         uri = self.make_uri(key)
-        response = requests.get(uri, headers=self._request_header)
+        response = requests.get(uri, headers=self.request_header)
         if response.status_code == 200:
             output = response.json()
             return output.get("secret")

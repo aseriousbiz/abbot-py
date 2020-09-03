@@ -29,7 +29,7 @@ class Bot(object):
             sys.modules['os'] = None
 
             script_locals = { "bot": self }
-
+            out = None
             # Run the code
             exec(self.code, script_locals, script_locals)
 
@@ -37,32 +37,21 @@ class Bot(object):
             sys.modules['os'] = os_copy
 
             out = script_locals.get('bot')
-            logging.info(dir(out))
+            # logging.info(dir(out))
             return out.__ScriptResponse__
         except SyntaxError as e:
             description = "{}: {}".format(e.__class__.__name__, e.args[0])
             err = exceptions.InterpreterError("SyntaxError", description, e.lineno, 0)
             raise err
         except AttributeError as e:
-            if not script_locals.get('__ScriptResponse__') or script_locals.get('__ScriptResponse__') is None:
+            if not out:
+                raise e
+            if not out.__ScriptResponse__ or out.__ScriptResponse__ is None:
                 err = exceptions.InterpreterError("NoResponseError", "You must call `bot.reply(<output>)` with your output.", 0, 0)
                 raise err
             else:
                 pass
         except Exception as e:
-            exc_type, exc_value, exc_tb = sys.exc_info()
-            tb = traceback.TracebackException(exc_type, exc_value, exc_tb)
-            try:
-                line_number = tb.lineno
-            except:
-                line_number = -1
-
-            try:
-                offset = tb.offset
-            except:
-                offset = -1
-
-            err = exceptions.InterpreterError(str(e.__class__.__name__), str(exc_value), line_number, offset)
             raise err
 
     

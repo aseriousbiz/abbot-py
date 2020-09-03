@@ -53,9 +53,16 @@ def main(req: func.HttpRequest) -> func.HttpResponse:
             status_code=200
         )
     except exceptions.InterpreterError as e:
-        logging.info(json.dumps(e, cls=exceptions.ExceptionEncoder))
         exception = e
         response = json.dumps([e], cls=exceptions.ExceptionEncoder)
+        return func.HttpResponse(
+            body=response,
+            mimetype="text/json",
+            status_code=500
+        )
+    except Exception as e: 
+        response = json.dumps([{ "errorId": type(e).__name__, "description": str(e) }])
+        logging.warning(response)
         return func.HttpResponse(
             body=response,
             mimetype="text/json",
