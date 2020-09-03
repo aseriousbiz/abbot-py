@@ -9,7 +9,6 @@ from __app__.FunctionRunner import bot as _bot
 from __app__.FunctionRunner import exceptions
 
 
-
 def run_code(req, api_token):
     # Instantiate a bot object
     try:

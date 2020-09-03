@@ -28,7 +28,7 @@ class Bot(object):
             os_copy = os
             sys.modules['os'] = None
 
-            script_locals = { "bot": self }
+            script_locals = { "bot": self, "args": self.args }
             out = None
             # Run the code
             exec(self.code, script_locals, script_locals)
@@ -52,7 +52,7 @@ class Bot(object):
             else:
                 pass
         except Exception as e:
-            raise err
+            raise e
 
     
     def reply(self, response):
