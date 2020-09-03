@@ -19,6 +19,7 @@ class Bot(object):
         self.brain = storage.Brain(skill_id, user_id, api_token, timestamp)
         self.secrets = secrets.Secrets(skill_id, user_id, api_token, timestamp)
     
+    
     def run_user_script(self):
         """
         Run the code the user has submitted.
@@ -36,7 +37,7 @@ class Bot(object):
             # Restore `os` so our code can use it if necessary.
             sys.modules['os'] = os_copy
             out = script_locals.get('bot')
-            
+
             return out.__ScriptResponse__
         except SyntaxError as e:
             description = "{}: {}".format(e.__class__.__name__, e.args[0])

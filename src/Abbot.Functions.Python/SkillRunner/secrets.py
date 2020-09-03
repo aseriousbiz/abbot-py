@@ -26,8 +26,10 @@ class Secrets(object):
         cipher = Fernet(safe_key)
         self._request_header = cipher.encrypt(obj)
 
+
     def make_uri(self, key):
         return self.request_uri.format(self.skill_id, key)
+
 
     def read(self, key):
         uri = self.make_uri(key)
@@ -44,11 +46,14 @@ class Secrets(object):
         else:
             return "Failed with a status of {}".format(response.status_code)
     
+
     def test(self, key):
         return "You requested a secret called '{}'.".format(key)
     
+
     def __str__(self):
         return "Secret store for {} skill.".format(self.skill_id)
+
 
     def __repr__(self):
         return "Secret store for {} skill.".format(self.skill_id)

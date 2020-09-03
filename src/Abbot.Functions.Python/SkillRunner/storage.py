@@ -25,8 +25,10 @@ class Brain(object):
         cipher = Fernet(safe_key)
         self._request_header = cipher.encrypt(obj)
 
+
     def make_uri(self, key):
         return self.request_uri.format(self.skill_id, key)
+
 
     def read(self, key):
         uri = self.make_uri(key)
@@ -42,6 +44,7 @@ class Brain(object):
             return None
         else:
             return "Failed with a status of {}".format(response.status_code)
+
 
     def write(self, key, value):
         uri = self.make_uri(key)
@@ -59,12 +62,15 @@ class Brain(object):
             logging.info(result.json())
             raise Exception
 
+
     def search(self, term):
         raise NotImplementedError
     
+
     def list(self):
         raise NotImplementedError
     
+
     def delete(self, key):
         uri = self.make_uri(key)
         cipher = Fernet(safe_key)
@@ -72,11 +78,14 @@ class Brain(object):
         headers = json.loads(obj)
         return requests.delete(uri, headers=headers)
 
+
     def test(self, key):
         return "You sent '{}' to the brain.".format(key)
     
+
     def __str__(self):
         return "Brain for {} skill.".format(self.skill)
+
 
     def __repr__(self):
         return "Brain for {} skill.".format(self.skill)
