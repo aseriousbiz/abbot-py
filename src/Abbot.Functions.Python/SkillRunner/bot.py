@@ -18,6 +18,7 @@ class Bot(object):
         self.code = req.get('Code')
         self.brain = storage.Brain(skill_id, user_id, api_token, timestamp)
         self.secrets = secrets.Secrets(skill_id, user_id, api_token, timestamp)
+        self.responses = []
     
     
     def run_user_script(self):
@@ -38,7 +39,7 @@ class Bot(object):
             sys.modules['os'] = os_copy
             out = script_locals.get('bot')
 
-            return out.__ScriptResponse__
+            return out.responses
         except SyntaxError as e:
             description = "{}: {}".format(e.__class__.__name__, e.args[0])
             err = exceptions.InterpreterError("SyntaxError", description, e.lineno, 0)
@@ -47,7 +48,7 @@ class Bot(object):
             if not out:
                 raise e
             if not out.__ScriptResponse__ or out.__ScriptResponse__ is None:
-                err = exceptions.InterpreterError("NoResponseError", "You must call `bot.reply(<output>)` with your output.", 0, 0)
+                err = exceptions.InterpreterError("NoResponseError", "You must call `bot.reply(<output>)` at least once with your output.", 0, 0)
                 raise err
             else:
                 pass
@@ -56,12 +57,12 @@ class Bot(object):
 
     
     def reply(self, response):
-        self.__ScriptResponse__ = response
+        self.responses.append(response)
 
 
     def __repr__(self):
         response = "A very nice bot with these features: \n"
-        response += "                args: " + self.args + "\n "
-        response += "  __ScriptResponse__: " + __ScriptResponse__
+        response += "       args: " + self.args + "\n "
+        response += "  responses: " + '\n'.join(self.responses)
 
         return response

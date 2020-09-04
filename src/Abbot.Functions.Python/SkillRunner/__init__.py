@@ -14,7 +14,7 @@ def run_code(req, api_token):
     try:
         bot = _bot.Bot(req, api_token)
         bot.run_user_script()
-        return bot.__ScriptResponse__
+        return bot.responses
     except Exception as e:
         raise e
     
@@ -41,8 +41,8 @@ def main(req: func.HttpRequest) -> func.HttpResponse:
         )
 
     try:
-        result = run_code(req_body, api_token)
-        response = json.dumps([result])
+        responses = run_code(req_body, api_token)
+        response = json.dumps(responses)
         return func.HttpResponse(
             body=response,
             mimetype="text/json",
