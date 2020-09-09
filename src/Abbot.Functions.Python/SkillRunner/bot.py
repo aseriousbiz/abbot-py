@@ -8,16 +8,37 @@ from __app__.SkillRunner import storage
 from __app__.SkillRunner import secrets
 from __app__.SkillRunner import exceptions
 
+
+class Mention(object):
+    def __init__(self, Id, UserName, Name):
+        self.id = Id
+        self.user_name = UserName
+        self.name = Name
+    
+    def toJSON(self):
+            return json.dumps(self, default=lambda o: o.__dict__, 
+                sort_keys=True, indent=4)
+
+    def __str__(self):
+        return "<@{}>".format(self.user_name)
+
+
 class Bot(object):
     def __init__(self, req, api_token):
         skill_id = req.get('SkillId')
         user_id = req.get('UserId')
         timestamp = req.get('Timestamp')
 
+        bot_data = req.get('Bot')
+
+        self.id = bot_data.get('Id')
+        self.user_name = bot_data.get('UserName')
         self.args = req.get('Arguments')
+        self.arguments = self.args
         self.code = req.get('Code')
         self.brain = storage.Brain(skill_id, user_id, api_token, timestamp)
         self.secrets = secrets.Secrets(skill_id, user_id, api_token, timestamp)
+        self.mentions = self.load_mentions(req.get('Mentions'))
         self.responses = []
     
     
@@ -58,6 +79,10 @@ class Bot(object):
     
     def reply(self, response):
         self.responses.append(response)
+
+
+    def load_mentions(self, mentions):
+        return [Mention(m.get('Id'), m.get('UserName'), m.get('Name')) for m in mentions]
 
 
     def __repr__(self):
