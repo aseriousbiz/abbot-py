@@ -45,6 +45,22 @@ class Brain(object):
         else:
             return "Failed with a status of {}".format(response.status_code)
 
+    
+    def list(self):
+        uri = self.make_uri("")
+        cipher = Fernet(safe_key)
+        obj = cipher.decrypt(self._request_header)
+        headers = json.loads(obj)
+
+        response = requests.get(uri, headers=headers)
+        if response.status_code == 200:
+            output = response.json()
+            return output.get("value")
+        elif response.status_code == 404:
+            return None
+        else:
+            return "Failed with a status of {}".format(response.status_code)
+
 
     def write(self, key, value):
         uri = self.make_uri(key)
@@ -64,10 +80,6 @@ class Brain(object):
 
 
     def search(self, term):
-        raise NotImplementedError
-    
-
-    def list(self):
         raise NotImplementedError
     
 
