@@ -12,6 +12,11 @@ class Brain(object):
         self.skill_id = skill_id
         self.user_id = user_id
         self.request_uri = os.environ.get('UserSkillApiUriFormatString', 'https://localhost:4979/api/skill/{0}/data/{1}')
+        if self.request_uri.startswith("https://localhost"):
+            self.verify_ssl = False
+        else:
+            self.verify_ssl = True
+
         header_obj = {
                 'Content-Type': 'application/json',
                 'X-Abbot-SkillApiToken': api_token, 
@@ -36,7 +41,7 @@ class Brain(object):
         obj = cipher.decrypt(self._request_header)
         headers = json.loads(obj)
 
-        response = requests.get(uri, headers=headers)
+        response = requests.get(uri, headers=headers, verify=self.verify_ssl)
         if response.status_code == 200:
             output = response.json()
             return output.get("value")
@@ -52,7 +57,7 @@ class Brain(object):
         obj = cipher.decrypt(self._request_header)
         headers = json.loads(obj)
 
-        response = requests.get(uri, headers=headers)
+        response = requests.get(uri, headers=headers, verify=self.verify_ssl)
         if response.status_code == 200:
             output = response.json()
             return output.get("value")
@@ -70,11 +75,12 @@ class Brain(object):
         obj = cipher.decrypt(self._request_header)
         headers = json.loads(obj)
 
-        result = requests.post(uri, headers=headers, json=data)
+        result = requests.post(uri, headers=headers, verify=self.verify_ssl, json=data)
         if result.status_code == 200:
             return result.json()
         else:
             logging.info("Couldn't write to the brain. ")
+            logging.info("Got Status Code: " + str(result.status_code))
             logging.info(result.json())
             raise Exception
 
@@ -88,7 +94,7 @@ class Brain(object):
         cipher = Fernet(safe_key)
         obj = cipher.decrypt(self._request_header)
         headers = json.loads(obj)
-        return requests.delete(uri, headers=headers)
+        return requests.delete(uri, headers=headers, verify=self.verify_ssl)
 
 
     def test(self, key):
