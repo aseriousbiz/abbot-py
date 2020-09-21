@@ -53,6 +53,7 @@ class Brain(object):
     
     def list(self):
         uri = self.make_uri("")
+        logging.info("Getting list with this URL: " + uri)
         cipher = Fernet(safe_key)
         obj = cipher.decrypt(self._request_header)
         headers = json.loads(obj)
@@ -60,7 +61,7 @@ class Brain(object):
         response = requests.get(uri, headers=headers, verify=self.verify_ssl)
         if response.status_code == 200:
             output = response.json()
-            return output.get("value")
+            return output
         elif response.status_code == 404:
             return None
         else:
