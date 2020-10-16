@@ -1,6 +1,7 @@
 import os
 import json
 import sys
+import requests
 import logging
 import traceback
 
@@ -31,6 +32,8 @@ class Bot(object):
 
         bot_data = req.get('Bot')
 
+        self.reply_api_uri = os.environ.get('AbbotReplyApiUrl', 'https://localhost:4979/api/skill/{0}/data/{1}')
+
         self.id = bot_data.get('Id')
         self.user_name = bot_data.get('UserName')
         self.args = req.get('Arguments')
@@ -39,6 +42,7 @@ class Bot(object):
         self.brain = storage.Brain(skill_id, user_id, api_token, timestamp)
         self.secrets = secrets.Secrets(skill_id, user_id, api_token, timestamp)
         self.mentions = self.load_mentions(req.get('Mentions'))
+        self.conversation_reference = req.get('ConversationReference')
         self.responses = []
     
     
@@ -78,6 +82,10 @@ class Bot(object):
 
     
     def reply(self, response):
+        # Requires SkillId, Message, ConversationReference
+        body = {"SkillId": self.id, "Message": response, "ConversationReference": self.conversation_reference}
+        r = requests.post(self.reply_api_url, body)
+
         self.responses.append(response)
 
 
