@@ -51,17 +51,18 @@ class ApiClient(object):
         cipher = Fernet(safe_key)
         obj = cipher.decrypt(self._request_header)
         headers = json.loads(obj)
-
-        result = requests.post(uri, headers=headers, verify=self.verify_ssl, json=data)
-
-        if result.status_code == 200:
+        logging.info("doin it")
+        try:
+            result = requests.post(uri, headers=headers, verify=self.verify_ssl, json=data)
+            logging.info("POSTING: " + uri)
+            logging.info("HEADERS: " + str(headers))
+            logging.info("DATA: " + str(data))
+            result.raise_for_status()
             return result.json()
-        else:
-            logging.error("API Client could not POST!")
-            logging.error("Got Status Code: " + str(result.status_code))
-            logging.error(result.json())
-            raise Exception("Failed with a status of {}".format(response.status_code))
-    
+        except Exception as e:
+            logging.error("There was an error POSTing (got status code: {})".format(result.status_code))
+            logging.error(e)
+
 
     def delete(self, uri, body):
         uri = self.make_uri(key)

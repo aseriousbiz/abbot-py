@@ -84,12 +84,12 @@ class Bot(object):
             raise e
 
     
-    def reply(self, response):
-        # Requires SkillId, Message, ConversationReference
-        body = {"SkillId": self.skill_id, "Message": response, "ConversationReference": self.conversation_reference}
-        self.api_client.post(self.reply_api_uri, body)
-
-        self.responses.append(response)
+    def reply(self, response):        
+        if self.conversation_reference:
+            body = {"SkillId": self.skill_id, "Message": response, "ConversationReference": self.conversation_reference}
+            self.api_client.post(self.reply_api_uri, body)
+        else:
+            self.responses.append(response)
 
 
     def load_mentions(self, mentions):
