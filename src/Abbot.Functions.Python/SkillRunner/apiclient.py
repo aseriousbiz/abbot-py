@@ -54,9 +54,6 @@ class ApiClient(object):
         logging.info("doin it")
         try:
             result = requests.post(uri, headers=headers, verify=self.verify_ssl, json=data)
-            logging.info("POSTING: " + uri)
-            logging.info("HEADERS: " + str(headers))
-            logging.info("DATA: " + str(data))
             result.raise_for_status()
             return result.json()
         except Exception as e:
@@ -64,8 +61,7 @@ class ApiClient(object):
             logging.error(e)
 
 
-    def delete(self, uri, body):
-        uri = self.make_uri(key)
+    def delete(self, uri):
         cipher = Fernet(safe_key)
         obj = cipher.decrypt(self._request_header)
         headers = json.loads(obj)

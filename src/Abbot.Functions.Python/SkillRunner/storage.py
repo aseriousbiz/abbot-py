@@ -3,6 +3,9 @@ import json
 import requests
 import logging
 
+from __app__.SkillRunner.apiclient import ApiClient
+
+# TODO: remove the next two lines (Fernet lines)
 from cryptography.fernet import Fernet
 
 safe_key = Fernet.generate_key()
@@ -16,6 +19,7 @@ class Brain(object):
             self.verify_ssl = False
         else:
             self.verify_ssl = True
+        self.api_client = ApiClient(self.request_uri, user_id, api_token, timestamp)
 
         header_obj = {
                 'Content-Type': 'application/json',
@@ -37,53 +41,22 @@ class Brain(object):
 
     def read(self, key):
         uri = self.make_uri(key)
-        cipher = Fernet(safe_key)
-        obj = cipher.decrypt(self._request_header)
-        headers = json.loads(obj)
-
-        response = requests.get(uri, headers=headers, verify=self.verify_ssl)
-        if response.status_code == 200:
-            output = response.json()
+        output = self.api_client.get(uri)
+        if output:
             return output.get("value")
-        elif response.status_code == 404:
-            return None
         else:
-            return "Failed with a status of {}".format(response.status_code)
+            return None
 
     
     def list(self):
         uri = self.make_uri("")
-        logging.info("Getting list with this URL: " + uri)
-        cipher = Fernet(safe_key)
-        obj = cipher.decrypt(self._request_header)
-        headers = json.loads(obj)
-
-        response = requests.get(uri, headers=headers, verify=self.verify_ssl)
-        if response.status_code == 200:
-            output = response.json()
-            return output
-        elif response.status_code == 404:
-            return None
-        else:
-            return "Failed with a status of {}".format(response.status_code)
+        return self.api_client.get(uri)
 
 
     def write(self, key, value):
         uri = self.make_uri(key)
         data = {"value": value}
-
-        cipher = Fernet(safe_key)
-        obj = cipher.decrypt(self._request_header)
-        headers = json.loads(obj)
-
-        result = requests.post(uri, headers=headers, verify=self.verify_ssl, json=data)
-        if result.status_code == 200:
-            return result.json()
-        else:
-            logging.info("Couldn't write to the brain. ")
-            logging.info("Got Status Code: " + str(result.status_code))
-            logging.info(result.json())
-            raise Exception
+        return self.api_client.post(uri, data)
 
 
     def search(self, term):
@@ -92,10 +65,7 @@ class Brain(object):
 
     def delete(self, key):
         uri = self.make_uri(key)
-        cipher = Fernet(safe_key)
-        obj = cipher.decrypt(self._request_header)
-        headers = json.loads(obj)
-        return requests.delete(uri, headers=headers, verify=self.verify_ssl)
+        return self.api_client.delete(uri)
 
 
     def test(self, key):

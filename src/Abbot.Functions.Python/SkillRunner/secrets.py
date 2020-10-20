@@ -20,7 +20,10 @@ class Secrets(object):
     def read(self, key):
         uri = self.request_uri.format(self.skill_id, key)
         output = self.api_client.get(uri)
-        return output.get("secret")
+        if output:
+            return output.get("secret")
+        else:
+            return None
 
 
     def test(self, key):
