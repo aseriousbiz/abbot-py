@@ -3,10 +3,7 @@ import logging
 import requests
 import json
 
-from cryptography.fernet import Fernet
 from __app__.SkillRunner.apiclient import ApiClient
-
-safe_key = Fernet.generate_key()
 
 class Secrets(object):
     def __init__(self, skill_id, user_id, api_token, timestamp):
