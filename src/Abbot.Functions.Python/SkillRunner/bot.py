@@ -8,6 +8,7 @@ import traceback
 from __app__.SkillRunner import storage 
 from __app__.SkillRunner import secrets
 from __app__.SkillRunner import exceptions
+from __app__.SkillRunner.apiclient import ApiClient
 
 
 class Mention(object):
@@ -26,23 +27,25 @@ class Mention(object):
 
 class Bot(object):
     def __init__(self, req, api_token):
-        skill_id = req.get('SkillId')
-        user_id = req.get('UserId')
-        timestamp = req.get('Timestamp')
+        self.skill_id = req.get('SkillId')
+        self.user_id = req.get('UserId')
+        self.timestamp = req.get('Timestamp')
 
         bot_data = req.get('Bot')
 
-        self.reply_api_uri = os.environ.get('AbbotReplyApiUrl', 'https://localhost:4979/api/skill/{0}/data/{1}')
+        self.reply_api_uri = os.environ.get('AbbotReplyApiUrl', 'https://localhost:4979/api/reply')
 
         self.id = bot_data.get('Id')
         self.user_name = bot_data.get('UserName')
         self.args = req.get('Arguments')
         self.arguments = self.args
         self.code = req.get('Code')
-        self.brain = storage.Brain(skill_id, user_id, api_token, timestamp)
-        self.secrets = secrets.Secrets(skill_id, user_id, api_token, timestamp)
+        self.brain = storage.Brain(self.skill_id, self.user_id, api_token, self.timestamp)
+        self.secrets = secrets.Secrets(self.skill_id, self.user_id, api_token, self.timestamp)
         self.mentions = self.load_mentions(req.get('Mentions'))
         self.conversation_reference = req.get('ConversationReference')
+
+        self.api_client = ApiClient(self.reply_api_uri, self.user_id, api_token, self.timestamp)
         self.responses = []
     
     
@@ -83,8 +86,8 @@ class Bot(object):
     
     def reply(self, response):
         # Requires SkillId, Message, ConversationReference
-        body = {"SkillId": self.id, "Message": response, "ConversationReference": self.conversation_reference}
-        r = requests.post(self.reply_api_url, body)
+        body = {"SkillId": self.skill_id, "Message": response, "ConversationReference": self.conversation_reference}
+        self.api_client.post(self.reply_api_uri, body)
 
         self.responses.append(response)
 

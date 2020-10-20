@@ -10,10 +10,10 @@ from urllib.error import HTTPError
 safe_key = Fernet.generate_key()
 
 class ApiClient(object):
-    def __init__(self, user_id, api_token, timestamp):
+    def __init__(self, request_uri, user_id, api_token, timestamp):
         self.user_id = user_id
 
-        if self.request_uri.startswith("https://localhost"):
+        if request_uri.startswith("https://localhost"):
             self.verify_ssl = False
         else:
             self.verify_ssl = True
@@ -32,7 +32,7 @@ class ApiClient(object):
         self._request_header = cipher.encrypt(obj)
 
 
-    def get(self, uri, body):
+    def get(self, uri, body=None):
         cipher = Fernet(safe_key)
         obj = cipher.decrypt(self._request_header)
         headers = json.loads(obj)
@@ -48,26 +48,24 @@ class ApiClient(object):
 
     
     def post(self, uri, data):
-        # data = {"value": value}
-
         cipher = Fernet(safe_key)
         obj = cipher.decrypt(self._request_header)
         headers = json.loads(obj)
 
         result = requests.post(uri, headers=headers, verify=self.verify_ssl, json=data)
+
         if result.status_code == 200:
             return result.json()
         else:
-            logging.info("Couldn't write to the brain. ")
-            logging.info("Got Status Code: " + str(result.status_code))
-            logging.info(result.json())
+            logging.error("API Client could not POST!")
+            logging.error("Got Status Code: " + str(result.status_code))
+            logging.error(result.json())
             raise Exception("Failed with a status of {}".format(response.status_code))
     
-    
+
     def delete(self, uri, body):
         uri = self.make_uri(key)
         cipher = Fernet(safe_key)
         obj = cipher.decrypt(self._request_header)
         headers = json.loads(obj)
-        return = requests.delete(uri, headers=headers, verify=self.verify_ssl)
-    
+        return requests.delete(uri, headers=headers, verify=self.verify_ssl)
