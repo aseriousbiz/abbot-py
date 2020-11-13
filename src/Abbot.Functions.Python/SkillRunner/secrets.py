@@ -9,8 +9,7 @@ class Secrets(object):
     def __init__(self, skill_id, user_id, api_token, timestamp):
         self.skill_id = skill_id
         self.user_id = user_id
-        uri_base = os.environ.get('UserSkillApiUriFormatString', 'https://localhost:4979/api/skill/{0}/data/{1}')
-        self.request_uri = uri_base.replace('/data/', '/secret/')
+        self.request_uri = os.environ.get('SkillApiBaseUriFormatString', 'https://localhost:4979/api/skills/{0}') + '/secret/{1}'
         self.api_client = ApiClient(self.request_uri, user_id, api_token, timestamp)
 
 
