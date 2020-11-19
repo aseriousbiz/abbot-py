@@ -90,6 +90,18 @@ class Bot(object):
             self.api_client.post(self.reply_api_uri, body)
         else:
             self.responses.append(response)
+    
+    def reply_later(self, response, delay_in_seconds):
+        if self.conversation_reference:
+            body = {
+                "SkillId": self.skill_id, 
+                "Message": response, 
+                "ConversationReference": self.conversation_reference, 
+                "Schedule": delay_in_seconds
+                }
+            self.api_client.post(self.reply_api_uri, body)
+        else:
+            self.responses.append(response)
 
 
     def load_mentions(self, mentions):

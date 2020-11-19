@@ -51,7 +51,7 @@ class ApiClient(object):
         cipher = Fernet(safe_key)
         obj = cipher.decrypt(self._request_header)
         headers = json.loads(obj)
-        logging.info("doin it")
+
         try:
             result = requests.post(uri, headers=headers, verify=self.verify_ssl, json=data)
             result.raise_for_status()
