@@ -37,7 +37,7 @@ class Bot(object):
         self.timestamp = req.get('Timestamp')
 
         bot_data = req.get('Bot')
-
+        self.raw = req
         self.reply_api_uri = os.environ.get('AbbotReplyApiUrl', 'https://localhost:4979/api/reply')
 
         self.id = bot_data.get('Id')
@@ -47,12 +47,22 @@ class Bot(object):
         self.code = req.get('Code')
         self.brain = storage.Brain(self.skill_id, self.user_id, api_token, self.timestamp)
         self.secrets = secrets.Secrets(self.skill_id, self.user_id, api_token, self.timestamp)
+        
+        self.from_user = req.get('From')
         self.mentions = self.load_mentions(req.get('Mentions'))
+
+        if req.get('HttpTriggerEvent'):
+            self.is_chat = True
+        else:
+            self.is_chat = False
+        
+        self.is_request = not self.is_chat
+
+        self.request = bot_data.get('HttpTriggerEvent')
         self.conversation_reference = req.get('ConversationReference')
 
         self.api_client = ApiClient(self.reply_api_uri, self.user_id, api_token, self.timestamp)
         self.responses = []
-    
     
     def run_user_script(self):
         """
