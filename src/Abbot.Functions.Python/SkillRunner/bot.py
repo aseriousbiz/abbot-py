@@ -5,6 +5,11 @@ import requests
 import logging
 import traceback
 
+# Imports solely for use in user skill
+import pandas
+import numpy
+# End of user skill imports
+
 from __app__.SkillRunner import storage 
 from __app__.SkillRunner import secrets
 from __app__.SkillRunner import exceptions
