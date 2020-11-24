@@ -20,7 +20,7 @@ class Brain(object):
         return self.request_uri.format(self.skill_id, key)
 
 
-    def read(self, key):
+    def get(self, key):
         uri = self.make_uri(key)
         output = self.api_client.get(uri)
         if output:
