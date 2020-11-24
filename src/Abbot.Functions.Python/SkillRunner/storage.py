@@ -27,6 +27,10 @@ class Brain(object):
             return output.get("value")
         else:
             return None
+    
+
+    def read(self, key):
+        return self.get(key)
 
     
     def list(self):
