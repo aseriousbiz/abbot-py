@@ -8,6 +8,8 @@ import traceback
 # Imports solely for use in user skill
 import pandas
 import numpy
+import bs4
+import soupsieve
 # End of user skill imports
 
 from __app__.SkillRunner import storage 
