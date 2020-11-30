@@ -30,7 +30,7 @@ class Brain(object):
     
 
     def read(self, key):
-        return self.get(key)
+        return json.loads(self.get(key))
 
     
     def list(self):
@@ -40,7 +40,7 @@ class Brain(object):
 
     def write(self, key, value):
         uri = self.make_uri(key)
-        data = {"value": value}
+        data = {"value": json.dumps(value)}
         return self.api_client.post(uri, data)
 
 
