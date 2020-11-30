@@ -126,8 +126,8 @@ class Bot(object):
 
 
     def __repr__(self):
-        response = "A very nice bot with these features: \n"
-        response += "       args: " + self.args + "\n "
-        response += "  responses: " + '\n'.join(self.responses)
+        response = "Abbot: "
+        response += "   args: " + self.args + "\n "
+        response += "    raw: " + self.raw
 
         return response

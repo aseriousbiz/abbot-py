@@ -30,7 +30,10 @@ class Brain(object):
     
 
     def read(self, key):
-        return json.loads(self.get(key))
+        value = self.get(key)
+        if value:
+            return json.loads(self.get(key))
+        return value
 
     
     def list(self):
