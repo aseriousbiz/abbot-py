@@ -54,11 +54,11 @@ class Bot(object):
         self.mentions = self.load_mentions(req.get('Mentions'))
 
         if req.get('HttpTriggerEvent'):
-            self.is_chat = True
-        else:
             self.is_chat = False
-        
-        self.is_request = not self.is_chat
+            self.is_request = True
+        else:
+            self.is_chat = True
+            self.is_request = False
 
         self.request = bot_data.get('HttpTriggerEvent')
         self.conversation_reference = req.get('ConversationReference')
