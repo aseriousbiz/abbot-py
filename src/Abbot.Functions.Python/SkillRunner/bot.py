@@ -14,6 +14,7 @@ import soupsieve
 
 from __app__.SkillRunner import storage 
 from __app__.SkillRunner import secrets
+from __app__.SkillRunner import utilities
 from __app__.SkillRunner import exceptions
 from __app__.SkillRunner.apiclient import ApiClient
 
@@ -49,6 +50,7 @@ class Bot(object):
         self.code = req.get('Code')
         self.brain = storage.Brain(self.skill_id, self.user_id, api_token, self.timestamp)
         self.secrets = secrets.Secrets(self.skill_id, self.user_id, api_token, self.timestamp)
+        self.utilities = utilities.Utilities(self.skill_id, self.user_id, api_token, self.timestamp)
         
         self.from_user = req.get('From')
         self.mentions = self.load_mentions(req.get('Mentions'))
