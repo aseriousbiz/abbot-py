@@ -4,8 +4,8 @@ source src/env/bin/activate
 
 mkdir -p -- ./blob
 
-sh ./script/azurite-server & 
-func start --script-root src --port 7072 &
+sh ./script/azurite-server &
+func start --script-root src --port 7072 &&
 fg
 
 # When you absolutely, positively got to kill every process in the room, accept no substitutes
