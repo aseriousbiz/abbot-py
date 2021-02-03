@@ -1,10 +1,10 @@
-# Abbot JavaScript Skill Runner
+# Abbot Python Skill Runner
 
-This is the JavaScript skill runner for Abbot hosted as an Azure Function (`abbot-skills-javascript`).
+This is the Python skill runner for Abbot hosted as an Azure Function (`abbot-skills-python`).
 
 ## Local Development
 
-To run the Abbot JavaScript runner locally:
+To run the Abbot Python runner locally:
 
 `script/server`.
 
