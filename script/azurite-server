@@ -1,0 +1,3 @@
+#! /bin/sh
+
+azurite-blob --loose -s -l ./blob -d ./blob/debug.log

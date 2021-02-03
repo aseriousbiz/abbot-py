@@ -1,0 +1,13 @@
+#! /bin/sh
+
+source src/env/bin/activate
+
+mkdir -p -- ./blob
+
+sh ./script/azurite-server & 
+func start --script-root src --port 7072 &
+fg
+
+# When you absolutely, positively got to kill every process in the room, accept no substitutes
+# https://stackoverflow.com/a/2173421
+trap "trap - SIGTERM && kill -- -$$" SIGINT SIGTERM EXIT

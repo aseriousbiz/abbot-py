@@ -22,7 +22,7 @@ def run_code(req, api_token):
 def main(req: func.HttpRequest) -> func.HttpResponse:
     if req.method == "GET":
         return func.HttpResponse(
-            body=json.dumps(["Ok!"]),
+            body=json.dumps(["Ok! Running Abbot Python Runner v0.1.3."]),
             mimetype="text/json",
             status_code=200
         )
