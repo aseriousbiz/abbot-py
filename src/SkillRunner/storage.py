@@ -8,7 +8,7 @@ from __app__.SkillRunner.apiclient import ApiClient
 class Brain(object):
     def __init__(self, skill_id, user_id, api_token, timestamp):
         self.skill_id = skill_id
-        self.request_uri = os.environ.get('SkillApiBaseUriFormatString', 'https://localhost:4979/api/skills/{0}') + '/data/{1}'
+        self.request_uri = os.environ.get('SkillApiBaseUriFormatString', 'https://localhost:4979/api/skills/{0}') + '/brain?key={1}'
         if self.request_uri.startswith("https://localhost"):
             self.verify_ssl = False
         else:
