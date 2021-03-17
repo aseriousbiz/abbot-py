@@ -3,7 +3,7 @@ import json
 import requests
 import logging
 
-from .apiclient import ApiClient
+from . import apiclient
 
 class Geocode(object):
     """
@@ -42,7 +42,7 @@ class Utilities(object):
             self.verify_ssl = False
         else:
             self.verify_ssl = True
-        self.api_client = ApiClient(self.request_uri, user_id, api_token, timestamp)
+        self.api_client = apiclient.ApiClient(self.request_uri, user_id, api_token, timestamp)
 
     
     def geocode(self, address, include_timezone=False):

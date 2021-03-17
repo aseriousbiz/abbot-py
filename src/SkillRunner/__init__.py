@@ -6,8 +6,7 @@ import os # used to block environ access
 
 import azure.functions as func
 
-from . import bot as _bot
-from . import exceptions
+from .bot import bot as _bot
 
 
 def run_code(req, api_token):

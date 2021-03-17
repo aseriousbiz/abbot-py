@@ -3,7 +3,7 @@ import logging
 import requests
 import json
 
-from .apiclient import ApiClient
+from . import apiclient
 
 class Secrets(object):
     """
@@ -15,7 +15,7 @@ class Secrets(object):
         self.skill_id = skill_id
         self.user_id = user_id
         self.request_uri = os.environ.get('SkillApiBaseUriFormatString', 'https://localhost:4979/api/skills/{0}') + '/secret?key={1}'
-        self.api_client = ApiClient(self.request_uri, user_id, api_token, timestamp)
+        self.api_client = apiclient.ApiClient(self.request_uri, user_id, api_token, timestamp)
 
 
     def read(self, key):

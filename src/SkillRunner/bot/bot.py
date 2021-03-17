@@ -16,7 +16,7 @@ from . import storage
 from . import secrets
 from . import utils
 from . import exceptions
-from .apiclient import ApiClient
+from . import apiclient
 
 
 class Mention(object):
@@ -36,7 +36,7 @@ class Mention(object):
 class Bot(object):
     """
     Most interactions with the outside world occur from the Bot object.
-    Abbot instantiates this object for you.
+    Abbot injects this object into your script as ``bot``.
     """
     def __init__(self, req, api_token):
         self.skill_id = req.get('SkillId')
@@ -69,7 +69,7 @@ class Bot(object):
         self.request = bot_data.get('HttpTriggerEvent')
         self.conversation_reference = req.get('ConversationReference')
 
-        self.api_client = ApiClient(self.reply_api_uri, self.user_id, api_token, self.timestamp)
+        self.api_client = apiclient.ApiClient(self.reply_api_uri, self.user_id, api_token, self.timestamp)
         self.responses = []
     
     def run_user_script(self):
