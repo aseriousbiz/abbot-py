@@ -3,9 +3,14 @@ import logging
 import requests
 import json
 
-from __app__.SkillRunner.apiclient import ApiClient
+from .apiclient import ApiClient
 
 class Secrets(object):
+    """
+    Abbot's secrets manager. 
+
+    This is automatically instantiated for you as ``bot.secrets``.
+    """
     def __init__(self, skill_id, user_id, api_token, timestamp):
         self.skill_id = skill_id
         self.user_id = user_id
@@ -14,6 +19,15 @@ class Secrets(object):
 
 
     def read(self, key):
+        """
+        Read a secret from the vault. 
+
+        Args: 
+            key (str): The key of the secret to retrieve.
+        
+        Returns: 
+            secret (str): The secret from the vault.
+        """
         uri = self.request_uri.format(self.skill_id, key)
         output = self.api_client.get(uri)
         if output:

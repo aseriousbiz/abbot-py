@@ -3,7 +3,7 @@ import json
 import requests
 import logging
 
-from __app__.SkillRunner import exceptions
+from . import exceptions
 from cryptography.fernet import Fernet
 from urllib.error import HTTPError
 

@@ -3,9 +3,14 @@ import json
 import requests
 import logging
 
-from __app__.SkillRunner.apiclient import ApiClient
+from .apiclient import ApiClient
 
 class Brain(object):
+    """
+    Abbot's brain. 
+
+    This has already been instantiated for you in ``bot.brain``.
+    """
     def __init__(self, skill_id, user_id, api_token, timestamp):
         self.skill_id = skill_id
         self.request_uri = os.environ.get('SkillApiBaseUriFormatString', 'https://localhost:4979/api/skills/{0}') + '/brain?key={1}'
@@ -21,6 +26,15 @@ class Brain(object):
 
 
     def get(self, key):
+        """
+        Get an item from Abbot's brain.
+
+        Args:
+            key (str): The item's key.
+        
+        Returns:
+            The string or object stored in Value.
+        """
         uri = self.make_uri(key)
         output = self.api_client.get(uri)
         if output:
@@ -30,6 +44,9 @@ class Brain(object):
     
 
     def read(self, key):
+        """
+        See `get`.
+        """
         value = self.get(key)
         if value:
             return json.loads(self.get(key))
@@ -42,6 +59,15 @@ class Brain(object):
 
 
     def write(self, key, value):
+        """
+        Write to Abbot's brain. 
+
+        This will overwrite any existing items with the same `key`.
+
+        Args:
+            key (str): The lookup key for the object.
+            value (object): The string or object to store in Abbot's brain.
+        """
         uri = self.make_uri(key)
         data = {"value": json.dumps(value)}
         return self.api_client.post(uri, data)
@@ -52,6 +78,12 @@ class Brain(object):
     
 
     def delete(self, key):
+        """
+        Delete an item from Abbot's brain.
+
+        Args:
+            key (str): The lookup key for the object to delete.
+        """
         uri = self.make_uri(key)
         return self.api_client.delete(uri)
 

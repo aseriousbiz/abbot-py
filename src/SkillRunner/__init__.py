@@ -5,8 +5,9 @@ import traceback
 import os # used to block environ access
 
 import azure.functions as func
-from __app__.SkillRunner import bot as _bot
-from __app__.SkillRunner import exceptions
+
+from . import bot as _bot
+from . import exceptions
 
 
 def run_code(req, api_token):
