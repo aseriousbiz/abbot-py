@@ -3,11 +3,14 @@ import json
 import requests
 import logging
 
-from __app__.SkillRunner import exceptions
 from cryptography.fernet import Fernet
 from urllib.error import HTTPError
 
-safe_key = Fernet.generate_key()
+try:
+    safe_key = Fernet.generate_key()
+except AttributeError:
+    # This may be running in a context where Fernet is mocked
+    pass
 
 class ApiClient(object):
     def __init__(self, request_uri, user_id, api_token, timestamp):

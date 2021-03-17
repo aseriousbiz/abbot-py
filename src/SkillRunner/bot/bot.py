@@ -12,11 +12,11 @@ import bs4
 import soupsieve
 # End of user skill imports
 
-from __app__.SkillRunner import storage 
-from __app__.SkillRunner import secrets
-from __app__.SkillRunner import utils
-from __app__.SkillRunner import exceptions
-from __app__.SkillRunner.apiclient import ApiClient
+from . import storage 
+from . import secrets
+from . import utils
+from . import exceptions
+from . import apiclient
 
 
 class Mention(object):
@@ -34,6 +34,10 @@ class Mention(object):
 
 
 class Bot(object):
+    """
+    Most interactions with the outside world occur from the Bot object.
+    Abbot injects this object into your script as ``bot``.
+    """
     def __init__(self, req, api_token):
         self.skill_id = req.get('SkillId')
         self.user_id = req.get('UserId')
@@ -65,7 +69,7 @@ class Bot(object):
         self.request = bot_data.get('HttpTriggerEvent')
         self.conversation_reference = req.get('ConversationReference')
 
-        self.api_client = ApiClient(self.reply_api_uri, self.user_id, api_token, self.timestamp)
+        self.api_client = apiclient.ApiClient(self.reply_api_uri, self.user_id, api_token, self.timestamp)
         self.responses = []
     
     def run_user_script(self):
@@ -103,7 +107,13 @@ class Bot(object):
             raise e
 
     
-    def reply(self, response):        
+    def reply(self, response):     
+        """
+        Send a reply. 
+        
+        Args:
+            response (str): The response to send back to chat.
+        """   
         if self.conversation_reference:
             body = {"SkillId": self.skill_id, "Message": str(response), "ConversationReference": self.conversation_reference}
             self.api_client.post(self.reply_api_uri, body)
@@ -111,6 +121,13 @@ class Bot(object):
             self.responses.append(str(response))
     
     def reply_later(self, response, delay_in_seconds):
+        """
+        Reply after a delay.
+
+        Args:
+            response (str): The response to send back to chat.
+            delay_in_seconds (int): The number of seconds to delay before sending the response.
+        """
         if self.conversation_reference:
             body = {
                 "SkillId": self.skill_id, 
