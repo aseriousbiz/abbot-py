@@ -92,9 +92,7 @@ class Bot(object):
 
             return out.responses
         except SyntaxError as e:
-            description = "{}: {}".format(e.__class__.__name__, e.args[0])
-            err = exceptions.InterpreterError("SyntaxError", description, e.lineno, 0)
-            raise err
+            raise e
         except AttributeError as e:
             if not out:
                 raise e
