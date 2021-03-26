@@ -4,6 +4,7 @@ cffi==1.14.2
 chardet==3.0.4
 cryptography==3.2
 idna==2.10
+jsonpickle==2.0.0
 numpy==1.19.4
 pandas==1.0.5
 pycparser==2.20
