@@ -8,12 +8,11 @@ from . import apiclient
 class Geocode(object):
     """
     A Geocoded address.
-
-    Attributes:
-        formatted_address (str): The formatted address returned by the geocoding service.
-        time_zone_id (str): A human-readable time zone id, like `America/Los_Angeles`.
-        latitude (long): The latitude of the geocoded address.
-        longitude (long): The longitude of the geocoded address.
+    
+    :var formatted_address: The formatted address returned by the geocoding service.
+    :var time_zone_id: A human-readable time zone id, like `America/Los_Angeles`.
+    :var latitude: The latitude of the geocoded address.
+    :var longitude: The longitude of the geocoded address.
     """
     def __init__(self, coordinate, formatted_address, time_zone_id = None):
         self.formatted_address = formatted_address
