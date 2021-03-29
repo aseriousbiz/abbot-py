@@ -37,6 +37,14 @@ class Bot(object):
     """
     Most interactions with the outside world occur from the Bot object.
     Abbot injects this object into your script as ``bot``.
+
+    :var id: The Bot's Id
+    :var user_name: The Bot's user name
+    :var args: Arguments from the user
+    :var arguments: Arguments from the user
+    :var mentions: A collection of user mentions
+    :var is_chat: True if the message came from chat. False if not. 
+    :var is_request: True if the message came from a trigger. False if not.
     """
     def __init__(self, req, api_token):
         self.skill_id = req.get('SkillId')
@@ -47,26 +55,26 @@ class Bot(object):
         self.raw = req
         self.reply_api_uri = os.environ.get('AbbotReplyApiUrl', 'https://localhost:4979/api/reply')
 
-        self.id = bot_data.get('Id') #: The Bot's Id
-        self.user_name = bot_data.get('UserName') #: The Bot's Username
-        self.args = req.get('Arguments') #: Arguments from the user
-        self.arguments = self.args #: Arguments from the user
+        self.id = bot_data.get('Id') 
+        self.user_name = bot_data.get('UserName') 
+        self.args = req.get('Arguments') 
+        self.arguments = self.args 
         self.code = req.get('Code')
-        self.brain = storage.Brain(self.skill_id, self.user_id, api_token, self.timestamp) #: Instantation of Brain as bot.brain
-        self.secrets = secrets.Secrets(self.skill_id, self.user_id, api_token, self.timestamp) #: Instantiation of Secrets as bot.secrets
-        self.utils = utils.Utilities(self.skill_id, self.user_id, api_token, self.timestamp) #: Instantiation of Utilities at bot.utils
+        self.brain = storage.Brain(self.skill_id, self.user_id, api_token, self.timestamp) 
+        self.secrets = secrets.Secrets(self.skill_id, self.user_id, api_token, self.timestamp)
+        self.utils = utils.Utilities(self.skill_id, self.user_id, api_token, self.timestamp)
         
-        self.from_user = req.get('From') #: The user who sent the message
-        self.mentions = self.load_mentions(req.get('Mentions')) #: A collection of user mentions
+        self.from_user = req.get('From')
+        self.mentions = self.load_mentions(req.get('Mentions'))
 
         if req.get('HttpTriggerEvent'):
-            self.is_chat = False  #: is_chat is set to False if the request is the result of a trigger. True otherwise.
-            self.is_request = True #: is_request is set to True if the request is the result of a trigger. False otherwise.
+            self.is_chat = False
+            self.is_request = True
         else:
             self.is_chat = True
             self.is_request = False
 
-        self.request = bot_data.get('HttpTriggerEvent') #: The http request that triggered this message
+        self.request = bot_data.get('HttpTriggerEvent')
         self.conversation_reference = req.get('ConversationReference')
 
         self.api_client = apiclient.ApiClient(self.reply_api_uri, self.user_id, api_token, self.timestamp)
