@@ -19,7 +19,44 @@ from . import exceptions
 from . import apiclient
 
 
+class TriggerEvent(object):
+    """
+    A request triggered by an external event.
+
+    :var content_type: The Content Type of the request.
+    :var http_method: The Http Method of the request.
+    :var is_form: True if the request is a form. Otherwise False.
+    :var is_json: True if the request contains json data. Otherwise False.
+    :var headers: The request headers.
+    :var form: Form data, if it exists.
+    :var query: QueryString data, if it exists.
+    :var url: The request url.
+    :var raw_body: The raw body of the request.
+    """
+    def __init__(self, request):
+        self.content_type = request.get('ContentType')
+        self.http_method = request.get('HttpMethod')
+        self.is_form = request.get('IsForm')
+        self.is_json = request.get('IsJson')
+        self.headers = request.get('Headers')
+        self.form = request.get('Form')
+        self.query = request.get('Query')
+        self.url = request.get('Url')
+        self.raw_body = request.get('RawBody')
+    
+    def toJSON(self):
+        return json.dumps(self, default=lambda o: o.__dict__, 
+            sort_keys=True, indent=4)
+
+
 class Mention(object):
+    """
+    A User mention.
+
+    :var id: The User's Id.
+    :var user_name: The User's user name.
+    :var name: The User's name.
+    """
     def __init__(self, Id, UserName, Name):
         self.id = Id
         self.user_name = UserName
@@ -38,13 +75,19 @@ class Bot(object):
     Most interactions with the outside world occur from the Bot object.
     Abbot injects this object into your script as ``bot``.
 
-    :var id: The Bot's Id
-    :var user_name: The Bot's user name
-    :var args: Arguments from the user
-    :var arguments: Arguments from the user
-    :var mentions: A collection of user mentions
+    :var id: The Bot's Id.
+    :var user_name: The Bot's user name.
+    :var from_user: The name of the user who called the skill.
+    :var args: Arguments from the user.
+    :var arguments: Arguments from the user.
+    :var mentions: A collection of user mentions.
     :var is_chat: True if the message came from chat. False if not. 
     :var is_request: True if the message came from a trigger. False if not.
+    :var platform_id: The id of the team this skill is being run in. This would be your Team Id in Slack, for example.
+    :var platform_type: The type of platform, such as Slack, Teams, or Discord.
+    :var room: The room the skill is being run in.
+    :var skill_name: The name of the skill being run.
+    :var skill_url: The URL to the edit screen of the skill being run.
     """
     def __init__(self, req, api_token):
         self.skill_id = req.get('SkillId')
@@ -63,6 +106,10 @@ class Bot(object):
         self.brain = storage.Brain(self.skill_id, self.user_id, api_token, self.timestamp) 
         self.secrets = secrets.Secrets(self.skill_id, self.user_id, api_token, self.timestamp)
         self.utils = utils.Utilities(self.skill_id, self.user_id, api_token, self.timestamp)
+        self.platform_id = req.get('PlatformId')
+        self.platform_type = req.get('PlatformType')
+        self.room = req.get('Room')
+        self.skill_name = req.get('SkillName')
         
         self.from_user = req.get('From')
         self.mentions = self.load_mentions(req.get('Mentions'))
@@ -70,11 +117,12 @@ class Bot(object):
         if req.get('HttpTriggerEvent'):
             self.is_chat = False
             self.is_request = True
+            self.request = TriggerEvent(req.get('HttpTriggerEvent'))
         else:
             self.is_chat = True
             self.is_request = False
+            self.request = None
 
-        self.request = bot_data.get('HttpTriggerEvent')
         self.conversation_reference = req.get('ConversationReference')
 
         self.api_client = apiclient.ApiClient(self.reply_api_uri, self.user_id, api_token, self.timestamp)
