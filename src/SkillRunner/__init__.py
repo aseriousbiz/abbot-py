@@ -47,10 +47,6 @@ def main(req: func.HttpRequest) -> func.HttpResponse:
         req_body = req.get_json()
         # The token is necessary for using the data API
         api_token = req.headers.get('x-abbot-skillapitoken')
-    except Exception as e:
-        logging.error(e)
-        rm.addError(e)
-    try:
         responses = run_code(req_body, api_token)
         for response in responses:
             rm.add(response)
