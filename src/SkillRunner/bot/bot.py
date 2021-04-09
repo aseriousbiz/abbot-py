@@ -115,13 +115,12 @@ class Bot(object):
         self.from_user = skillInfo.get('From')
         self.mentions = self.load_mentions(skillInfo.get('Mentions'))
 
-        if req.get('HttpTriggerEvent'):
-            self.is_chat = False
-            self.is_request = True
-            self.request = TriggerEvent(skillInfo.get('HttpTriggerEvent'))
+        self.is_request = skillInfo.get("IsRequest")
+        self.is_chat = not self.is_request
+
+        if self.is_request:
+            self.request = TriggerEvent(skillInfo.get('Request'))
         else:
-            self.is_chat = True
-            self.is_request = False
             self.request = None
 
         self.conversation_reference = req.get('ConversationReference')
