@@ -43,10 +43,6 @@ class TriggerEvent(object):
         self.query = request.get('Query')
         self.url = request.get('Url')
         self.raw_body = request.get('RawBody')
-    
-    def toJSON(self):
-        return json.dumps(self, default=lambda o: o.__dict__, 
-            sort_keys=True, indent=4)
 
 
 class Mention(object):
@@ -61,10 +57,6 @@ class Mention(object):
         self.id = Id
         self.user_name = UserName
         self.name = Name
-    
-    def toJSON(self):
-            return json.dumps(self, default=lambda o: o.__dict__, 
-                sort_keys=True, indent=4)
 
     def __str__(self):
         return "<@{}>".format(self.user_name)
