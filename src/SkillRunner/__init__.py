@@ -48,8 +48,8 @@ def main(req: func.HttpRequest) -> func.HttpResponse:
         # The token is necessary for using the data API
         api_token = req.headers.get('x-abbot-skillapitoken')
     except Exception as e:
+        logging.error(e)
         rm.addError(e)
-
     try:
         responses = run_code(req_body, api_token)
         for response in responses:
@@ -57,6 +57,7 @@ def main(req: func.HttpRequest) -> func.HttpResponse:
     except exceptions.InterpreterError as e:
         rm.addError(e)
     except Exception as e: 
+        logging.error(e)
         rm.addError({ "errorId": type(e).__name__, "description": str(e) })
 
     finally:

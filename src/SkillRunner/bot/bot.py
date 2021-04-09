@@ -159,6 +159,7 @@ class Bot(object):
             else:
                 pass
         except Exception as e:
+            logging.error(e)
             raise e
 
     
