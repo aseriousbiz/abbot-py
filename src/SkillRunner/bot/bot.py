@@ -93,31 +93,32 @@ class Bot(object):
         self.skill_id = req.get('SkillId')
         self.user_id = req.get('UserId')
         self.timestamp = req.get('Timestamp')
+        skillInfo = req.get('SkillInfo')
 
         bot_data = req.get('Bot')
         self.raw = req
         self.reply_api_uri = os.environ.get('AbbotReplyApiUrl', 'https://localhost:4979/api/reply')
 
         self.id = bot_data.get('Id') 
-        self.user_name = bot_data.get('UserName') 
-        self.args = req.get('Arguments') 
+        self.user_name = skillInfo.get('UserName') 
+        self.args = skillInfo.get('Arguments') 
         self.arguments = self.args 
         self.code = req.get('Code')
         self.brain = storage.Brain(self.skill_id, self.user_id, api_token, self.timestamp) 
         self.secrets = secrets.Secrets(self.skill_id, self.user_id, api_token, self.timestamp)
         self.utils = utils.Utilities(self.skill_id, self.user_id, api_token, self.timestamp)
-        self.platform_id = req.get('PlatformId')
-        self.platform_type = req.get('PlatformType')
-        self.room = req.get('Room')
-        self.skill_name = req.get('SkillName')
+        self.platform_id = skillInfo.get('PlatformId')
+        self.platform_type = skillInfo.get('PlatformType')
+        self.room = skillInfo.get('Room')
+        self.skill_name = skillInfo.get('SkillName')
         
-        self.from_user = req.get('From')
-        self.mentions = self.load_mentions(req.get('Mentions'))
+        self.from_user = skillInfo.get('From')
+        self.mentions = self.load_mentions(skillInfo.get('Mentions'))
 
         if req.get('HttpTriggerEvent'):
             self.is_chat = False
             self.is_request = True
-            self.request = TriggerEvent(req.get('HttpTriggerEvent'))
+            self.request = TriggerEvent(skillInfo.get('HttpTriggerEvent'))
         else:
             self.is_chat = True
             self.is_request = False
