@@ -90,20 +90,25 @@ class Bot(object):
     :var skill_url: The URL to the edit screen of the skill being run.
     """
     def __init__(self, req, api_token):
-        self.skill_id = req.get('SkillId')
-        self.user_id = req.get('UserId')
-        self.timestamp = req.get('Timestamp')
-        skillInfo = req.get('SkillInfo')
-
-        bot_data = req.get('Bot')
-        self.raw = req
         self.reply_api_uri = os.environ.get('AbbotReplyApiUrl', 'https://localhost:4979/api/reply')
+        
+        skillInfo = req.get('SkillInfo')
+        runnerInfo = req.get('RunnerInfo')
 
-        self.id = bot_data.get('Id') 
+        self.skill_id = runnerInfo.get('SkillId')
+        self.user_id = runnerInfo.get('UserId')
+        self.timestamp = runnerInfo.get('Timestamp')
+        
+
+        bot_data = runnerInfo.get('Bot')
+        self.raw = skillInfo
+        
+
+        self.id = runnerInfo.get('Id') 
         self.user_name = skillInfo.get('UserName') 
         self.args = skillInfo.get('Arguments') 
         self.arguments = self.args 
-        self.code = req.get('Code')
+        self.code = runnerInfo.get('Code')
         self.brain = storage.Brain(self.skill_id, self.user_id, api_token, self.timestamp) 
         self.secrets = secrets.Secrets(self.skill_id, self.user_id, api_token, self.timestamp)
         self.utils = utils.Utilities(self.skill_id, self.user_id, api_token, self.timestamp)
@@ -123,7 +128,7 @@ class Bot(object):
         else:
             self.request = None
 
-        self.conversation_reference = req.get('ConversationReference')
+        self.conversation_reference = runnerInfo.get('ConversationReference')
 
         self.api_client = apiclient.ApiClient(self.reply_api_uri, self.user_id, api_token, self.timestamp)
         self.responses = []
