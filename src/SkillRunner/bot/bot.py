@@ -148,7 +148,7 @@ class Bot(object):
         Run the code the user has submitted.
         """
         try:
-            # Remove `os` from `sys` so users cannot use the module.
+            # Replace `os` with an instance of FakeOS so skills can't access the operating system.
             os_copy = os
             sys.modules['os'] = FakeOS()
 
