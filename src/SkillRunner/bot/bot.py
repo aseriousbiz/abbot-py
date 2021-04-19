@@ -69,6 +69,16 @@ class Mention(object):
     def __str__(self):
         return "<@{}>".format(self.user_name)
 
+class FakeOS(object):
+    """
+    Used to pass into the skill runner. 
+    Every method call returns None, but lets libraries that
+    rely on the existence of the `os` module continue running.
+    """
+    def __getattr__(self, name):
+        def method(*args):
+            return None
+
 
 class Bot(object):
     """
@@ -140,7 +150,7 @@ class Bot(object):
         try:
             # Remove `os` from `sys` so users cannot use the module.
             os_copy = os
-            sys.modules['os'] = None
+            sys.modules['os'] = FakeOS()
 
             script_locals = { "bot": self, "args": self.args }
             out = None
