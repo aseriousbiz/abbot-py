@@ -155,42 +155,15 @@ class Bot(object):
 
             # Many libraries rely on a real environ object, can't set this to None
             os.environ.clear() 
-
-            whitelisted = [
-                'CLD_CONTINUED', 'CLD_DUMPED', 'CLD_EXITED', 'CLD_TRAPPED', 'DirEntry', 'EX_CANTCREAT', 'EX_CONFIG', 
-                'EX_DATAERR', 'EX_IOERR', 'EX_NOHOST', 'EX_NOINPUT', 'EX_NOPERM', 'EX_NOUSER', 'EX_OK', 'EX_OSERR', 
-                'EX_OSFILE', 'EX_PROTOCOL', 'EX_SOFTWARE', 'EX_TEMPFAIL', 'EX_UNAVAILABLE', 'EX_USAGE', 'F_LOCK', 
-                'F_OK', 'F_TEST', 'F_TLOCK', 'F_ULOCK', 'MutableMapping', 'NGROUPS_MAX', 'O_ACCMODE', 'O_APPEND', 
-                'O_ASYNC', 'O_CLOEXEC', 'O_CREAT', 'O_DIRECTORY', 'O_DSYNC', 'O_EXCL', 'O_EXLOCK', 'O_NDELAY', 
-                'O_NOCTTY', 'O_NOFOLLOW', 'O_NONBLOCK', 'O_RDONLY', 'O_RDWR', 'O_SHLOCK', 'O_SYNC', 'O_TRUNC', 
-                'O_WRONLY', 'POSIX_SPAWN_CLOSE', 'POSIX_SPAWN_DUP2', 'POSIX_SPAWN_OPEN', 'PRIO_PGRP', 'PRIO_PROCESS', 
-                'PRIO_USER', 'P_ALL', 'P_NOWAIT', 'P_NOWAITO', 'P_PGID', 'P_PID', 'P_WAIT', 'PathLike', 'RTLD_GLOBAL', 
-                'RTLD_LAZY', 'RTLD_LOCAL', 'RTLD_NODELETE', 'RTLD_NOLOAD', 'RTLD_NOW', 'R_OK', 'SCHED_FIFO', 'SCHED_OTHER', 
-                'SCHED_RR', 'SEEK_CUR', 'SEEK_DATA', 'SEEK_END', 'SEEK_HOLE', 'SEEK_SET', 'ST_NOSUID', 'ST_RDONLY', 
-                'TMP_MAX', 'WCONTINUED', 'WCOREDUMP', 'WEXITED', 'WEXITSTATUS', 'WIFCONTINUED', 'WIFEXITED', 'WIFSIGNALED', 
-                'WIFSTOPPED', 'WNOHANG', 'WNOWAIT', 'WSTOPPED', 'WSTOPSIG', 'WTERMSIG', 'WUNTRACED', 'W_OK', 'X_OK', 
-                '__all__', '__builtins__', '__cached__', '__doc__', '__file__', '__loader__', '__name__', '__package__', 
-                '__spec__', '_check_methods', '_execvpe', '_exists', '_exit', '_fspath', '_fwalk', '_get_exports_list', 
-                '_putenv', '_spawnvef', '_unsetenv', '_wrap_close',
-                'abc',  'access', 'altsep', 'close', 'closerange', 'confstr', 'confstr_names', 'chdir', 'chflags', 
-                'cpu_count', 'ctermid', 'curdir',  'device_encoding', 'devnull', 'dup', 'dup2', 'environ', 'error', 
-                'extsep', 'fsdecode', 'fsencode', 'fspath', 'fstat', 'fstatvfs', 'fsync', 'ftruncate', 'fwalk', 
-                'get_blocking', 'get_exec_path', 'get_inheritable', 'get_terminal_size', 'getcwd', 'getcwdb', 
-                'getegid', 'getenv', 'getenvb', 'geteuid', 'getgid', 'getgrouplist', 'getgroups', 'getloadavg', 
-                'getlogin', 'getpgid', 'getpgrp', 'getpid', 'getppid', 'getpriority', 'getsid', 'getuid', 
-                'initgroups', 'isatty', 'lchflags', 'linesep','listdir', 'lockf', 'lseek', 'lstat', 'major', 'makedev',  
-                'minor', 'name', 'nice', 'open', 'pardir', 'path', 'pathconf', 'pathconf_names', 'pathsep', 'pread', 
-                'preadv', 'putenv', 'pwrite', 'pwritev', 'read', 'readlink', 'readv', 'register_at_fork', 'remove',  
-                'rename', 'renames', 'replace', 'sched_get_priority_max', 'sched_get_priority_min', 'sched_yield', 
-                'sep', 'set_blocking', 'set_inheritable', 'setegid', 'seteuid', 'setgid', 'st', 'stat', 'stat_result', 
-                'statvfs', 'statvfs_result', 'strerror', 'supports_bytes_environ', 'supports_dir_fd', 'supports_effective_ids', 
-                'supports_fd', 'supports_follow_symlinks', 'sync', 'sysconf', 'sysconf_names', 'tcgetpgrp', 
-                'tcsetpgrp', 'terminal_size', 'times', 'times_result', 'truncate', 'ttyname', 'umask', 'uname', 
-                'uname_result', 'unsetenv', 'urandom', 'utime', 'wait', 'wait3', 'wait4', 'waitpid', 'walk', 'write']
+            
+            deny = [
+                '_execvpe', 'chmod', 'chown', 'chroot', 'execl', 'execle', 'execlp', 'execlpe', 'execv', 'execve', 'execvp', 'execvpe', 
+                'kill', 'killpg',  'lchmod', 'lchown',  'link', 'posix_spawn', 'posix_spawnp','spawnl', 'spawnle', 'spawnlp', 'spawnlpe', 'spawnv', 'spawnve', 'spawnvp', 'spawnvpe', 
+                'symlink']
             
             # Remove any object from os that hasn't been explicity whitelisted.
             for attr, value in os.__dict__.items():
-                if attr not in whitelisted:
+                if attr in deny:
                     setattr(os, attr, lambda self: PermissionError("Access to this module (os.{}) is denied".format(attr)))
 
             script_locals = { "bot": self, "args": self.args }
