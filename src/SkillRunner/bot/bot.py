@@ -155,11 +155,11 @@ class Bot(object):
 
             # Many libraries rely on a real environ object, can't set this to None
             os.environ.clear() 
-            
+
             deny = [
-                '_execvpe', 'chmod', 'chown', 'chroot', 'execl', 'execle', 'execlp', 'execlpe', 'execv', 'execve', 'execvp', 'execvpe', 
-                'kill', 'killpg',  'lchmod', 'lchown',  'link', 'posix_spawn', 'posix_spawnp','spawnl', 'spawnle', 'spawnlp', 'spawnlpe', 'spawnv', 'spawnve', 'spawnvp', 'spawnvpe', 
-                'symlink']
+                '_execvpe', 'chmod', 'chown', 'chroot', 'execl', 'execle', 'execlp', 'execlpe', 'execv', 'execve', 'execvp', 
+                'execvpe', 'kill', 'killpg', 'lchmod', 'lchown', 'link', 'posix_spawn', 'posix_spawnp','spawnl', 'spawnle', 
+                'spawnlp', 'spawnlpe', 'spawnv', 'spawnve', 'spawnvp', 'spawnvpe', 'symlink']
             
             # Remove any object from os that hasn't been explicity whitelisted.
             for attr, value in os.__dict__.items():
