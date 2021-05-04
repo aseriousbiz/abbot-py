@@ -173,6 +173,7 @@ class Bot(object):
 
             # Restore `os` so our code can use it if necessary.
             sys.modules['os'] = os_copy
+            os.environ = os_copy.environ
             out = script_locals.get('bot')
 
             return out.responses
