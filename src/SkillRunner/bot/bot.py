@@ -154,7 +154,7 @@ class Bot(object):
             os_copy = os
 
             # Many libraries rely on a real environ object, can't set this to None
-            os.environ.clear() 
+            os.environ = None
 
             deny = [
                 '_execvpe', 'chmod', 'chown', 'chroot', 'execl', 'execle', 'execlp', 'execlpe', 'execv', 'execve', 'execvp', 
