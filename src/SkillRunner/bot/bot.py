@@ -103,7 +103,6 @@ class Bot(object):
     """
     def __init__(self, req, api_token):
         self.reply_api_uri = os.environ.get('AbbotReplyApiUrl', 'https://localhost:4979/api/reply')
-        
         skillInfo = req.get('SkillInfo')
         runnerInfo = req.get('RunnerInfo')
 
@@ -154,7 +153,8 @@ class Bot(object):
             os_copy = os
 
             # Many libraries rely on a real environ object, can't set this to None
-            os.environ = None
+            os_env_copy = os.environ.copy()
+            os.environ.clear()
 
             deny = [
                 '_execvpe', 'chmod', 'chown', 'chroot', 'execl', 'execle', 'execlp', 'execlpe', 'execv', 'execve', 'execvp', 
@@ -173,7 +173,8 @@ class Bot(object):
 
             # Restore `os` so our code can use it if necessary.
             sys.modules['os'] = os_copy
-            os.environ = os_copy.environ
+            os.environ = os_env_copy.copy()
+
             out = script_locals.get('bot')
 
             return out.responses
