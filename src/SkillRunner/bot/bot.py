@@ -149,11 +149,8 @@ class Bot(object):
         Run the code the user has submitted.
         """
         try:
-            # Make a copy of os to come back to after the skill has run.
-            os_copy = os
-
             # Many libraries rely on a real environ object, can't set this to None
-            os_env_copy = os.environ.copy()
+            old_environ = dict(os.environ)
             os.environ.clear()
 
             deny = [
@@ -169,11 +166,11 @@ class Bot(object):
             script_locals = { "bot": self, "args": self.args }
             out = None
             # Run the code
+
             exec(self.code, script_locals, script_locals)
 
-            # Restore `os` so our code can use it if necessary.
-            sys.modules['os'] = os_copy
-            os.environ = os_env_copy.copy()
+            # Restore the environment so the rest of the runner can use it.
+            os.environ.update(old_environ) 
 
             out = script_locals.get('bot')
 

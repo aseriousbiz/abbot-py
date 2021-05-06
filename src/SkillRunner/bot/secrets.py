@@ -15,6 +15,8 @@ class Secrets(object):
         self.skill_id = skill_id
         self.user_id = user_id
         self.request_uri = os.environ.get('SkillApiBaseUriFormatString', 'https://localhost:4979/api/skills/{0}') + '/secret?key={1}'
+        if self.request_uri.startswith("https://localhost:4979"):
+            logging.warn("SkillApiBaseUriFormatString appears to be blank. Using localhost as a fallback.")
         self.api_client = apiclient.ApiClient(self.request_uri, user_id, api_token, timestamp)
 
 
