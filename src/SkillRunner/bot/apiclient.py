@@ -60,7 +60,7 @@ class ApiClient(object):
             result.raise_for_status()
             return result.json()
         except Exception as e:
-            logging.error("There was an error POSTing (got status code: {})".format(result.status_code))
+            logging.error("There was an error POSTing ({})".format(e))
             logging.error(e)
 
 
