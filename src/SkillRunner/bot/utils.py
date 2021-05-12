@@ -1,7 +1,5 @@
 import os
-import json
 import requests
-import logging
 
 from . import apiclient
 

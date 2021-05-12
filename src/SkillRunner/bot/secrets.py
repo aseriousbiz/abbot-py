@@ -1,7 +1,5 @@
 import os
 import logging
-import requests
-import json
 
 from . import apiclient
 
@@ -14,7 +12,7 @@ class Secrets(object):
     def __init__(self, skill_id, user_id, api_token, timestamp):
         self.skill_id = skill_id
         self.user_id = user_id
-        self.request_uri = os.environ.get('SkillApiBaseUriFormatString', 'https://ab.bot/api/skills/{0}') + '/secret?key={1}'
+        self.request_uri = os.environ.get('SkillApiBaseUriFormatString', 'https://ab.bot/api/skills/{0}') + '/secret?key={1}' # TODO: replace failure mode with localhost
         if self.request_uri.startswith("https://localhost:4979"):
             logging.warn("SkillApiBaseUriFormatString appears to be blank. Using localhost as a fallback.")
         self.api_client = apiclient.ApiClient(self.request_uri, user_id, api_token, timestamp)
