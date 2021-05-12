@@ -1,10 +1,8 @@
 import os
 import json
-import sys
 import jsonpickle
 import requests
 import logging
-import traceback
 from unittest.mock import patch
 
 # Imports solely for use in user skill
@@ -72,16 +70,6 @@ class Mention(object):
     def __str__(self):
         return "<@{}>".format(self.user_name)
 
-class FakeOS(object):
-    """
-    Used to pass into the skill runner. 
-    Every method call returns None, but lets libraries that
-    rely on the existence of the `os` module continue running.
-    """
-    def __getattr__(self, name):
-        def method(*args):
-            return None
-
 
 class Bot(object):
     """
@@ -103,7 +91,7 @@ class Bot(object):
     :var skill_url: The URL to the edit screen of the skill being run.
     """
     def __init__(self, req, api_token):
-        self.reply_api_uri = os.environ.get('AbbotReplyApiUrl', 'https://ab.bot/api/reply')
+        self.reply_api_uri = os.environ.get('AbbotReplyApiUrl', 'https://ab.bot/api/reply') #TODO: change failure mode back to localhost.
         skillInfo = req.get('SkillInfo')
         runnerInfo = req.get('RunnerInfo')
 
@@ -153,9 +141,8 @@ class Bot(object):
             script_locals = { "bot": self, "args": self.args }
             out = None
             
-            # Remove any object from os that hasn't been explicity whitelisted.
             with patch.dict("os.environ", {}):
-                # Run the code
+                # Clear os.environ, then run the code
                 os.environ.clear()
                 exec(self.code, script_locals, script_locals)
 

@@ -1,4 +1,3 @@
-import os
 import json
 import requests
 import logging
@@ -60,7 +59,7 @@ class ApiClient(object):
             result.raise_for_status()
             return result.json()
         except Exception as e:
-            logging.error("There was an error POSTing ({})".format(e))
+            logging.error("There was an error POSTing to {}".format(uri))
             logging.error(e)
 
 

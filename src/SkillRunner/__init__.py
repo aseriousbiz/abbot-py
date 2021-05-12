@@ -1,9 +1,6 @@
-import sys
 import logging
-import json
 import jsonpickle
-import traceback
-import os # used to block environ access
+import os 
 
 import azure.functions as func
 
@@ -56,7 +53,7 @@ def main(req: func.HttpRequest) -> func.HttpResponse:
     rm = ResponseManager()
 
     if req.method == "GET":
-        rm.add("Ok! Running Abbot Python Runner v0.5.1.")
+        rm.add("Ok! Running Abbot Python Runner v0.6.0.")
 
     try:
         deny_os_modules()
