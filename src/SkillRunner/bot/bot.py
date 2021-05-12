@@ -102,7 +102,7 @@ class Bot(object):
     :var skill_url: The URL to the edit screen of the skill being run.
     """
     def __init__(self, req, api_token):
-        self.reply_api_uri = os.environ.get('AbbotReplyApiUrl', 'https://localhost:4979/api/reply')
+        self.reply_api_uri = os.environ.get('AbbotReplyApiUrl', 'https://ab.bot/api/reply')
         skillInfo = req.get('SkillInfo')
         runnerInfo = req.get('RunnerInfo')
 
