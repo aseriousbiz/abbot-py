@@ -5,6 +5,7 @@ import jsonpickle
 import requests
 import logging
 import traceback
+from unittest.mock import patch
 
 # Imports solely for use in user skill
 import pandas
@@ -149,28 +150,14 @@ class Bot(object):
         Run the code the user has submitted.
         """
         try:
-            # Many libraries rely on a real environ object, can't set this to None
-            old_environ = dict(os.environ)
-            os.environ.clear()
-
-            deny = [
-                '_execvpe', 'chmod', 'chown', 'chroot', 'execl', 'execle', 'execlp', 'execlpe', 'execv', 'execve', 'execvp', 
-                'execvpe', 'kill', 'killpg', 'lchmod', 'lchown', 'link', 'posix_spawn', 'posix_spawnp','spawnl', 'spawnle', 
-                'spawnlp', 'spawnlpe', 'spawnv', 'spawnve', 'spawnvp', 'spawnvpe', 'symlink']
-            
-            # Remove any object from os that hasn't been explicity whitelisted.
-            for attr, value in os.__dict__.items():
-                if attr in deny:
-                    setattr(os, attr, lambda self: PermissionError("Access to this module (os.{}) is denied".format(attr)))
-
             script_locals = { "bot": self, "args": self.args }
             out = None
-            # Run the code
-
-            exec(self.code, script_locals, script_locals)
-
-            # Restore the environment so the rest of the runner can use it.
-            os.environ.update(old_environ) 
+            
+            # Remove any object from os that hasn't been explicity whitelisted.
+            with patch.dict("os.environ", {}):
+                # Run the code
+                os.environ.clear()
+                exec(self.code, script_locals, script_locals)
 
             out = script_locals.get('bot')
 
