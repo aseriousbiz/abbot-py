@@ -14,7 +14,7 @@ import boto3
 import octokit
 # End of user skill imports
 
-from . import storage 
+from . import storage
 from . import secrets
 from . import utils
 from . import exceptions
@@ -132,7 +132,8 @@ class Bot(object):
 
         self.api_client = apiclient.ApiClient(self.reply_api_uri, self.user_id, api_token, self.timestamp)
         self.responses = []
-    
+
+
     def run_user_script(self):
         """
         Run the code the user has submitted.
@@ -163,7 +164,7 @@ class Bot(object):
             logging.error(e)
             raise e
 
-    
+
     def reply(self, response):     
         """
         Send a reply. 
@@ -176,7 +177,8 @@ class Bot(object):
             self.api_client.post(self.reply_api_uri, body)
         else:
             self.responses.append(str(response))
-    
+
+
     def reply_later(self, response, delay_in_seconds):
         """
         Reply after a delay.
