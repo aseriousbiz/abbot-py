@@ -98,16 +98,14 @@ class Bot(object):
         self.skill_id = runnerInfo.get('SkillId')
         self.user_id = runnerInfo.get('UserId')
         self.timestamp = runnerInfo.get('Timestamp')
-        
 
         bot_data = runnerInfo.get('Bot')
         self.raw = skillInfo
-        
 
         self.id = runnerInfo.get('Id') 
-        self.user_name = skillInfo.get('UserName') 
-        self.args = skillInfo.get('Arguments') 
-        self.arguments = self.args 
+        self.user_name = skillInfo.get('UserName')
+        self.args = skillInfo.get('Arguments')
+        self.arguments = self.args
         self.code = runnerInfo.get('Code')
         self.brain = storage.Brain(self.skill_id, self.user_id, api_token, self.timestamp) 
         self.secrets = secrets.Secrets(self.skill_id, self.user_id, api_token, self.timestamp)
@@ -165,9 +163,9 @@ class Bot(object):
             raise e
 
 
-    def reply(self, response):     
+    def reply(self, response):
         """
-        Send a reply. 
+        Send a reply.
         
         Args:
             response (str): The response to send back to chat.
@@ -189,9 +187,9 @@ class Bot(object):
         """
         if self.conversation_reference:
             body = {
-                "SkillId": self.skill_id, 
-                "Message": str(response), 
-                "ConversationReference": self.conversation_reference, 
+                "SkillId": self.skill_id,
+                "Message": str(response),
+                "ConversationReference": self.conversation_reference,
                 "Schedule": delay_in_seconds
                 }
             self.api_client.post(self.reply_api_uri, body)
