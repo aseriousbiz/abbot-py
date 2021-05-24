@@ -58,12 +58,14 @@ class Mention(object):
     :var user_name: The user's user name.
     :var name: The user's name.
     :var location: The user's location if known.
+    :var timezone: The user's timezone if known
     """
-    def __init__(self, id, user_name, name, location):
+    def __init__(self, id, user_name, name, location, timezone):
         self.id = id
         self.user_name = user_name
         self.name = name
         self.location = location
+        self.timezone = timezone
 
 
     def toJSON(self):
@@ -97,6 +99,20 @@ class Location(object):
     def __init__(self, coordinate, formatted_address):
         self.coordinate = coordinate
         self.formatted_address = formatted_address
+
+
+class TimeZone(object):
+    """
+    Information about a user's timezone
+
+    :var id: The provider's ID for the timezone. Could be IANA or BCL.
+    :var min_offset: Gets the least (most negative) offset within this time zone, over all time.
+    :var max_offset: Gets the greatest (most positive) offset within this time zone, over all time.
+    """
+    def __init__(self, id, min_offset=None, max_offset=None):
+        self.id = id
+        self.min_offset = min_offset
+        self.max_offset = max_offset
 
 
 class Argument(object):
@@ -171,9 +187,9 @@ class Bot(object):
         
         self.from_user = skillInfo.get('From')
         self.mentions = self.load_mentions(skillInfo.get('Mentions'))
-        self.tokenized_arguments = self.load_arguments(skillInfo.get("TokenizedArguments"))
+        self.tokenized_arguments = self.load_arguments(skillInfo.get('TokenizedArguments'))
 
-        self.is_request = skillInfo.get("IsRequest")
+        self.is_request = skillInfo.get('IsRequest')
         self.is_chat = not self.is_request
 
         if self.is_request:
@@ -264,9 +280,22 @@ class Bot(object):
         return Location(coordinate, location_arg.get('FormattedAddress'))
 
 
+    def load_timezone(self, tz_arg):
+        if tz_arg is None:
+            return None
+        return TimeZone(tz_arg.get('Id'), tz_arg.get('MinOffset'), tz_arg.get('MaxOffset'))
+
+
     def load_mention(self, mention):
+        location_arg = mention.get('Location')
         location = self.load_location(mention.get('Location'))
-        return Mention(mention.get('Id'), mention.get('UserName'), mention.get('Name'), location)
+        timezone = self.load_timezone(mention.get('TimeZone'))
+        # Special case for PlatformUser mentions
+        if (location_arg is not None and timezone is None):
+            tz_id = location_arg.get('TimeZoneId')
+            if tz_id is not None:
+                timezone = TimeZone(tz_id)
+        return Mention(mention.get('Id'), mention.get('UserName'), mention.get('Name'), location, timezone)
 
 
     def load_mentions(self, mentions):
@@ -276,7 +305,7 @@ class Bot(object):
     def load_argument(self, argument):
         value = argument.get('Value')
         original_text = argument.get('OriginalText')
-        mentioned_arg = argument.get("Mentioned")
+        mentioned_arg = argument.get('Mentioned')
         mentioned = self.load_mention(mentioned_arg) if mentioned_arg is not None else None
         return Argument(value, original_text) if mentioned is None else MentionArgument(value, original_text, mentioned)
 
