@@ -52,16 +52,18 @@ class TriggerEvent(object):
 
 class Mention(object):
     """
-    A User mention.
+    A user mention.
 
-    :var id: The User's Id.
-    :var user_name: The User's user name.
-    :var name: The User's name.
+    :var id: The user's Id.
+    :var user_name: The user's user name.
+    :var name: The user's name.
+    :var location: The user's location if known.
     """
-    def __init__(self, Id, UserName, Name):
-        self.id = Id
-        self.user_name = UserName
-        self.name = Name
+    def __init__(self, id, user_name, name, location):
+        self.id = id
+        self.user_name = user_name
+        self.name = name
+        self.location = location
 
 
     def toJSON(self):
@@ -71,6 +73,30 @@ class Mention(object):
 
     def __str__(self):
         return "<@{}>".format(self.user_name)
+
+
+class Coordinate(object):
+    """
+    Represents a geographic coordinate.
+
+    :var latitude: The latitude. Those are the lines that are the belts of the earth.
+    :var longitude: The longitude. Those are the pin stripes of the earth.
+    """
+    def __init__(self, latitude, longitude):
+        self.latitude = latitude
+        self.longitude = longitude
+
+
+class Location(object):
+    """
+    A geo-coded location
+
+    :var coordinate: The coordinates of the location.
+    :var formatted_address: The formatted address of the location.
+    """
+    def __init__(self, coordinate, formatted_address):
+        self.coordinate = coordinate
+        self.formatted_address = formatted_address
 
 
 class Argument(object):
@@ -226,8 +252,21 @@ class Bot(object):
             self.responses.append(str(response))
 
 
+    def load_coordinate(self, coordinate_arg):
+        return None if coordinate_arg is None else Coordinate(coordinate_arg.get('Latitude'), coordinate_arg.get('Longitude'))
+
+
+    def load_location(self, location_arg):
+        if location_arg is None:
+            return None
+        coordinate_arg = location_arg.get('Coordinate')
+        coordinate = self.load_coordinate(coordinate_arg)
+        return Location(coordinate, location_arg.get('FormattedAddress'))
+
+
     def load_mention(self, mention):
-        return Mention(mention.get('Id'), mention.get('UserName'), mention.get('Name'))
+        location = self.load_location(mention.get('Location'))
+        return Mention(mention.get('Id'), mention.get('UserName'), mention.get('Name'), location)
 
 
     def load_mentions(self, mentions):
