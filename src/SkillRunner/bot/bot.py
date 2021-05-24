@@ -62,13 +62,41 @@ class Mention(object):
         self.id = Id
         self.user_name = UserName
         self.name = Name
-    
+
+
     def toJSON(self):
             return json.dumps(self, default=lambda o: o.__dict__, 
                 sort_keys=True, indent=4)
 
+
     def __str__(self):
         return "<@{}>".format(self.user_name)
+
+
+class Argument(object):
+    """
+    An argument parsed from the bot.arguments property. Arguments may be delimited by a space or 
+    by a matching pair of quotes.
+
+    :var value: The normalized argument value
+    :var original_text: The original argument value. For quoted values this would include the surrounding quotes.
+    """
+    def __init__(self, value, original_text):
+        self.value = value
+        self.original_text = original_text
+
+
+    def __str__(self):
+        return self.value
+
+
+class MentionArgument(Argument):
+    """
+    An argument that represents a mentioned user.
+    """
+    def __init__(self, value, original_text, mentioned):
+        super().__init__(value, original_text)
+        self.mentioned = mentioned
 
 
 class Bot(object):
@@ -117,6 +145,7 @@ class Bot(object):
         
         self.from_user = skillInfo.get('From')
         self.mentions = self.load_mentions(skillInfo.get('Mentions'))
+        self.tokenized_arguments = self.load_arguments(skillInfo.get("TokenizedArguments"))
 
         self.is_request = skillInfo.get("IsRequest")
         self.is_chat = not self.is_request
@@ -197,8 +226,24 @@ class Bot(object):
             self.responses.append(str(response))
 
 
+    def load_mention(self, mention):
+        return Mention(mention.get('Id'), mention.get('UserName'), mention.get('Name'))
+
+
     def load_mentions(self, mentions):
-        return [Mention(m.get('Id'), m.get('UserName'), m.get('Name')) for m in mentions]
+        return [self.load_mention(m) for m in mentions]
+
+
+    def load_argument(self, argument):
+        value = argument.get('Value')
+        original_text = argument.get('OriginalText')
+        mentioned_arg = argument.get("Mentioned")
+        mentioned = self.load_mention(mentioned_arg) if mentioned_arg is not None else None
+        return Argument(value, original_text) if mentioned is None else MentionArgument(value, original_text, mentioned)
+
+
+    def load_arguments(self, tokenized_arguments):
+        return [self.load_argument(arg) for arg in tokenized_arguments]
 
 
     def __repr__(self):
