@@ -296,7 +296,7 @@ class Bot(object):
 
     def load_mention(self, mention):
         location_arg = mention.get('Location')
-        timezone_arg = mention.Get('TimeZone')
+        timezone_arg = mention.get('TimeZone')
         location = self.load_location(location_arg) if location_arg is not None else None
         timezone = self.load_timezone(timezone_arg) if timezone_arg is not None else None
         # Special case for PlatformUser mentions
