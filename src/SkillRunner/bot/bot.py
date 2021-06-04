@@ -88,6 +88,9 @@ class Coordinate(object):
         self.latitude = latitude
         self.longitude = longitude
 
+    def __str__(self):
+        return "lat: {}, lon: {}".format(self.latitude, self.longitude)
+
 
 class Location(object):
     """
@@ -99,6 +102,9 @@ class Location(object):
     def __init__(self, coordinate, formatted_address):
         self.coordinate = coordinate
         self.formatted_address = formatted_address
+
+    def __str__(self):
+        return "coordinate: {}, address: {}".format(self.coordinate, self.formatted_address)
 
 
 class TimeZone(object):
@@ -113,6 +119,9 @@ class TimeZone(object):
         self.id = id
         self.min_offset = min_offset
         self.max_offset = max_offset
+
+    def __str__(self):
+        return "id: {}, min_offset: {}, max_offset: {}".format(self.id, self.min_offset, self.max_offset)
 
 
 class Argument(object):
@@ -139,6 +148,9 @@ class MentionArgument(Argument):
     def __init__(self, value, original_text, mentioned):
         super().__init__(value, original_text)
         self.mentioned = mentioned
+
+    def __str__(self):
+        return "mentioned: {}".format(self.mentioned)
 
 
 class Bot(object):
