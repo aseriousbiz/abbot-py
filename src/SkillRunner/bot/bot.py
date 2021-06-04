@@ -285,23 +285,20 @@ class Bot(object):
 
 
     def load_location(self, location_arg):
-        if location_arg is None:
-            return None
         coordinate_arg = location_arg.get('Coordinate')
         coordinate = self.load_coordinate(coordinate_arg)
         return Location(coordinate, location_arg.get('FormattedAddress'))
 
 
     def load_timezone(self, tz_arg):
-        if tz_arg is None:
-            return None
         return TimeZone(tz_arg.get('Id'), tz_arg.get('MinOffset'), tz_arg.get('MaxOffset'))
 
 
     def load_mention(self, mention):
         location_arg = mention.get('Location')
-        location = self.load_location(mention.get('Location'))
-        timezone = self.load_timezone(mention.get('TimeZone'))
+        timezone_arg = mention.Get('TimeZone')
+        location = self.load_location(location_arg) if location_arg is not None else None
+        timezone = self.load_timezone(timezone_arg) if timezone_arg is not None else None
         # Special case for PlatformUser mentions
         if (location_arg is not None and timezone is None):
             tz_id = location_arg.get('TimeZoneId')
