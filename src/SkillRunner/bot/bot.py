@@ -52,23 +52,105 @@ class TriggerEvent(object):
 
 class Mention(object):
     """
-    A User mention.
+    A user mention.
 
-    :var id: The User's Id.
-    :var user_name: The User's user name.
-    :var name: The User's name.
+    :var id: The user's Id.
+    :var user_name: The user's user name.
+    :var name: The user's name.
+    :var location: The user's location if known.
+    :var timezone: The user's timezone if known
     """
-    def __init__(self, Id, UserName, Name):
-        self.id = Id
-        self.user_name = UserName
-        self.name = Name
-    
+    def __init__(self, id, user_name, name, location, timezone):
+        self.id = id
+        self.user_name = user_name
+        self.name = name
+        self.location = location
+        self.timezone = timezone
+
+
     def toJSON(self):
             return json.dumps(self, default=lambda o: o.__dict__, 
                 sort_keys=True, indent=4)
 
+
     def __str__(self):
         return "<@{}>".format(self.user_name)
+
+
+class Coordinate(object):
+    """
+    Represents a geographic coordinate.
+
+    :var latitude: The latitude. Those are the lines that are the belts of the earth.
+    :var longitude: The longitude. Those are the pin stripes of the earth.
+    """
+    def __init__(self, latitude, longitude):
+        self.latitude = latitude
+        self.longitude = longitude
+
+    def __str__(self):
+        return "lat: {}, lon: {}".format(self.latitude, self.longitude)
+
+
+class Location(object):
+    """
+    A geo-coded location
+
+    :var coordinate: The coordinates of the location.
+    :var formatted_address: The formatted address of the location.
+    """
+    def __init__(self, coordinate, formatted_address):
+        self.coordinate = coordinate
+        self.formatted_address = formatted_address
+
+    def __str__(self):
+        return "coordinate: {}, address: {}".format(self.coordinate, self.formatted_address)
+
+
+class TimeZone(object):
+    """
+    Information about a user's timezone
+
+    :var id: The provider's ID for the timezone. Could be IANA or BCL.
+    :var min_offset: Gets the least (most negative) offset within this time zone, over all time.
+    :var max_offset: Gets the greatest (most positive) offset within this time zone, over all time.
+    """
+    def __init__(self, id, min_offset=None, max_offset=None):
+        self.id = id
+        self.min_offset = min_offset
+        self.max_offset = max_offset
+
+    def __str__(self):
+        return "id: {}, min_offset: {}, max_offset: {}".format(self.id, self.min_offset, self.max_offset)
+
+
+class Argument(object):
+    """
+    An argument parsed from the bot.arguments property. Arguments may be delimited by a space or 
+    by a matching pair of quotes.
+
+    :var value: The normalized argument value
+    :var original_text: The original argument value. For quoted values this would include the surrounding quotes.
+    """
+    def __init__(self, value, original_text):
+        self.value = value
+        self.original_text = original_text
+
+
+    def __str__(self):
+        return self.value
+
+
+class MentionArgument(Argument):
+    """
+    An argument that represents a mentioned user.
+    """
+    def __init__(self, value, original_text, mentioned):
+        super().__init__(value, original_text)
+        self.mentioned = mentioned
+
+    def __str__(self):
+        return "mentioned: {}".format(self.mentioned)
 
 
 class Bot(object):
@@ -98,16 +180,14 @@ class Bot(object):
         self.skill_id = runnerInfo.get('SkillId')
         self.user_id = runnerInfo.get('UserId')
         self.timestamp = runnerInfo.get('Timestamp')
-        
 
         bot_data = runnerInfo.get('Bot')
         self.raw = skillInfo
-        
 
         self.id = runnerInfo.get('Id') 
-        self.user_name = skillInfo.get('UserName') 
-        self.args = skillInfo.get('Arguments') 
-        self.arguments = self.args 
+        self.user_name = skillInfo.get('UserName')
+        self.args = skillInfo.get('Arguments')
+        self.arguments = self.args
         self.code = runnerInfo.get('Code')
         self.brain = storage.Brain(self.skill_id, self.user_id, api_token, self.timestamp) 
         self.secrets = secrets.Secrets(self.skill_id, self.user_id, api_token, self.timestamp)
@@ -119,8 +199,9 @@ class Bot(object):
         
         self.from_user = skillInfo.get('From')
         self.mentions = self.load_mentions(skillInfo.get('Mentions'))
+        self.tokenized_arguments = self.load_arguments(skillInfo.get('TokenizedArguments', []))
 
-        self.is_request = skillInfo.get("IsRequest")
+        self.is_request = skillInfo.get('IsRequest')
         self.is_chat = not self.is_request
 
         if self.is_request:
@@ -165,9 +246,9 @@ class Bot(object):
             raise e
 
 
-    def reply(self, response):     
+    def reply(self, response):
         """
-        Send a reply. 
+        Send a reply.
         
         Args:
             response (str): The response to send back to chat.
@@ -189,9 +270,9 @@ class Bot(object):
         """
         if self.conversation_reference:
             body = {
-                "SkillId": self.skill_id, 
-                "Message": str(response), 
-                "ConversationReference": self.conversation_reference, 
+                "SkillId": self.skill_id,
+                "Message": str(response),
+                "ConversationReference": self.conversation_reference,
                 "Schedule": delay_in_seconds
                 }
             self.api_client.post(self.reply_api_uri, body)
@@ -199,8 +280,47 @@ class Bot(object):
             self.responses.append(str(response))
 
 
+    def load_coordinate(self, coordinate_arg):
+        return None if coordinate_arg is None else Coordinate(coordinate_arg.get('Latitude'), coordinate_arg.get('Longitude'))
+
+
+    def load_location(self, location_arg):
+        coordinate_arg = location_arg.get('Coordinate')
+        coordinate = self.load_coordinate(coordinate_arg)
+        return Location(coordinate, location_arg.get('FormattedAddress'))
+
+
+    def load_timezone(self, tz_arg):
+        return TimeZone(tz_arg.get('Id'), tz_arg.get('MinOffset'), tz_arg.get('MaxOffset'))
+
+
+    def load_mention(self, mention):
+        location_arg = mention.get('Location')
+        timezone_arg = mention.get('TimeZone')
+        location = self.load_location(location_arg) if location_arg is not None else None
+        timezone = self.load_timezone(timezone_arg) if timezone_arg is not None else None
+        # Special case for PlatformUser mentions
+        if (location_arg is not None and timezone is None):
+            tz_id = location_arg.get('TimeZoneId')
+            if tz_id is not None:
+                timezone = TimeZone(tz_id)
+        return Mention(mention.get('Id'), mention.get('UserName'), mention.get('Name'), location, timezone)
+
+
     def load_mentions(self, mentions):
-        return [Mention(m.get('Id'), m.get('UserName'), m.get('Name')) for m in mentions]
+        return [self.load_mention(m) for m in mentions]
+
+
+    def load_argument(self, argument):
+        value = argument.get('Value')
+        original_text = argument.get('OriginalText')
+        mentioned_arg = argument.get('Mentioned')
+        mentioned = self.load_mention(mentioned_arg) if mentioned_arg is not None else None
+        return Argument(value, original_text) if mentioned is None else MentionArgument(value, original_text, mentioned)
+
+
+    def load_arguments(self, tokenized_arguments):
+        return [self.load_argument(arg) for arg in tokenized_arguments]
 
 
     def __repr__(self):
