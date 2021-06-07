@@ -310,7 +310,6 @@ class Bot(object):
                     }
                 ]
             }
-            logging.error(self.tokenized_arguments)
             self.api_client.post(self.reply_api_uri, body)
         else:
             self.responses.append(str(response))
