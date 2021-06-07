@@ -6,6 +6,7 @@ import azure.functions as func
 
 from .bot import bot as _bot
 from .bot import exceptions
+from .bot.bot import Button
 
 class ResponseManager:
     def __init__(self):

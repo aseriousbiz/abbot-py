@@ -45,7 +45,7 @@ class TriggerEvent(object):
         self.query = request.get('Query')
         self.url = request.get('Url')
         self.raw_body = request.get('RawBody')
-    
+
     def toJSON(self):
         return jsonpickle.encode(self)
 
@@ -69,8 +69,8 @@ class Mention(object):
 
 
     def toJSON(self):
-            return json.dumps(self, default=lambda o: o.__dict__, 
-                sort_keys=True, indent=4)
+        return json.dumps(self, default=lambda o: o.__dict__, 
+            sort_keys=True, indent=4)
 
 
     def __str__(self):
@@ -153,6 +153,27 @@ class MentionArgument(Argument):
         return "mentioned: {}".format(self.mentioned)
 
 
+class Button(object):
+    """
+    A button presented to the user.
+
+    :var title: The title displayed on the button.
+    :var args: The arguments to pass back to this skill when the button is clicked.
+    :var style: (optional) The style to apply to the button. Allowed values are 'default', 'primary', and 'danger'. Use 'primary' and 'danger' sparingly.
+    """
+    def __init__(self, title, args=None, style="default"):
+        self.title = title
+        self.arguments = args if args is not None else title
+        self.style = style
+
+    def toJSON(self):
+        return {
+            "Title": self.title,
+            "Arguments": self.arguments,
+            "Style": self.style
+        }
+
+
 class Bot(object):
     """
     Most interactions with the outside world occur from the Bot object.
@@ -164,6 +185,7 @@ class Bot(object):
     :var args: Arguments from the user.
     :var arguments: Arguments from the user.
     :var mentions: A collection of user mentions.
+    :var is_interaction: True if the message came from a user interacting with a UI element in chat such as clicking on a button. False if not.
     :var is_chat: True if the message came from chat. False if not. 
     :var is_request: True if the message came from a trigger. False if not.
     :var platform_id: The id of the team this skill is being run in. This would be your Team Id in Slack, for example.
@@ -184,7 +206,7 @@ class Bot(object):
         bot_data = runnerInfo.get('Bot')
         self.raw = skillInfo
 
-        self.id = runnerInfo.get('Id') 
+        self.id = runnerInfo.get('Id')
         self.user_name = skillInfo.get('UserName')
         self.args = skillInfo.get('Arguments')
         self.arguments = self.args
@@ -201,6 +223,7 @@ class Bot(object):
         self.mentions = self.load_mentions(skillInfo.get('Mentions'))
         self.tokenized_arguments = self.load_arguments(skillInfo.get('TokenizedArguments', []))
 
+        self.is_interaction = skillInfo.get('IsInteraction')
         self.is_request = skillInfo.get('IsRequest')
         self.is_chat = not self.is_request
 
@@ -220,7 +243,7 @@ class Bot(object):
         Run the code the user has submitted.
         """
         try:
-            script_locals = { "bot": self, "args": self.args }
+            script_locals = { "bot": self, "args": self.args, "Button": Button }
             out = None
             
             with patch.dict("os.environ", {}):
@@ -255,6 +278,38 @@ class Bot(object):
         """   
         if self.conversation_reference:
             body = {"SkillId": self.skill_id, "Message": str(response), "ConversationReference": self.conversation_reference}
+            self.api_client.post(self.reply_api_uri, body)
+        else:
+            self.responses.append(str(response))
+
+
+    def reply_with_buttons(self, response, buttons, buttons_label=None, image_url=None, title=None, color=None):
+        """
+        Sends a reply with a set of buttons. Clicking a button will call back into this skill.
+
+        Args:
+            response (str): The message to send as a response.
+            buttons (list[Button]): The set of buttons to display (Maximum 6).
+            buttons_label (str): The text that serves as a label for the set of buttons (optional).
+            image_url (str): An image to render before the set of buttons (optional).
+            title (str): A title to render (optional).
+            color (str): The color to use for the sidebar (Slack Only) in hex (ex. #3AA3E3) (optional).
+        """
+        if self.conversation_reference:
+            body = {
+                "SkillId": self.skill_id,
+                "Message": str(response),
+                "ConversationReference": self.conversation_reference,
+                "Attachments": [
+                    {
+                        "Buttons": [b.toJSON() for b in buttons],
+                        "ButtonsLabel": buttons_label,
+                        "ImageUrl": image_url,
+                        "Title": title,
+                        "Color": color
+                    }
+                ]
+            }
             self.api_client.post(self.reply_api_uri, body)
         else:
             self.responses.append(str(response))
