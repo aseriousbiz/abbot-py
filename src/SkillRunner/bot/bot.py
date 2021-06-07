@@ -223,8 +223,8 @@ class Bot(object):
         self.mentions = self.load_mentions(skillInfo.get('Mentions'))
         self.tokenized_arguments = self.load_arguments(skillInfo.get('TokenizedArguments', []))
 
-        self.is_interaction = skillInfo.get("IsInteraction")
-        self.is_request = skillInfo.get("IsRequest")
+        self.is_interaction = skillInfo.get('IsInteraction')
+        self.is_request = skillInfo.get('IsRequest')
         self.is_chat = not self.is_request
 
         if self.is_request:
