@@ -241,8 +241,8 @@ class Bot(object):
             self.request = None
 
         # Load the full skillInfo object for debugging purposes. Don't document it for users.
-        skillInfo["from_name"] = skillInfo["From"]
-        del skillInfo["From"] # `from` is a protected Python keyword, and can't be converted to an object
+        skillInfo['from_name'] = skillInfo['From']
+        del skillInfo['From'] # `from` is a protected Python keyword, and can't be converted to an object
         self.skill_data = obj(skillInfo)
 
         self.responses = []
