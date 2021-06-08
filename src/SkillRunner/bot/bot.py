@@ -73,6 +73,8 @@ class Mention(object):
         return json.dumps(self, default=lambda o: o.__dict__, 
             sort_keys=True, indent=4)
 
+    def __repr__(self):
+        return "<@{}>".format(self.user_name) 
 
     def __str__(self):
         return "<@{}>".format(self.user_name)
@@ -137,6 +139,8 @@ class Argument(object):
         self.value = value
         self.original_text = original_text
 
+    def __repr__(self):
+        return self.value
 
     def __str__(self):
         return self.value
@@ -223,7 +227,7 @@ class Bot(object):
         self.room = skillInfo.get('Room')
         self.skill_name = skillInfo.get('SkillName')
         
-        self.from_user = skillInfo.get('From')
+        self.from_user = self.load_mention(skillInfo.get('From'))
         self.mentions = self.load_mentions(skillInfo.get('Mentions'))
         self.tokenized_arguments = self.load_arguments(skillInfo.get('TokenizedArguments', []))
 
@@ -235,6 +239,11 @@ class Bot(object):
             self.request = TriggerEvent(skillInfo.get('Request'))
         else:
             self.request = None
+
+        # Load the full skillInfo object for debugging purposes. Don't document it for users.
+        skillInfo["from_name"] = skillInfo["From"]
+        del skillInfo["From"] # `from` is a protected Python keyword, and can't be converted to an object
+        self.skill_data = obj(skillInfo)
 
         self.responses = []
 
