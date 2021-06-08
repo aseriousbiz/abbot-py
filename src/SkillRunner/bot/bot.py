@@ -17,6 +17,7 @@ import octokit
 from . import storage
 from . import secrets
 from . import utils
+from .utils import obj
 from . import exceptions
 from . import apiclient
 
@@ -72,6 +73,8 @@ class Mention(object):
         return json.dumps(self, default=lambda o: o.__dict__, 
             sort_keys=True, indent=4)
 
+    def __repr__(self):
+        return "<@{}>".format(self.user_name) 
 
     def __str__(self):
         return "<@{}>".format(self.user_name)
@@ -136,6 +139,8 @@ class Argument(object):
         self.value = value
         self.original_text = original_text
 
+    def __repr__(self):
+        return self.value
 
     def __str__(self):
         return self.value
@@ -195,46 +200,51 @@ class Bot(object):
     :var skill_url: The URL to the edit screen of the skill being run.
     """
     def __init__(self, req, api_token):
-        self.reply_api_uri = os.environ.get('AbbotReplyApiUrl', 'https://ab.bot/api/reply') #TODO: change failure mode back to localhost.
+        self.reply_api_uri = os.environ.get('AbbotReplyApiUrl', 'https://localhost:4979/api/reply')
         skillInfo = req.get('SkillInfo')
         runnerInfo = req.get('RunnerInfo')
 
+        self.id = runnerInfo.get('Id')
         self.skill_id = runnerInfo.get('SkillId')
         self.user_id = runnerInfo.get('UserId')
         self.timestamp = runnerInfo.get('Timestamp')
-
-        bot_data = runnerInfo.get('Bot')
-        self.raw = skillInfo
-
-        self.id = runnerInfo.get('Id')
-        self.user_name = skillInfo.get('UserName')
-        self.args = skillInfo.get('Arguments')
-        self.arguments = self.args
         self.code = runnerInfo.get('Code')
+        self.conversation_reference = runnerInfo.get('ConversationReference')
+        self.api_client = apiclient.ApiClient(self.reply_api_uri, self.user_id, api_token, self.timestamp)
+
         self.brain = storage.Brain(self.skill_id, self.user_id, api_token, self.timestamp) 
         self.secrets = secrets.Secrets(self.skill_id, self.user_id, api_token, self.timestamp)
         self.utils = utils.Utilities(self.skill_id, self.user_id, api_token, self.timestamp)
+
+        self.raw = skillInfo
+
+        # Properties for skill authors to consume
+        self.user_name = skillInfo.get('UserName')
+        self.args = skillInfo.get('Arguments')
+        self.arguments = self.args
         self.platform_id = skillInfo.get('PlatformId')
         self.platform_type = skillInfo.get('PlatformType')
         self.room = skillInfo.get('Room')
         self.skill_name = skillInfo.get('SkillName')
         
-        self.from_user = skillInfo.get('From')
+        self.from_user = self.load_mention(skillInfo.get('From'))
         self.mentions = self.load_mentions(skillInfo.get('Mentions'))
         self.tokenized_arguments = self.load_arguments(skillInfo.get('TokenizedArguments', []))
 
         self.is_interaction = skillInfo.get('IsInteraction')
         self.is_request = skillInfo.get('IsRequest')
         self.is_chat = not self.is_request
-
+        
         if self.is_request:
             self.request = TriggerEvent(skillInfo.get('Request'))
         else:
             self.request = None
 
-        self.conversation_reference = runnerInfo.get('ConversationReference')
+        # Load the full skillInfo object for debugging purposes. Don't document it for users.
+        skillInfo['from_name'] = skillInfo['From']
+        del skillInfo['From'] # `from` is a protected Python keyword, and can't be converted to an object
+        self.skill_data = obj(skillInfo)
 
-        self.api_client = apiclient.ApiClient(self.reply_api_uri, self.user_id, api_token, self.timestamp)
         self.responses = []
 
 
