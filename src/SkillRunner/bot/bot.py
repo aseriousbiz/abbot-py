@@ -17,6 +17,7 @@ import octokit
 from . import storage
 from . import secrets
 from . import utils
+from .utils import obj
 from . import exceptions
 from . import apiclient
 
@@ -199,21 +200,24 @@ class Bot(object):
         skillInfo = req.get('SkillInfo')
         runnerInfo = req.get('RunnerInfo')
 
+        self.id = runnerInfo.get('Id')
         self.skill_id = runnerInfo.get('SkillId')
         self.user_id = runnerInfo.get('UserId')
         self.timestamp = runnerInfo.get('Timestamp')
-
-        bot_data = runnerInfo.get('Bot')
-        self.raw = skillInfo
-
-        self.id = runnerInfo.get('Id')
-        self.user_name = skillInfo.get('UserName')
-        self.args = skillInfo.get('Arguments')
-        self.arguments = self.args
         self.code = runnerInfo.get('Code')
+        self.conversation_reference = runnerInfo.get('ConversationReference')
+        self.api_client = apiclient.ApiClient(self.reply_api_uri, self.user_id, api_token, self.timestamp)
+
         self.brain = storage.Brain(self.skill_id, self.user_id, api_token, self.timestamp) 
         self.secrets = secrets.Secrets(self.skill_id, self.user_id, api_token, self.timestamp)
         self.utils = utils.Utilities(self.skill_id, self.user_id, api_token, self.timestamp)
+
+        self.raw = skillInfo
+
+        # Properties for skill authors to consume
+        self.user_name = skillInfo.get('UserName')
+        self.args = skillInfo.get('Arguments')
+        self.arguments = self.args
         self.platform_id = skillInfo.get('PlatformId')
         self.platform_type = skillInfo.get('PlatformType')
         self.room = skillInfo.get('Room')
@@ -226,15 +230,12 @@ class Bot(object):
         self.is_interaction = skillInfo.get('IsInteraction')
         self.is_request = skillInfo.get('IsRequest')
         self.is_chat = not self.is_request
-
+        
         if self.is_request:
             self.request = TriggerEvent(skillInfo.get('Request'))
         else:
             self.request = None
 
-        self.conversation_reference = runnerInfo.get('ConversationReference')
-
-        self.api_client = apiclient.ApiClient(self.reply_api_uri, self.user_id, api_token, self.timestamp)
         self.responses = []
 
 
