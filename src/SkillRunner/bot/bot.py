@@ -325,6 +325,37 @@ class Bot(object):
             self.responses.append(str(response))
 
 
+    def reply_with_image(self, image, response=None, title=None, title_url=None, color=None):
+        """
+        Sends a reply along with an image attachment. The image can be a URL to an image or a base64 encoded image.
+
+        Args:
+            image (str): Either the URL to an image or the base64 encoded image.
+            response (str): The message to send as a response (optional).
+            title (str): An image title to render (optional).
+            title_url (str): If specified, makes the title a link to this URL. Ignored if title is not set. (optional).
+            color (str): The color to use for the sidebar (Slack Only) in hex (ex. #3AA3E3) (optional).
+        """
+        if self.conversation_reference:
+            body = {
+                "SkillId": self.skill_id,
+                "Message": str(response),
+                "ConversationReference": self.conversation_reference,
+                "Attachments": [
+                    {
+                        "Buttons": [],
+                        "ImageUrl": image,
+                        "Title": title,
+                        "TitleUrl": title_url,
+                        "Color": color
+                    }
+                ]
+            }
+            self.api_client.post(self.reply_api_uri, body)
+        else:
+            self.responses.append(str(response))
+
+
     def reply_later(self, response, delay_in_seconds):
         """
         Reply after a delay.
