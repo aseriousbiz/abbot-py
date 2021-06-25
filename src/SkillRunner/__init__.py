@@ -54,7 +54,7 @@ def main(req: func.HttpRequest) -> func.HttpResponse:
     rm = ResponseManager()
 
     if req.method == "GET":
-        rm.add("Ok! Running Abbot Python Runner v0.6.1.")
+        rm.add("Ok! Running Abbot Python Runner v0.7.1.")
 
     try:
         deny_os_modules()
