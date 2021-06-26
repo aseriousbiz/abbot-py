@@ -19,7 +19,6 @@ octokitpy==0.15.0
 octokitpy-routes==2.5.0
 pandas==1.0.5
 protobuf==3.17.3
-psycopg2==2.9.1
 psycopg2-binary==2.9.1
 pyasn1==0.4.8
 pycparser==2.20
