@@ -58,13 +58,15 @@ class Mention(object):
     :var id: The user's Id.
     :var user_name: The user's user name.
     :var name: The user's name.
+    :var email: The user's email if known
     :var location: The user's location if known.
     :var timezone: The user's timezone if known
     """
-    def __init__(self, id, user_name, name, location, timezone):
+    def __init__(self, id, user_name, name, email, location, timezone):
         self.id = id
         self.user_name = user_name
         self.name = name
+        self.email = email
         self.location = location
         self.timezone = timezone
 
@@ -400,7 +402,7 @@ class Bot(object):
             tz_id = location_arg.get('TimeZoneId')
             if tz_id is not None:
                 timezone = TimeZone(tz_id)
-        return Mention(mention.get('Id'), mention.get('UserName'), mention.get('Name'), location, timezone)
+        return Mention(mention.get('Id'), mention.get('UserName'), mention.get('Name'), mention.get('Email'), location, timezone)
 
 
     def load_mentions(self, mentions):
