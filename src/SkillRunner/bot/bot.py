@@ -20,6 +20,7 @@ from . import utils
 from .utils import obj
 from . import exceptions
 from . import apiclient
+from types import SimpleNamespace
 
 class TriggerEvent(object):
     """
@@ -46,6 +47,9 @@ class TriggerEvent(object):
         self.url = request.get('Url')
         self.raw_body = request.get('RawBody')
 
+    def json(self):
+        return json.loads(self.raw_body, object_hook=lambda d: SimpleNamespace(**d))
+
     def toJSON(self):
         return jsonpickle.encode(self)
 
@@ -68,7 +72,7 @@ class TriggerResponse(object):
     @content.setter
     def content(self, value):
         self._content = value
-        self._raw_content = jsonpickle.encode(value)
+        self._raw_content = str(jsonpickle.encode(value))
 
     @content.deleter
     def content(self):
@@ -81,9 +85,9 @@ class TriggerResponse(object):
     @raw_content.setter
     def raw_content(self, value):
         self._content = None
-        self._raw_content = value
+        self._raw_content = value if type(value) == str else str(value)
 
-    @content.deleter
+    @raw_content.deleter
     def raw_content(self):
         del self._raw_content
 
