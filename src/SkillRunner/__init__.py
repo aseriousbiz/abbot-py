@@ -10,7 +10,7 @@ from .bot.bot import Button
 
 class ResponseManager:
     def __init__(self):
-        self.content_type = "application/json"
+        self.content_type = None
         self.content = None
         self.success = True
         self.errors = []
@@ -45,7 +45,7 @@ def run_code(req, api_token):
     try:
         bot = _bot.Bot(req, api_token)
         bot.run_user_script()
-        return bot.responses
+        return bot
     except Exception as e:
         raise e
     
@@ -54,16 +54,25 @@ def main(req: func.HttpRequest) -> func.HttpResponse:
     rm = ResponseManager()
 
     if req.method == "GET":
-        rm.add("Ok! Running Abbot Python Runner v0.7.1.")
+        rm.add("Ok! Running Abbot Python Runner v0.7.2.")
 
     try:
         deny_os_modules()
         req_body = req.get_json()
         # The token is necessary for using the data API
         api_token = req.headers.get('x-abbot-skillapitoken')
-        responses = run_code(req_body, api_token)
-        for response in responses:
+        bot = run_code(req_body, api_token)
+        for response in bot.responses:
             rm.add(response)
+        if bot.is_request:
+            response = bot.response
+            rm.content = response.raw_content
+            rm.content_type = response.content_type
+            headers = {}
+            for key, value in response.headers.items():
+                headers[key] = [value]
+            rm.headers = headers
+
     except exceptions.InterpreterError as e:
         rm.addError(e)
     except Exception as e: 

@@ -20,7 +20,7 @@ from . import utils
 from .utils import obj
 from . import exceptions
 from . import apiclient
-
+from types import SimpleNamespace
 
 class TriggerEvent(object):
     """
@@ -47,8 +47,61 @@ class TriggerEvent(object):
         self.url = request.get('Url')
         self.raw_body = request.get('RawBody')
 
+    def json(self):
+        return json.loads(self.raw_body, object_hook=lambda d: SimpleNamespace(**d))
+
     def toJSON(self):
         return jsonpickle.encode(self)
+
+class TriggerResponse(object):
+    """
+    A response to an HTTP request triggered by an external event.
+
+    :var raw_content: The raw content to return as the body of the response. Cannot be set if content is set.
+    :var content: The content to return as the body of the response. This will be serialized as JSON. Cannot be set if raw_content is set.
+    :var content_type: The Content Type of the response. If null, Abbot will choose the best content type using content negotiation.
+    :var headers: The request Headers as defined in RFC 2616 that should be sent in the response.
+    """
+    def __init__(self):
+        self.headers = {}
+
+    @property
+    def content(self):
+        return self._content
+
+    @content.setter
+    def content(self, value):
+        self._content = value
+        self._raw_content = str(jsonpickle.encode(value))
+
+    @content.deleter
+    def content(self):
+        del self._content
+
+    @property
+    def raw_content(self):
+        return self._raw_content
+
+    @raw_content.setter
+    def raw_content(self, value):
+        self._content = None
+        self._raw_content = value if type(value) == str else str(value)
+
+    @raw_content.deleter
+    def raw_content(self):
+        del self._raw_content
+
+    @property
+    def content_type(self):
+        return self._content_type
+
+    @content_type.setter
+    def content_type(self, value):
+        self._content_type = value
+
+    @content_type.deleter
+    def content_type(self):
+        del self._content_type
 
 
 class Mention(object):
@@ -58,13 +111,15 @@ class Mention(object):
     :var id: The user's Id.
     :var user_name: The user's user name.
     :var name: The user's name.
+    :var email: The user's email if known
     :var location: The user's location if known.
     :var timezone: The user's timezone if known
     """
-    def __init__(self, id, user_name, name, location, timezone):
+    def __init__(self, id, user_name, name, email, location, timezone):
         self.id = id
         self.user_name = user_name
         self.name = name
+        self.email = email
         self.location = location
         self.timezone = timezone
 
@@ -237,6 +292,7 @@ class Bot(object):
         
         if self.is_request:
             self.request = TriggerEvent(skillInfo.get('Request'))
+            self.response = TriggerResponse()
         else:
             self.request = None
 
@@ -400,7 +456,7 @@ class Bot(object):
             tz_id = location_arg.get('TimeZoneId')
             if tz_id is not None:
                 timezone = TimeZone(tz_id)
-        return Mention(mention.get('Id'), mention.get('UserName'), mention.get('Name'), location, timezone)
+        return Mention(mention.get('Id'), mention.get('UserName'), mention.get('Name'), mention.get('Email'), location, timezone)
 
 
     def load_mentions(self, mentions):
