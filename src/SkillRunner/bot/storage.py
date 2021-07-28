@@ -32,12 +32,12 @@ class Brain(object):
             key (str): The item's key.
         
         Returns:
-            The string or object stored in Value.
+            The string or object stored in Value. This data is JSON serialized.
         """
         uri = self.make_uri(key)
         output = self.api_client.get(uri)
         if output:
-            return output.get("value")
+            return json.loads(output.get("value"))
         else:
             return None
     
@@ -46,12 +46,9 @@ class Brain(object):
         """
         See `get`.
         """
-        value = self.get(key)
-        if value:
-            return json.loads(self.get(key))
-        return value
+        return self.get(key)
 
-    
+
     def list(self):
         uri = self.make_uri("")
         return self.api_client.get(uri)
@@ -65,7 +62,7 @@ class Brain(object):
 
         Args:
             key (str): The lookup key for the object.
-            value (object): The string or object to store in Abbot's brain.
+            value (object): The string or object to store in Abbot's brain. This data is JSON serialized.
         """
         uri = self.make_uri(key)
         data = {"value": json.dumps(value)}
