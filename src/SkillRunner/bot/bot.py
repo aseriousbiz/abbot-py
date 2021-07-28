@@ -241,7 +241,7 @@ class Bot(object):
 
     :var id: The Bot's Id.
     :var user_name: The Bot's user name.
-    :var from_user: The name of the user who called the skill.
+    :var from_user: A User object that represents the person who called the skill.
     :var args: Arguments from the user.
     :var arguments: Arguments from the user.
     :var mentions: A collection of user mentions.
