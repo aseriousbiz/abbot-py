@@ -37,7 +37,7 @@ class Brain(object):
         uri = self.make_uri(key)
         output = self.api_client.get(uri)
         if output:
-            return output.get("value")
+            return json.loads(output.get("value"))
         else:
             return None
     
@@ -46,12 +46,9 @@ class Brain(object):
         """
         See `get`.
         """
-        value = self.get(key)
-        if value:
-            return json.loads(self.get(key))
-        return value
+        return self.get(key)
 
-    
+
     def list(self):
         uri = self.make_uri("")
         return self.api_client.get(uri)
