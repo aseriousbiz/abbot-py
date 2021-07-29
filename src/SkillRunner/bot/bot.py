@@ -66,6 +66,7 @@ class TriggerResponse(object):
         self.headers = {}
         self._content = None
         self._raw_content = None
+        self._content_type = None
 
     @property
     def content(self):
