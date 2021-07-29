@@ -64,6 +64,8 @@ class TriggerResponse(object):
     """
     def __init__(self):
         self.headers = {}
+        self._content = None
+        self._raw_content = None
 
     @property
     def content(self):
