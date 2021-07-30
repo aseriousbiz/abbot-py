@@ -10,19 +10,19 @@ from .bot.bot import Button
 
 class ResponseManager:
     def __init__(self):
-        self.content_type = None
-        self.content = None
-        self.success = True
-        self.errors = []
-        self.replies = []
-        self.headers = None
+        self.ContentType = None
+        self.Content = None
+        self.Success = True
+        self.Errors = []
+        self.Replies = []
+        self.Headers = None
     
     def add(self, message):
-        self.replies.append(message)
+        self.Replies.append(message)
     
     def addError(self, error):
-        self.errors.append(error)
-        self.success = False
+        self.Errors.append(error)
+        self.Success = False
 
 
 def deny_os_modules():
@@ -66,12 +66,15 @@ def main(req: func.HttpRequest) -> func.HttpResponse:
             rm.add(response)
         if bot.is_request:
             response = bot.response
-            rm.content = response.raw_content
-            rm.content_type = response.content_type
+            rm.Content = response.raw_content
+            rm.ContentType = response.content_type
             headers = {}
             for key, value in response.headers.items():
                 headers[key] = [value]
-            rm.headers = headers
+            rm.Headers = headers
+
+            logging.info("rm: ")
+            logging.info(jsonpickle.encode(rm))
 
     except exceptions.InterpreterError as e:
         rm.addError(e)
@@ -80,7 +83,7 @@ def main(req: func.HttpRequest) -> func.HttpResponse:
         rm.addError({ "errorId": type(e).__name__, "description": str(e) })
 
     finally:
-        if rm.success:
+        if rm.Success:
             status_code=200
         else:
             status_code=500
