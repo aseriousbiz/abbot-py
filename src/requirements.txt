@@ -22,6 +22,7 @@ protobuf==3.17.3
 psycopg2-binary==2.9.1
 pyasn1==0.4.8
 pycparser==2.20
+PyJWT==1.7.1
 python-dateutil==2.8.1
 python-dotenv==0.14.0
 python-jose==3.2.0
@@ -34,4 +35,5 @@ six==1.15.0
 soupsieve==2.0.1
 SQLAlchemy==1.4.19
 tabulate==0.8.9
+twilio==6.63.0
 urllib3==1.25.9
