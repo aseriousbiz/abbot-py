@@ -1,0 +1,44 @@
+#!/bin/bash -eu
+
+{ set +x; } 2>/dev/null
+SOURCE=$0
+DIR="$( cd -P "$( dirname "$SOURCE" )" >/dev/null 2>&1 && pwd )"
+
+OS="Mac"
+if [[ -e "/c/" ]]; then
+  OS="Windows"
+fi
+
+DOMAIN=azurecr.io
+REGISTRY=abbotacr02
+TAG=latest
+BASENAME=abbot-skills-python
+PORT=7072
+
+TEMPORARY="--rm"
+IMAGE=${BASENAME}-dev
+
+while (( "$#" )); do
+  case "$1" in
+  -p|--permanent)
+    TEMPORARY=
+  ;;
+  -l|--latest)
+    IMAGE="${REGISTRY}.${DOMAIN}/${BASENAME}:${TAG}"
+  ;;
+  --trace)
+  { set -x; } 2>/dev/null
+  ;;
+  -*|--*=) # unsupported flags
+    #echo "Error: Unsupported flag $1" >&2
+    #exit 1
+  ;;
+  esac
+  shift
+done
+
+
+docker run ${TEMPORARY} -d -p ${PORT}:8080 --name ${BASENAME}-dev \
+--mount type=bind,source="$(pwd)/docker/keys",target="/azure-functions-host/Secrets" \
+--mount type=bind,source="$(pwd)/docker/logging/host.json",target="/home/site/wwwroot/host.json" \
+${IMAGE}
