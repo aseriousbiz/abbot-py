@@ -1,0 +1,19 @@
+{
+  "masterKey": {
+    "name": "master",
+    "value": "masterkey",
+    "encrypted": false
+  },
+  "functionKeys": [
+    {
+      "name": "default",
+      "value": "functionkey",
+      "encrypted": false
+    }
+  ],
+  "systemKeys": [],
+  "hostName": "abbot-skills-python",
+  "instanceId": "00000000000000000000000095F7821B",
+  "source": "runtime",
+  "decryptionKeyId": ""
+}

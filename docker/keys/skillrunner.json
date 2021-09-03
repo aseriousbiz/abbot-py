@@ -1,0 +1,13 @@
+{
+  "keys": [
+    {
+      "name": "default",
+      "value": "skillkey",
+      "encrypted": false
+    }
+  ],
+  "hostName": null,
+  "instanceId": "000000000000000000000000579B1A80",
+  "source": "runtime",
+  "decryptionKeyId": ""
+}
