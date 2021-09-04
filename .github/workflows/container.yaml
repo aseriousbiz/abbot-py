@@ -85,6 +85,9 @@ jobs:
         regex: '^[\w\.-]+$'
     - run: echo "CUSTOM_TAG=${{steps.parse_input.outputs.match}}" >> $GITHUB_ENV
 
+    - name: Checkout branch
+      uses: actions/checkout@v2
+
     - name: Auto deploy ${{ env.CUSTOM_TAG }}
       if: ${{ github.event.inputs.deploy == '1' && env.CUSTOM_TAG != '' }}
       env:
