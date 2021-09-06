@@ -3,6 +3,7 @@ FROM mcr.microsoft.com/azure-functions/python:3.0-python3.7-slim
 # required container environment
 ENV \
     # Enable detection of running in a container
+    DOTNET_RUNNING_IN_CONTAINER=true \
     DOTNET_CLI_TELEMETRY_OPTOUT=1 \
     DOTNET_SKIP_FIRST_TIME_EXPERIENCE=1 \
     DOTNET_NOLOGO=true \
