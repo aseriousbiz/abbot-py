@@ -1,4 +1,4 @@
-FROM abbotacr02.azurecr.io//abbot-skills-python:latest
+FROM abbotacr02.azurecr.io/abbot-skills-python:latest
 
 # development environment
 ENV SkillApiBaseUriFormatString=http://host.docker.internal:4978/api/skills/{0} \
