@@ -8,7 +8,7 @@ on:
         required: false
         default: ''
       deploy:
-        description: Trigger auto deployment
+        description: Trigger deployment
         required: false
         default: '0'
 
@@ -40,35 +40,35 @@ jobs:
     - name: Checkout branch
       uses: actions/checkout@v2
 
-  #   - name: Login to docker
-  #     uses: docker/login-action@v1
-  #     with:
-  #       registry: ${{ secrets.AZURE_ACR_SERVER }}
-  #       username: ${{ secrets.AZURE_ACR_USER_CLIENTID }}
-  #       password: ${{ secrets.AZURE_ACR_USER_CLIENTSECRET }}
+    - name: Login to docker
+      uses: docker/login-action@v1
+      with:
+        registry: ${{ secrets.AZURE_ACR_SERVER }}
+        username: ${{ secrets.AZURE_ACR_USER_CLIENTID }}
+        password: ${{ secrets.AZURE_ACR_USER_CLIENTSECRET }}
 
-  #   - name: Build image
-  #     run: docker build -t ${{ secrets.AZURE_ACR_SERVER }}/${{ env.APP_NAME }}:${{ github.sha }} -f docker/${{ env.APP_NAME }}.Dockerfile .
+    - name: Build image
+      run: docker build -t ${{ secrets.AZURE_ACR_SERVER }}/${{ env.APP_NAME }}:${{ github.sha }} -f docker/${{ env.APP_NAME }}.Dockerfile .
 
-  #   - name: Tag latest on main
-  #     if: ${{ github.ref == 'refs/heads/main' }}
-  #     run: docker image tag ${{ secrets.AZURE_ACR_SERVER }}/${{ env.APP_NAME }}:${{ github.sha }} ${{ secrets.AZURE_ACR_SERVER }}/${{ env.APP_NAME }}:${{ env.LATEST_TAG }}
+    - name: Tag latest on main
+      if: ${{ github.ref == 'refs/heads/main' }}
+      run: docker image tag ${{ secrets.AZURE_ACR_SERVER }}/${{ env.APP_NAME }}:${{ github.sha }} ${{ secrets.AZURE_ACR_SERVER }}/${{ env.APP_NAME }}:${{ env.LATEST_TAG }}
 
-  #   - name: Custom tag
-  #     if: ${{ github.event_name == 'workflow_dispatch' && env.CUSTOM_TAG != '' }}
-  #     run: docker image tag ${{ secrets.AZURE_ACR_SERVER }}/${{ env.APP_NAME }}:${{ github.sha }} ${{ secrets.AZURE_ACR_SERVER }}/${{ env.APP_NAME }}:${{env.CUSTOM_TAG}}
+    - name: Custom tag
+      if: ${{ github.event_name == 'workflow_dispatch' && env.CUSTOM_TAG != '' }}
+      run: docker image tag ${{ secrets.AZURE_ACR_SERVER }}/${{ env.APP_NAME }}:${{ github.sha }} ${{ secrets.AZURE_ACR_SERVER }}/${{ env.APP_NAME }}:${{env.CUSTOM_TAG}}
 
-  #   - name: Push image
-  #     run: docker push ${{ secrets.AZURE_ACR_SERVER }}/${{ env.APP_NAME }}:${{ github.sha }}
+    - name: Push image
+      run: docker push ${{ secrets.AZURE_ACR_SERVER }}/${{ env.APP_NAME }}:${{ github.sha }}
 
-  #   - name: Push latest tag
-  #     if: ${{ github.ref == 'refs/heads/main' }}
-  #     run: |
-  #       docker push ${{ secrets.AZURE_ACR_SERVER }}/${{ env.APP_NAME }}:${{ env.LATEST_TAG }}
+    - name: Push latest tag
+      if: ${{ github.ref == 'refs/heads/main' }}
+      run: |
+        docker push ${{ secrets.AZURE_ACR_SERVER }}/${{ env.APP_NAME }}:${{ env.LATEST_TAG }}
 
-  #   - name: Push custom tag
-  #     if: ${{ github.event_name == 'workflow_dispatch' && env.CUSTOM_TAG != '' }}
-  #     run: docker push ${{ secrets.AZURE_ACR_SERVER }}/${{ env.APP_NAME }}:${{ env.CUSTOM_TAG }}
+    - name: Push custom tag
+      if: ${{ github.event_name == 'workflow_dispatch' && env.CUSTOM_TAG != '' }}
+      run: docker push ${{ secrets.AZURE_ACR_SERVER }}/${{ env.APP_NAME }}:${{ env.CUSTOM_TAG }}
 
   deploy:
     runs-on: ubuntu-latest
@@ -88,14 +88,14 @@ jobs:
     - name: Checkout branch
       uses: actions/checkout@v2
 
-    - name: Auto deploy ${{ env.CUSTOM_TAG }}
+    - name: Auto deploy ${{ env.CUSTOM_TAG }} to aseriousbiz fly.io
       if: ${{ github.event.inputs.deploy == '1' && env.CUSTOM_TAG != '' }}
       env:
         GH_BOT_TOKEN: ${{ secrets.GH_BOT_TOKEN }}
-      run: ./.github/deploy_fly.sh python ${{ env.CUSTOM_TAG }}
+      run: ./.github/deploy_fly.sh python ${{ env.CUSTOM_TAG }} ${{ env.CUSTOM_TAG }}
 
-    - name: Auto deploy latest
-      if: ${{ github.ref == 'refs/heads/main' }}
+    - name: Auto deploy latest to aseriousbiz fly.io
+      if: ${{ github.ref == 'refs/heads/main' && env.CUSTOM_TAG == '' }}
       env:
         GH_BOT_TOKEN: ${{ secrets.GH_BOT_TOKEN }}
-      run: ./.github/deploy_fly.sh python ${{ env.LATEST_TAG }}
+      run: ./.github/deploy_fly.sh python ${{ env.LATEST_TAG }} ${{ env.LATEST_TAG }}
