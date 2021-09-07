@@ -18,6 +18,7 @@ on:
     paths:
       - src/
       - docker/*.Dockerfile
+      - .github/
 
 env:
   APP_NAME: abbot-skills-python
