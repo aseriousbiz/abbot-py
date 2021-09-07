@@ -16,9 +16,9 @@ on:
     branches:
       - main
     paths:
-      - src/
-      - docker/*.Dockerfile
-      - .github/
+      - 'src/'
+      - 'docker/*.Dockerfile'
+      - '.github/'
 
 env:
   APP_NAME: abbot-skills-python
