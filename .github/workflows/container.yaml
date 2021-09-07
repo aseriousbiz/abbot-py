@@ -18,7 +18,7 @@ on:
     paths:
       - 'src/**'
       - 'docker/abbot-skills-python.Dockerfile'
-      - '.github/deploy_fly.sh'
+      - '.github/*.sh'
       - '.github/workflows/main_abbot.yml'
 
 env:
@@ -99,3 +99,15 @@ jobs:
       env:
         GH_BOT_TOKEN: ${{ secrets.GH_BOT_TOKEN }}
       run: ./.github/deploy_fly.sh ${{env.RUNNER}} ${{ env.LATEST_TAG }} ${{ env.LATEST_TAG }}
+
+    - name: Auto deploy ${{ env.CUSTOM_TAG }} to registry for all orgs
+      if: ${{ github.event.inputs.deploy == '1' && env.CUSTOM_TAG != '' }}
+      env:
+        GH_BOT_TOKEN: ${{ secrets.GH_BOT_TOKEN }}
+      run: ./.github/registry_publish.sh ${{env.RUNNER}} ${{ env.CUSTOM_TAG }} ${{ env.CUSTOM_TAG }}
+
+    - name: Auto deploy latest to registry for all orgs
+      if: ${{ github.ref == 'refs/heads/main' && env.CUSTOM_TAG == '' }}
+      env:
+        GH_BOT_TOKEN: ${{ secrets.GH_BOT_TOKEN }}
+      run: ./.github/registry_publish.sh ${{env.RUNNER}} ${{ env.LATEST_TAG }} ${{ env.LATEST_TAG }}
