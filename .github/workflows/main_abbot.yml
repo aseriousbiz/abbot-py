@@ -5,7 +5,7 @@ on:
     branches:
       - main
     paths:
-      - 'src/'
+      - 'src/**'
       - 'script/build'
       - '.github/workflows/main_abbot.yml'
   pull_request:

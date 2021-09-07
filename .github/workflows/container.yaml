@@ -16,9 +16,10 @@ on:
     branches:
       - main
     paths:
-      - 'src/'
-      - 'docker/*.Dockerfile'
-      - '.github/'
+      - 'src/**'
+      - 'docker/abbot-skills-python.Dockerfile'
+      - '.github/deploy_fly.sh'
+      - '.github/workflows/main_abbot.yml'
 
 env:
   APP_NAME: abbot-skills-python
