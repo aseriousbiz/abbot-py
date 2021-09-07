@@ -22,6 +22,7 @@ on:
 env:
   APP_NAME: abbot-skills-python
   LATEST_TAG: latest
+  RUNNER: python
 
 jobs:
   container:
@@ -58,9 +59,6 @@ jobs:
       if: ${{ github.event_name == 'workflow_dispatch' && env.CUSTOM_TAG != '' }}
       run: docker image tag ${{ secrets.AZURE_ACR_SERVER }}/${{ env.APP_NAME }}:${{ github.sha }} ${{ secrets.AZURE_ACR_SERVER }}/${{ env.APP_NAME }}:${{env.CUSTOM_TAG}}
 
-    - name: Push image
-      run: docker push ${{ secrets.AZURE_ACR_SERVER }}/${{ env.APP_NAME }}:${{ github.sha }}
-
     - name: Push latest tag
       if: ${{ github.ref == 'refs/heads/main' }}
       run: |
@@ -92,10 +90,10 @@ jobs:
       if: ${{ github.event.inputs.deploy == '1' && env.CUSTOM_TAG != '' }}
       env:
         GH_BOT_TOKEN: ${{ secrets.GH_BOT_TOKEN }}
-      run: ./.github/deploy_fly.sh python ${{ env.CUSTOM_TAG }} ${{ env.CUSTOM_TAG }}
+      run: ./.github/deploy_fly.sh ${{env.RUNNER}} ${{ env.CUSTOM_TAG }} ${{ env.CUSTOM_TAG }}
 
     - name: Auto deploy latest to aseriousbiz fly.io
       if: ${{ github.ref == 'refs/heads/main' && env.CUSTOM_TAG == '' }}
       env:
         GH_BOT_TOKEN: ${{ secrets.GH_BOT_TOKEN }}
-      run: ./.github/deploy_fly.sh python ${{ env.LATEST_TAG }} ${{ env.LATEST_TAG }}
+      run: ./.github/deploy_fly.sh ${{env.RUNNER}} ${{ env.LATEST_TAG }} ${{ env.LATEST_TAG }}
