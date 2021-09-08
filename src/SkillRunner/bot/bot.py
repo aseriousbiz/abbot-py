@@ -338,15 +338,20 @@ class Bot(object):
             raise e
 
 
-    def reply(self, response):
+    def reply(self, response, direct_message=False):
         """
-        Send a reply.
+        Send a reply. If direct_message is True, then the reply is sent as a direct message to the caller.
         
         Args:
             response (str): The response to send back to chat.
-        """   
+        """
         if self.conversation_reference:
-            body = {"SkillId": self.skill_id, "Message": str(response), "ConversationReference": self.conversation_reference}
+            body = {
+                "SkillId": self.skill_id,
+                "Message": str(response),
+                "ConversationReference": self.conversation_reference,
+                "DirectMessage": direct_message
+            }
             self.api_client.post(self.reply_api_uri, body)
         else:
             self.responses.append(str(response))
