@@ -17,6 +17,7 @@ PORT=7072
 
 TEMPORARY="--rm"
 IMAGE=${BASENAME}-dev
+ARGS=
 
 while (( "$#" )); do
   case "$1" in
@@ -25,6 +26,7 @@ while (( "$#" )); do
   ;;
   -l|--latest)
     IMAGE="${REGISTRY}.${DOMAIN}/${BASENAME}:${TAG}"
+    ARGS="--env-file docker/dev.env"
   ;;
   --trace)
   { set -x; } 2>/dev/null
@@ -41,4 +43,5 @@ done
 docker run ${TEMPORARY} -d -p ${PORT}:8080 --name ${BASENAME}-dev \
 --mount type=bind,source="$(pwd)/docker/keys",target="/azure-functions-host/Secrets" \
 --mount type=bind,source="$(pwd)/docker/logging/host.json",target="/home/site/wwwroot/host.json" \
+${ARGS} \
 ${IMAGE}
