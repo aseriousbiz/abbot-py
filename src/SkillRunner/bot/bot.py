@@ -22,6 +22,22 @@ from . import exceptions
 from . import apiclient
 from types import SimpleNamespace
 
+class Room(object):
+    """
+    A room is a place where people can chat.
+
+    :var id: The room ID.
+    :var name: The room name.
+    """
+    def __init__(self, room_id, room_name):
+        self.id = room_id
+        self.name = room_name
+        self.cache_key = room_id if room_id else room_name
+
+    def __str__(self):
+        return self.name
+
+
 class TriggerEvent(object):
     """
     A request triggered by an external event.
@@ -282,7 +298,7 @@ class Bot(object):
         self.arguments = self.args
         self.platform_id = skillInfo.get('PlatformId')
         self.platform_type = skillInfo.get('PlatformType')
-        self.room = skillInfo.get('Room')
+        self.room = Room(skillInfo.get('RoomId'), skillInfo.get('Room'))
         self.skill_name = skillInfo.get('SkillName')
         
         self.from_user = self.load_mention(skillInfo.get('From'))
