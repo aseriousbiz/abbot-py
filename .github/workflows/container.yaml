@@ -11,6 +11,10 @@ on:
         description: Trigger deployment
         required: false
         default: '0'
+      publish:
+        description: Trigger publish to orgs
+        required: false
+        default: '0'
 
   push:
     branches:
