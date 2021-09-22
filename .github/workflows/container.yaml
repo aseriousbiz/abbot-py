@@ -11,6 +11,10 @@ on:
         description: Trigger deployment
         required: false
         default: '0'
+      publish:
+        description: Trigger publish to orgs
+        required: false
+        default: '0'
 
   push:
     branches:
@@ -38,7 +42,19 @@ jobs:
       with:
         text: ${{ github.event.inputs.tag }}
         regex: '^[\w\.-]+$'
+
     - run: echo "CUSTOM_TAG=${{steps.parse_input.outputs.match}}" >> $GITHUB_ENV
+      if: ${{ github.event_name == 'workflow_dispatch' }}
+    - run: echo "THETAG=${{env.LATEST_TAG}}" >> $GITHUB_ENV
+      if: ${{ github.ref == 'refs/heads/main' }}
+    - run: echo "THETAG=${{env.CANARY_TAG}}" >> $GITHUB_ENV
+      if: ${{ github.ref == 'refs/heads/canary' }}
+    - run: echo "THETAG=${{env.CUSTOM_TAG}}" >> $GITHUB_ENV
+      if: ${{ github.event_name == 'workflow_dispatch' && env.CUSTOM_TAG != '' }}
+    - run: echo "DEPLOY=1" >> $GITHUB_ENV
+      if: (github.event.inputs.deploy == '1' && env.CUSTOM_TAG != '') || (github.event_name != 'workflow_dispatch' && env.THETAG != '')
+    - run: echo "PUBLISH=1" >> $GITHUB_ENV
+      if: (github.event.inputs.publish == '1' && env.CUSTOM_TAG != '') || (github.event_name != 'workflow_dispatch' && env.THETAG != '')
 
     - name: Checkout branch
       uses: actions/checkout@v2
@@ -50,64 +66,22 @@ jobs:
         username: ${{ secrets.AZURE_ACR_USER_CLIENTID }}
         password: ${{ secrets.AZURE_ACR_USER_CLIENTSECRET }}
 
-    - name: Build image
-      run: docker build -t ${{ secrets.AZURE_ACR_SERVER }}/${{ env.APP_NAME }}:${{ github.sha }} -f docker/${{ env.APP_NAME }}.Dockerfile .
-
-    - name: Tag latest on main
-      if: ${{ github.ref == 'refs/heads/main' }}
-      run: docker image tag ${{ secrets.AZURE_ACR_SERVER }}/${{ env.APP_NAME }}:${{ github.sha }} ${{ secrets.AZURE_ACR_SERVER }}/${{ env.APP_NAME }}:${{ env.LATEST_TAG }}
-
-    - name: Custom tag
-      if: ${{ github.event_name == 'workflow_dispatch' && env.CUSTOM_TAG != '' }}
-      run: docker image tag ${{ secrets.AZURE_ACR_SERVER }}/${{ env.APP_NAME }}:${{ github.sha }} ${{ secrets.AZURE_ACR_SERVER }}/${{ env.APP_NAME }}:${{env.CUSTOM_TAG}}
-
-    - name: Push latest tag
-      if: ${{ github.ref == 'refs/heads/main' }}
+    - name: Build ${{env.THETAG}}
+      if: env.THETAG != ''
       run: |
-        docker push ${{ secrets.AZURE_ACR_SERVER }}/${{ env.APP_NAME }}:${{ env.LATEST_TAG }}
+        docker build -t ${{ secrets.AZURE_ACR_SERVER }}/${{ env.APP_NAME }}:${{ env.THETAG }} -f docker/${{ env.APP_NAME }}.Dockerfile .
+        docker push ${{ secrets.AZURE_ACR_SERVER }}/${{ env.APP_NAME }}:${{ env.THETAG }}
 
-    - name: Push custom tag
-      if: ${{ github.event_name == 'workflow_dispatch' && env.CUSTOM_TAG != '' }}
-      run: docker push ${{ secrets.AZURE_ACR_SERVER }}/${{ env.APP_NAME }}:${{ env.CUSTOM_TAG }}
-
-  deploy:
-    runs-on: ubuntu-latest
-    needs: container
-    if: ${{ (github.event_name == 'workflow_dispatch' && github.event.inputs.deploy == '1') || github.ref == 'refs/heads/main' }}
-
-    steps:
-    - name: Parse inputs
-      if: ${{ github.event_name == 'workflow_dispatch' }}
-      uses: actions-ecosystem/action-regex-match@v2
-      id: parse_input
-      with:
-        text: ${{ github.event.inputs.tag }}
-        regex: '^[\w\.-]+$'
-    - run: echo "CUSTOM_TAG=${{steps.parse_input.outputs.match}}" >> $GITHUB_ENV
-
-    - name: Checkout branch
-      uses: actions/checkout@v2
-
-    - name: Auto deploy ${{ env.CUSTOM_TAG }} to aseriousbiz fly.io
-      if: ${{ github.event.inputs.deploy == '1' && env.CUSTOM_TAG != '' }}
+    - name: Publish ${{ env.THETAG }} containers to all orgs
+      if: env.PUBLISH == 1
       env:
         GH_BOT_TOKEN: ${{ secrets.GH_BOT_TOKEN }}
-      run: ./.github/deploy_fly.sh ${{env.RUNNER}} ${{ env.CUSTOM_TAG }} ${{ env.CUSTOM_TAG }}
+      run: |
+        ./.github/registry_publish.sh ${{env.RUNNER}} ${{ env.THETAG }} ${{ env.THETAG }}
 
-    - name: Auto deploy latest to aseriousbiz fly.io
-      if: ${{ github.ref == 'refs/heads/main' && env.CUSTOM_TAG == '' }}
+    - name: Deploy ${{ env.THETAG }} to fly
+      if: env.DEPLOY == 1
       env:
         GH_BOT_TOKEN: ${{ secrets.GH_BOT_TOKEN }}
-      run: ./.github/deploy_fly.sh ${{env.RUNNER}} ${{ env.LATEST_TAG }} ${{ env.LATEST_TAG }}
-
-    - name: Auto deploy ${{ env.CUSTOM_TAG }} to registry for all orgs
-      if: ${{ github.event.inputs.deploy == '1' && env.CUSTOM_TAG != '' }}
-      env:
-        GH_BOT_TOKEN: ${{ secrets.GH_BOT_TOKEN }}
-      run: ./.github/registry_publish.sh ${{env.RUNNER}} ${{ env.CUSTOM_TAG }} ${{ env.CUSTOM_TAG }}
-
-    - name: Auto deploy latest to registry for all orgs
-      if: ${{ github.ref == 'refs/heads/main' && env.CUSTOM_TAG == '' }}
-      env:
-        GH_BOT_TOKEN: ${{ secrets.GH_BOT_TOKEN }}
-      run: ./.github/registry_publish.sh ${{env.RUNNER}} ${{ env.LATEST_TAG }} ${{ env.LATEST_TAG }}
+      run: |
+        ./.github/deploy_fly.sh ${{env.RUNNER}} ${{ env.THETAG }}
