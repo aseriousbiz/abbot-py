@@ -7,6 +7,7 @@ import azure.functions as func
 from .bot import bot as _bot
 from .bot import exceptions
 from .bot.bot import Button
+from .bot.pattern import PatternType
 
 class ResponseManager:
     def __init__(self):
@@ -54,7 +55,7 @@ def main(req: func.HttpRequest) -> func.HttpResponse:
     rm = ResponseManager()
 
     if req.method == "GET":
-        rm.add("Ok! Running Abbot Python Runner v0.9.0.")
+        rm.add("Ok! Running Abbot Python Runner v0.10.0.")
 
     try:
         deny_os_modules()

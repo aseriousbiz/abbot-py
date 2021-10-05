@@ -1,5 +1,6 @@
 import os
 import json
+from typing import Pattern
 import jsonpickle
 import requests
 import logging
@@ -17,6 +18,7 @@ import octokit
 from . import storage
 from . import secrets
 from . import utils
+from . import pattern
 from .utils import obj
 from . import exceptions
 from . import apiclient
@@ -68,6 +70,7 @@ class TriggerEvent(object):
 
     def toJSON(self):
         return jsonpickle.encode(self)
+
 
 class TriggerResponse(object):
     """
@@ -296,11 +299,14 @@ class Bot(object):
         self.user_name = skillInfo.get('UserName')
         self.args = skillInfo.get('Arguments')
         self.arguments = self.args
+        patternRequest = skillInfo.get('Pattern')
+        self.pattern = None if patternRequest is None else pattern.Pattern(patternRequest)
+        self.is_pattern_match = self.pattern is not None
         self.platform_id = skillInfo.get('PlatformId')
         self.platform_type = skillInfo.get('PlatformType')
         self.room = Room(skillInfo.get('RoomId'), skillInfo.get('Room'))
         self.skill_name = skillInfo.get('SkillName')
-        
+        self.skill_url = skillInfo.get('SkillUrl')
         self.from_user = self.load_mention(skillInfo.get('From'))
         self.mentions = self.load_mentions(skillInfo.get('Mentions'))
         self.tokenized_arguments = self.load_arguments(skillInfo.get('TokenizedArguments', []))
@@ -328,7 +334,7 @@ class Bot(object):
         Run the code the user has submitted.
         """
         try:
-            script_locals = { "bot": self, "args": self.args, "Button": Button }
+            script_locals = { "bot": self, "args": self.args, "Button": Button, "PatternType": pattern.PatternType }
             out = None
             
             with patch.dict("os.environ", {}):
