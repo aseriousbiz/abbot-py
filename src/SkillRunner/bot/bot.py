@@ -23,6 +23,7 @@ from .utils import obj
 from . import exceptions
 from . import apiclient
 from types import SimpleNamespace
+from .urls import Urls
 
 class Room(object):
     """
@@ -277,12 +278,12 @@ class Bot(object):
     :var skill_url: The URL to the edit screen of the skill being run.
     """
     def __init__(self, req, api_token):
-        self.reply_api_uri = os.environ.get('AbbotReplyApiUrl', 'https://localhost:4979/api/reply')
         skillInfo = req.get('SkillInfo')
         runnerInfo = req.get('RunnerInfo')
 
         self.id = runnerInfo.get('Id')
         self.skill_id = runnerInfo.get('SkillId')
+        self.reply_api_uri = Urls.get_reply_url(self.skill_id)
         self.user_id = runnerInfo.get('UserId')
         self.timestamp = runnerInfo.get('Timestamp')
         self.code = runnerInfo.get('Code')

@@ -1,6 +1,6 @@
 import os
 import logging
-
+from .urls import Urls
 from . import apiclient
 
 class Secrets(object):
@@ -12,9 +12,9 @@ class Secrets(object):
     def __init__(self, skill_id, user_id, api_token, timestamp):
         self.skill_id = skill_id
         self.user_id = user_id
-        self.request_uri = os.environ.get('SkillApiBaseUriFormatString', 'https://localhost:4979/api/skills/{0}') + '/secret?key={1}'
+        self.request_uri = Urls.get_skill_api_url(skill_id) + '/secret?key={0}'
         if self.request_uri.startswith("https://localhost:4979"):
-            logging.warn("SkillApiBaseUriFormatString appears to be blank. Using localhost as a fallback.")
+            logging.warn("AbbotApiBaseUrl appears to be blank. Using localhost as a fallback.")
         self.api_client = apiclient.ApiClient(self.request_uri, user_id, api_token, timestamp)
 
 
@@ -28,7 +28,7 @@ class Secrets(object):
         Returns: 
             secret (str): The secret from the vault.
         """
-        uri = self.request_uri.format(self.skill_id, key)
+        uri = self.request_uri.format(key)
         output = self.api_client.get(uri)
         if output:
             return output.get("secret")

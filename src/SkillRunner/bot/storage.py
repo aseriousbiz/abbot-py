@@ -1,7 +1,7 @@
 import os
 import json
 import logging
-
+from .urls import Urls
 from . import apiclient
 
 class Brain(object):
@@ -12,7 +12,7 @@ class Brain(object):
     """
     def __init__(self, skill_id, user_id, api_token, timestamp):
         self.skill_id = skill_id
-        self.request_uri = os.environ.get('SkillApiBaseUriFormatString', 'https://localhost:4979/api/skills/{0}') + '/brain?key={1}'
+        self.request_uri = Urls.get_skill_api_url(skill_id) + '/brain?key={0}'
         if self.request_uri.startswith("https://localhost"):
             self.verify_ssl = False
         else:
@@ -21,7 +21,7 @@ class Brain(object):
 
 
     def make_uri(self, key):
-        return self.request_uri.format(self.skill_id, key)
+        return self.request_uri.format(key)
 
 
     def get(self, key):

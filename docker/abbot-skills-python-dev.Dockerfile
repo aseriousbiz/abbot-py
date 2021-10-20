@@ -16,8 +16,7 @@ ENV \
     ASPNETCORE_URLS=http://+:8080
 
 # development environment
-ENV SkillApiBaseUriFormatString=http://host.docker.internal:4978/api/skills/{0} \
-    AbbotReplyApiUrl=http://host.docker.internal:4978/api/reply \
+ENV AbbotApiBaseUrl=http://host.docker.internal:4978/api \
     AZURE_FUNCTIONS_ENVIRONMENT=Development \
     AzureFunctionsJobHost__Logging__Console__IsEnabled=true \
     HTTP_LOGGING_ENABLED=1 \

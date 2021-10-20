@@ -1,5 +1,4 @@
-import json 
-import logging
+import json
 
 class ExceptionEncoder(json.JSONEncoder):
     def default(self, o):
