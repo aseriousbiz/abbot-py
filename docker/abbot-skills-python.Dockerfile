@@ -13,8 +13,7 @@ ENV \
     DOTNET_NOLOGO=true \
     FUNCTIONS_EXTENSION_VERSION=~3 \
     ASPNETCORE_URLS=http://+:8080 \
-    SkillApiBaseUriFormatString=https://ab.bot/api/skills/{0} \
-    AbbotReplyApiUrl=https://ab.bot/api/reply
+    AbbotApiBaseUrl=http://host.docker.internal:4978/api
 
 EXPOSE 8080
 COPY --from=build ["./output", "/home/site/wwwroot"]
