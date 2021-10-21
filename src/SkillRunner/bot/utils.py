@@ -2,7 +2,7 @@ import jsonpickle
 import os
 import re
 import requests
-from .urls import Urls
+from .urls import get_skill_api_url
 from . import apiclient
 
 class Geocode(object):
@@ -34,7 +34,7 @@ class Utilities(object):
     """
     def __init__(self, skill_id, user_id, api_token, timestamp):
         self.skill_id = skill_id
-        self.request_uri = Urls.get_skill_api_url(skill_id)
+        self.request_uri = get_skill_api_url(skill_id)
 
         if self.request_uri.startswith("https://localhost"):
             self.verify_ssl = False

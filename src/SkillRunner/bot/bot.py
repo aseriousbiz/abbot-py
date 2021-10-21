@@ -23,7 +23,7 @@ from .utils import obj
 from . import exceptions
 from . import apiclient
 from types import SimpleNamespace
-from .urls import Urls
+from .urls import get_reply_url
 
 class Room(object):
     """
@@ -283,7 +283,7 @@ class Bot(object):
 
         self.id = runnerInfo.get('Id')
         self.skill_id = runnerInfo.get('SkillId')
-        self.reply_api_uri = Urls.get_reply_url(self.skill_id)
+        self.reply_api_uri = get_reply_url(self.skill_id)
         self.user_id = runnerInfo.get('UserId')
         self.timestamp = runnerInfo.get('Timestamp')
         self.code = runnerInfo.get('Code')
