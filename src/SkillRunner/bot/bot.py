@@ -19,6 +19,8 @@ from . import storage
 from . import secrets
 from . import utils
 from . import pattern
+from . import signal_event
+from .signaler import Signaler
 from .utils import obj
 from . import exceptions
 from . import apiclient
@@ -280,6 +282,8 @@ class Bot(object):
     def __init__(self, req, api_token):
         skillInfo = req.get('SkillInfo')
         runnerInfo = req.get('RunnerInfo')
+        self._signal_info = req.get('SignalInfo')
+        self._signal_event = None
 
         self.id = runnerInfo.get('Id')
         self.skill_id = runnerInfo.get('SkillId')
@@ -328,6 +332,8 @@ class Bot(object):
         self.skill_data = obj(skillInfo)
 
         self.responses = []
+
+        self._signaler = Signaler(self.skill_id, self.user_id, api_token, self.timestamp, req)
 
 
     def run_user_script(self):
@@ -512,3 +518,23 @@ class Bot(object):
         response += "    raw: " + self.raw
 
         return response
+
+
+    @property
+    def signal_event(self):
+        """
+        The SignalEvent that this source skill is responding to, if any.
+        """
+        if (self._signal_event is None):
+            self._signal_event = signal_event.SignalEvent(self._signal_info) if self._signal_info is not None else None
+        return self._signal_event
+
+
+    def signal(self, name, args):
+        """
+        Raises a signal from the skill with the specified name and arguments.
+        Args:
+            name (str): The name of the signal to raise.
+            args (str): The arguments to pass to the skills that are subscribed to this signal.
+        """
+        return self._signaler.signal(name, args)
