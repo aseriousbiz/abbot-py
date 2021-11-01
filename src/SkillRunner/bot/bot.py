@@ -22,6 +22,7 @@ from . import pattern
 from . import signal_event
 from .signaler import Signaler
 from .utils import obj
+from .reply_client import ReplyClient
 from . import exceptions
 from . import apiclient
 from types import SimpleNamespace
@@ -280,6 +281,8 @@ class Bot(object):
     :var skill_url: The URL to the edit screen of the skill being run.
     """
     def __init__(self, req, api_token):
+        self.responses = []
+
         skillInfo = req.get('SkillInfo')
         runnerInfo = req.get('RunnerInfo')
         self._signal_info = req.get('SignalInfo')
@@ -287,16 +290,17 @@ class Bot(object):
 
         self.id = runnerInfo.get('Id')
         self.skill_id = runnerInfo.get('SkillId')
-        self.reply_api_uri = get_reply_url(self.skill_id)
         self.user_id = runnerInfo.get('UserId')
         self.timestamp = runnerInfo.get('Timestamp')
         self.code = runnerInfo.get('Code')
-        self.conversation_reference = runnerInfo.get('ConversationReference')
-        self._api_client = apiclient.ApiClient(self.reply_api_uri, self.user_id, api_token, self.timestamp)
 
-        self.brain = storage.Brain(self._api_client, self.skill_id) 
-        self.secrets = secrets.Secrets(self._api_client, self.skill_id)
-        self.utils = utils.Utilities(self._api_client, self.skill_id)
+        # Clients
+        api_client = apiclient.ApiClient(get_reply_url(self.skill_id), self.user_id, api_token, self.timestamp)
+        self.brain = storage.Brain(api_client, self.skill_id) 
+        self.secrets = secrets.Secrets(api_client, self.skill_id)
+        self.utils = utils.Utilities(api_client, self.skill_id)
+        self._reply_client = ReplyClient(api_client, runnerInfo.get('ConversationReference'), self.skill_id, self.responses)
+        self._signaler = Signaler(api_client, self.skill_id, req)
 
         self.raw = skillInfo
 
@@ -330,10 +334,6 @@ class Bot(object):
         skillInfo['from_name'] = skillInfo['From']
         del skillInfo['From'] # `from` is a protected Python keyword, and can't be converted to an object
         self.skill_data = obj(skillInfo)
-
-        self.responses = []
-
-        self._signaler = Signaler(self._api_client, self.skill_id, req)
 
 
     def run_user_script(self):
@@ -374,16 +374,7 @@ class Bot(object):
         Args:
             response (str): The response to send back to chat.
         """
-        if self.conversation_reference:
-            body = {
-                "SkillId": self.skill_id,
-                "Message": str(response),
-                "ConversationReference": self.conversation_reference,
-                "DirectMessage": direct_message
-            }
-            self._api_client.post(self.reply_api_uri, body)
-        else:
-            self.responses.append(str(response))
+        self._reply_client.reply(response, direct_message)
 
 
     def reply_with_buttons(self, response, buttons, buttons_label=None, image_url=None, title=None, color=None):
@@ -398,24 +389,7 @@ class Bot(object):
             title (str): A title to render (optional).
             color (str): The color to use for the sidebar (Slack Only) in hex (ex. #3AA3E3) (optional).
         """
-        if self.conversation_reference:
-            body = {
-                "SkillId": self.skill_id,
-                "Message": str(response),
-                "ConversationReference": self.conversation_reference,
-                "Attachments": [
-                    {
-                        "Buttons": [b.toJSON() for b in buttons],
-                        "ButtonsLabel": buttons_label,
-                        "ImageUrl": image_url,
-                        "Title": title,
-                        "Color": color
-                    }
-                ]
-            }
-            self._api_client.post(self.reply_api_uri, body)
-        else:
-            self.responses.append(str(response))
+        self._reply_client.reply_with_buttons(response, buttons, buttons_label, image_url, title, color)
 
 
     def reply_with_image(self, image, response=None, title=None, title_url=None, color=None):
@@ -429,24 +403,7 @@ class Bot(object):
             title_url (str): If specified, makes the title a link to this URL. Ignored if title is not set. (optional).
             color (str): The color to use for the sidebar (Slack Only) in hex (ex. #3AA3E3) (optional).
         """
-        if self.conversation_reference:
-            body = {
-                "SkillId": self.skill_id,
-                "Message": str(response),
-                "ConversationReference": self.conversation_reference,
-                "Attachments": [
-                    {
-                        "Buttons": [],
-                        "ImageUrl": image,
-                        "Title": title,
-                        "TitleUrl": title_url,
-                        "Color": color
-                    }
-                ]
-            }
-            self._api_client.post(self.reply_api_uri, body)
-        else:
-            self.responses.append(str(response))
+        self._reply_client.reply_with_image(image, response, title, title_url, color)
 
 
     def reply_later(self, response, delay_in_seconds):
@@ -457,16 +414,7 @@ class Bot(object):
             response (str): The response to send back to chat.
             delay_in_seconds (int): The number of seconds to delay before sending the response.
         """
-        if self.conversation_reference:
-            body = {
-                "SkillId": self.skill_id,
-                "Message": str(response),
-                "ConversationReference": self.conversation_reference,
-                "Schedule": delay_in_seconds
-                }
-            self._api_client.post(self.reply_api_uri, body)
-        else:
-            self.responses.append(str(response))
+        self._reply_client.reply_later(response, delay_in_seconds)
 
 
     def load_coordinate(self, coordinate_arg):
