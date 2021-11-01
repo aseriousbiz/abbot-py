@@ -1,7 +1,4 @@
-import os
-import logging
 from .urls import get_skill_api_url
-from . import apiclient
 
 class Secrets(object):
     """
@@ -9,13 +6,10 @@ class Secrets(object):
 
     This is automatically instantiated for you as ``bot.secrets``.
     """
-    def __init__(self, skill_id, user_id, api_token, timestamp):
-        self.skill_id = skill_id
-        self.user_id = user_id
-        self.request_uri = get_skill_api_url(skill_id) + '/secret?key={0}'
-        if self.request_uri.startswith("https://localhost:4979"):
-            logging.warn("AbbotApiBaseUrl appears to be blank. Using localhost as a fallback.")
-        self.api_client = apiclient.ApiClient(self.request_uri, user_id, api_token, timestamp)
+    def __init__(self, api_client, skill_id):
+        self._skill_id = skill_id
+        self._request_uri = get_skill_api_url(skill_id) + '/secret?key={0}'
+        self._api_client = api_client
 
 
     def read(self, key):
@@ -28,8 +22,8 @@ class Secrets(object):
         Returns: 
             secret (str): The secret from the vault.
         """
-        uri = self.request_uri.format(key)
-        output = self.api_client.get(uri)
+        uri = self._request_uri.format(key)
+        output = self._api_client.get(uri)
         if output:
             return output.get("secret")
         else:
@@ -41,8 +35,8 @@ class Secrets(object):
     
 
     def __str__(self):
-        return "Secret store for {} skill.".format(self.skill_id)
+        return "Secret store for {} skill.".format(self._skill_id)
 
 
     def __repr__(self):
-        return "Secret store for {} skill.".format(self.skill_id)
+        return "Secret store for {} skill.".format(self._skill_id)

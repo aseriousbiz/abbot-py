@@ -292,11 +292,11 @@ class Bot(object):
         self.timestamp = runnerInfo.get('Timestamp')
         self.code = runnerInfo.get('Code')
         self.conversation_reference = runnerInfo.get('ConversationReference')
-        self.api_client = apiclient.ApiClient(self.reply_api_uri, self.user_id, api_token, self.timestamp)
+        self._api_client = apiclient.ApiClient(self.reply_api_uri, self.user_id, api_token, self.timestamp)
 
-        self.brain = storage.Brain(self.skill_id, self.user_id, api_token, self.timestamp) 
-        self.secrets = secrets.Secrets(self.skill_id, self.user_id, api_token, self.timestamp)
-        self.utils = utils.Utilities(self.skill_id, self.user_id, api_token, self.timestamp)
+        self.brain = storage.Brain(self._api_client, self.skill_id) 
+        self.secrets = secrets.Secrets(self._api_client, self.skill_id)
+        self.utils = utils.Utilities(self._api_client, self.skill_id)
 
         self.raw = skillInfo
 
@@ -333,7 +333,7 @@ class Bot(object):
 
         self.responses = []
 
-        self._signaler = Signaler(self.skill_id, self.user_id, api_token, self.timestamp, req)
+        self._signaler = Signaler(self._api_client, self.skill_id, req)
 
 
     def run_user_script(self):
@@ -381,7 +381,7 @@ class Bot(object):
                 "ConversationReference": self.conversation_reference,
                 "DirectMessage": direct_message
             }
-            self.api_client.post(self.reply_api_uri, body)
+            self._api_client.post(self.reply_api_uri, body)
         else:
             self.responses.append(str(response))
 
@@ -413,7 +413,7 @@ class Bot(object):
                     }
                 ]
             }
-            self.api_client.post(self.reply_api_uri, body)
+            self._api_client.post(self.reply_api_uri, body)
         else:
             self.responses.append(str(response))
 
@@ -444,7 +444,7 @@ class Bot(object):
                     }
                 ]
             }
-            self.api_client.post(self.reply_api_uri, body)
+            self._api_client.post(self.reply_api_uri, body)
         else:
             self.responses.append(str(response))
 
@@ -464,7 +464,7 @@ class Bot(object):
                 "ConversationReference": self.conversation_reference,
                 "Schedule": delay_in_seconds
                 }
-            self.api_client.post(self.reply_api_uri, body)
+            self._api_client.post(self.reply_api_uri, body)
         else:
             self.responses.append(str(response))
 

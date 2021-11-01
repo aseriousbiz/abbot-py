@@ -9,17 +9,13 @@ class Signaler(object):
     Not to be confused with SignalR, use this to raise signals by calling the
     signal api endpoint https://ab.bot/api/skills/{id}/signal
     """
-    def __init__(self, skill_id, user_id, api_token, timestamp, skill_message):
-        self.skill_id = skill_id
-        self.skill_info = skill_message.get('SkillInfo')
-        self.runner_info = skill_message.get('RunnerInfo')
-        self.signal_info = skill_message.get('SignalInnfo')
-        self.request_uri = get_skill_api_url(skill_id) + '/signal'
-        if self.request_uri.startswith("https://localhost"):
-            self.verify_ssl = False
-        else:
-            self.verify_ssl = True
-        self.api_client = apiclient.ApiClient(self.request_uri, user_id, api_token, timestamp)
+    def __init__(self, api_client, skill_id, skill_message):
+        self._skill_id = skill_id
+        self._skill_info = skill_message.get('SkillInfo')
+        self._runner_info = skill_message.get('RunnerInfo')
+        self._signal_info = skill_message.get('SignalInnfo')
+        self._request_uri = get_skill_api_url(skill_id) + '/signal'
+        self._api_client = api_client
 
 
     def signal(self, name, args):
@@ -29,35 +25,38 @@ class Signaler(object):
         :param data: The arguments to pass to the skills that are subscribed to this signal.
         :return: a result indicating success or failure
         """
-        logging.info("Sending signal to skill: %s", self.skill_id)
+        logging.info("Sending signal to skill: %s", self._skill_id)
 
-        is_root = self.signal_info is None
-        conversation_reference = self.runner_info.get('ConversationReference')
+        is_root = self._signal_info is None
+        conversation_reference = self._runner_info.get('ConversationReference')
         conversation_reference = jsonpickle.encode(conversation_reference) if conversation_reference else None
+
+        skill_info = self._skill_info
+        runner_info = self._runner_info
 
         data = {
             "Name": name,
             "Arguments": args,
             "ConversationReference": conversation_reference,
-            "Room": self.skill_info.get('Room'),
-            "RoomId": self.skill_info.get('RoomId'),
-            "SenderId": self.runner_info.get('MemberId'),
+            "Room": skill_info.get('Room'),
+            "RoomId": skill_info.get('RoomId'),
+            "SenderId": runner_info.get('MemberId'),
             "Source": {
-                "AuditIdentifier": self.runner_info.get('AuditIdentifier'),
-                "SkillName": self.skill_info.get('SkillName'),
-                "SkillUrl": self.skill_info.get('SkillUrl'),
-                "Arguments": self.skill_info.get('Arguments'),
-                "Mentions": self.skill_info.get('Mentions'),
+                "AuditIdentifier": runner_info.get('AuditIdentifier'),
+                "SkillName": skill_info.get('SkillName'),
+                "SkillUrl": skill_info.get('SkillUrl'),
+                "Arguments": skill_info.get('Arguments'),
+                "Mentions": skill_info.get('Mentions'),
                 # Only set these if this is a root source (aka isRoot = true)
-                "IsChat" : is_root and self.skill_info.get('IsChat'),
-                "IsInteraction": is_root and self.skill_info.get('IsInteraction'),
-                "IsPatternMatch": is_root and self.skill_info.get('Pattern') is not None,
-                "IsRequest": is_root and self.skill_info.get('IsRequest'),
-                "Pattern": is_root and self.skill_info.get('Pattern'),
-                "Request": is_root and self.skill_info.get('Request'),
-                "SignalEvent": is_root and self.signal_info,
+                "IsChat" : is_root and skill_info.get('IsChat'),
+                "IsInteraction": is_root and skill_info.get('IsInteraction'),
+                "IsPatternMatch": is_root and skill_info.get('Pattern') is not None,
+                "IsRequest": is_root and skill_info.get('IsRequest'),
+                "Pattern": is_root and skill_info.get('Pattern'),
+                "Request": is_root and skill_info.get('Request'),
+                "SignalEvent": is_root and self._signal_info,
             }
         }
 
         logging.info(data)
-        return ApiResult(self.api_client.post(self.request_uri, data))
+        return ApiResult(self._api_client.post(self._request_uri, data))
