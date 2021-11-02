@@ -1,9 +1,7 @@
 import jsonpickle
 import os
 import re
-import requests
-from .urls import get_skill_api_url
-from . import apiclient
+import urllib.parse
 
 class Geocode(object):
     """
@@ -32,9 +30,7 @@ class Utilities(object):
 
     This has already been instantiated for you in ``bot.utils``.
     """
-    def __init__(self, api_client, skill_id):
-        self._skill_id = skill_id
-        self._request_uri = get_skill_api_url(skill_id)
+    def __init__(self, api_client):
         self._api_client = api_client
 
     
@@ -46,8 +42,8 @@ class Utilities(object):
             address (str): the address to geocode.
             include_timezone (bool, optional): If True, include time zone information in the result. Defaults to False.
         """
-        clean_address = requests.utils.requote_uri(address)
-        uri = self._request_uri + "/geo?address={}&includeTimezone={}".format(clean_address, include_timezone)
+        clean_address = urllib.parse.quote_plus(address)
+        uri = "/geo?address={}&includeTimezone={}".format(clean_address, include_timezone)
         result = self._api_client.get(uri)
         # This will return an object that contains a string called Address, and an (int, int) tuple called Geocode 
         # representing the lat/lng of the point.

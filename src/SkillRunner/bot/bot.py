@@ -15,18 +15,17 @@ import boto3
 import octokit
 # End of user skill imports
 
-from . import storage
-from . import secrets
-from . import utils
+from .storage import Brain
+from .secrets import Secrets
+from .utils import Utilities
 from . import pattern
 from . import signal_event
 from .signaler import Signaler
 from .utils import obj
 from .reply_client import ReplyClient
 from . import exceptions
-from . import apiclient
+from .apiclient import ApiClient
 from types import SimpleNamespace
-from .urls import get_reply_url
 
 class Room(object):
     """
@@ -295,12 +294,12 @@ class Bot(object):
         self.code = runnerInfo.get('Code')
 
         # Clients
-        api_client = apiclient.ApiClient(get_reply_url(self.skill_id), self.user_id, api_token, self.timestamp)
-        self.brain = storage.Brain(api_client, self.skill_id) 
-        self.secrets = secrets.Secrets(api_client, self.skill_id)
-        self.utils = utils.Utilities(api_client, self.skill_id)
+        api_client = ApiClient(self.skill_id, self.user_id, api_token, self.timestamp)
+        self.brain = Brain(api_client) 
+        self.secrets = Secrets(api_client)
+        self.utils = Utilities(api_client)
         self._reply_client = ReplyClient(api_client, runnerInfo.get('ConversationReference'), self.skill_id, self.responses)
-        self._signaler = Signaler(api_client, self.skill_id, req)
+        self._signaler = Signaler(api_client, req)
 
         self.raw = skillInfo
 

@@ -1,12 +1,11 @@
 import logging
-from .urls import get_reply_url
 
 class ReplyClient(object):
     def __init__(self, api_client, conversation_reference, skill_id, responses):
         self._api_client = api_client
         self._conversation_reference = conversation_reference
         self._skill_id = skill_id
-        self._reply_url = get_reply_url(skill_id)
+        self._reply_url = "/reply"
         logging.info("Reply URL: %s", self._reply_url)
 
         self._responses = responses

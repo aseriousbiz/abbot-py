@@ -1,4 +1,4 @@
-from .urls import get_skill_api_url
+import urllib.parse
 
 class Secrets(object):
     """
@@ -6,9 +6,7 @@ class Secrets(object):
 
     This is automatically instantiated for you as ``bot.secrets``.
     """
-    def __init__(self, api_client, skill_id):
-        self._skill_id = skill_id
-        self._request_uri = get_skill_api_url(skill_id) + '/secret?key={0}'
+    def __init__(self, api_client):
         self._api_client = api_client
 
 
@@ -22,21 +20,16 @@ class Secrets(object):
         Returns: 
             secret (str): The secret from the vault.
         """
-        uri = self._request_uri.format(key)
-        output = self._api_client.get(uri)
+        output = self._api_client.get(f"/secret?key={urllib.parse.quote_plus(key)}")
         if output:
             return output.get("secret")
         else:
             return None
 
 
-    def test(self, key):
-        return "You requested a secret called '{}'.".format(key)
-    
-
     def __str__(self):
-        return "Secret store for {} skill.".format(self._skill_id)
+        return "Secret store for skills."
 
 
     def __repr__(self):
-        return "Secret store for {} skill.".format(self._skill_id)
+        return "Secret store for skills."

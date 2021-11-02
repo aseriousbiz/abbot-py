@@ -1,5 +1,5 @@
 import json
-from .urls import get_skill_api_url
+import urllib.parse
 
 class Brain(object):
     """
@@ -7,14 +7,12 @@ class Brain(object):
 
     This has already been instantiated for you in ``bot.brain``.
     """
-    def __init__(self, api_client, skill_id):
-        self._skill_id = skill_id
-        self._request_uri = get_skill_api_url(skill_id) + '/brain?key={0}'
+    def __init__(self, api_client):
         self._api_client = api_client
 
 
     def __make_uri(self, key):
-        return self._request_uri.format(key)
+        return f"/brain?key={urllib.parse.quote_plus(key)}"
 
 
     def get(self, key):
@@ -77,13 +75,9 @@ class Brain(object):
         return self._api_client.delete(uri)
 
 
-    def test(self, key):
-        return "You sent '{}' to the brain.".format(key)
-    
-
     def __str__(self):
-        return "Brain for {} skill.".format(self.skill)
+        return "Brain for the skill."
 
 
     def __repr__(self):
-        return "Brain for {} skill.".format(self.skill)
+        return "Brain for the skill."

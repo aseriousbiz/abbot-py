@@ -1,20 +1,16 @@
 import logging
 from .api_result import ApiResult
 import jsonpickle
-from .urls import get_skill_api_url
-from . import apiclient
 
 class Signaler(object):
     """
     Not to be confused with SignalR, use this to raise signals by calling the
     signal api endpoint https://ab.bot/api/skills/{id}/signal
     """
-    def __init__(self, api_client, skill_id, skill_message):
-        self._skill_id = skill_id
+    def __init__(self, api_client, skill_message):
         self._skill_info = skill_message.get('SkillInfo')
         self._runner_info = skill_message.get('RunnerInfo')
         self._signal_info = skill_message.get('SignalInnfo')
-        self._request_uri = get_skill_api_url(skill_id) + '/signal'
         self._api_client = api_client
 
 
@@ -25,7 +21,7 @@ class Signaler(object):
         :param data: The arguments to pass to the skills that are subscribed to this signal.
         :return: a result indicating success or failure
         """
-        logging.info("Sending signal to skill: %s", self._skill_id)
+        logging.info(f"Sending signal from skill: {self._skill_info.get('SkillName')}")
 
         is_root = self._signal_info is None
         conversation_reference = self._runner_info.get('ConversationReference')
@@ -59,4 +55,4 @@ class Signaler(object):
         }
 
         logging.info(data)
-        return ApiResult(self._api_client.post(self._request_uri, data))
+        return ApiResult(self._api_client.post('/signal', data))
