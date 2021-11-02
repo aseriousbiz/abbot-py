@@ -43,14 +43,14 @@ class Signaler(object):
                 "SkillUrl": skill_info.get('SkillUrl'),
                 "Arguments": skill_info.get('Arguments'),
                 "Mentions": skill_info.get('Mentions'),
+                "SignalEvent": self._signal_info,
                 # Only set these if this is a root source (aka isRoot = true)
-                "IsChat" : is_root and skill_info.get('IsChat'),
-                "IsInteraction": is_root and skill_info.get('IsInteraction'),
-                "IsPatternMatch": is_root and skill_info.get('Pattern') is not None,
-                "IsRequest": is_root and skill_info.get('IsRequest'),
-                "Pattern": is_root and skill_info.get('Pattern'),
-                "Request": is_root and skill_info.get('Request'),
-                "SignalEvent": is_root and self._signal_info,
+                "IsChat" : skill_info.get('IsChat') if is_root else None,
+                "IsInteraction": skill_info.get('IsInteraction') if is_root else None,
+                "IsPatternMatch": skill_info.get('Pattern') is not None,
+                "IsRequest": skill_info.get('IsRequest') if is_root else None,
+                "Pattern": skill_info.get('Pattern'), # This could only be populated by a root skill source.
+                "Request": skill_info.get('Request')  # This could only be populated by a root skill source.
             }
         }
 

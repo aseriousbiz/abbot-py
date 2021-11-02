@@ -1,6 +1,6 @@
 class SignalEvent(object):
     """
-    A signal raised by a skill or pattern.
+    A signal raised by a skill.
     """
     def __init__(self, signal_message):
         self._signal_message = signal_message
@@ -52,15 +52,14 @@ class SourceSkill(SignalSource):
     """
     def __init__(self, signal_source_message):
         super().__init__(signal_source_message)
-        self._signal_message = signal_source_message.get('SignalEvent')
+        self._signal_event_message = signal_source_message.get('SignalEvent')
         self._signal_event = None
 
 
     @property
     def signal_event(self):
-        if self._signal_event is None and self._signal_message is not None:
-            signal_event = self._signal_message.get('SignalEvent')
-            self._signal_event = SignalEvent(signal_event) if signal_event is not None else None
+        if self._signal_event is None and self._signal_event_message is not None:
+            self._signal_event = SignalEvent(self._signal_event_message)
         return self._signal_event
 
 
