@@ -43,8 +43,8 @@ class Utilities(object):
             include_timezone (bool, optional): If True, include time zone information in the result. Defaults to False.
         """
         clean_address = urllib.parse.quote_plus(address)
-        uri = "/geo?address={}&includeTimezone={}".format(clean_address, include_timezone)
-        result = self._api_client.get(uri)
+        path = "/geo?address={}&includeTimezone={}".format(clean_address, include_timezone)
+        result = self._api_client.get(path)
         # This will return an object that contains a string called Address, and an (int, int) tuple called Geocode 
         # representing the lat/lng of the point.
         # example:

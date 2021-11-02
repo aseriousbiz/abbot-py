@@ -11,7 +11,7 @@ class Brain(object):
         self._api_client = api_client
 
 
-    def __make_uri(self, key):
+    def __get_path(self, key):
         return f"/brain?key={urllib.parse.quote_plus(key)}"
 
 
@@ -25,8 +25,8 @@ class Brain(object):
         Returns:
             The string or object stored in Value. This data is JSON serialized.
         """
-        uri = self.__make_uri(key)
-        output = self._api_client.get(uri)
+        path = self.__get_path(key)
+        output = self._api_client.get(path)
         if output:
             return json.loads(output.get("value"))
         else:
@@ -41,8 +41,8 @@ class Brain(object):
 
 
     def list(self):
-        uri = self.make_uri("")
-        return self._api_client.get(uri)
+        path = self.__get_path("")
+        return self._api_client.get(path)
 
 
     def write(self, key, value):
@@ -55,9 +55,9 @@ class Brain(object):
             key (str): The lookup key for the object.
             value (object): The string or object to store in Abbot's brain. This data is JSON serialized.
         """
-        uri = self.__make_uri(key)
+        path = self.__get_path(key)
         data = {"value": json.dumps(value)}
-        return self._api_client.post(uri, data)
+        return self._api_client.post(path, data)
 
 
     def search(self, term):
@@ -71,8 +71,8 @@ class Brain(object):
         Args:
             key (str): The lookup key for the object to delete.
         """
-        uri = self.__make_uri(key)
-        return self._api_client.delete(uri)
+        path = self.__get_path(key)
+        return self._api_client.delete(path)
 
 
     def __str__(self):
