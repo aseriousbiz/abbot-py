@@ -1,8 +1,5 @@
-import os
 import json
-import logging
-from .urls import get_skill_api_url
-from . import apiclient
+import urllib.parse
 
 class Brain(object):
     """
@@ -10,18 +7,12 @@ class Brain(object):
 
     This has already been instantiated for you in ``bot.brain``.
     """
-    def __init__(self, skill_id, user_id, api_token, timestamp):
-        self.skill_id = skill_id
-        self.request_uri = get_skill_api_url(skill_id) + '/brain?key={0}'
-        if self.request_uri.startswith("https://localhost"):
-            self.verify_ssl = False
-        else:
-            self.verify_ssl = True
-        self.api_client = apiclient.ApiClient(self.request_uri, user_id, api_token, timestamp)
+    def __init__(self, api_client):
+        self._api_client = api_client
 
 
-    def make_uri(self, key):
-        return self.request_uri.format(key)
+    def __get_path(self, key):
+        return f"/brain?key={urllib.parse.quote_plus(key)}"
 
 
     def get(self, key):
@@ -34,8 +25,8 @@ class Brain(object):
         Returns:
             The string or object stored in Value. This data is JSON serialized.
         """
-        uri = self.make_uri(key)
-        output = self.api_client.get(uri)
+        path = self.__get_path(key)
+        output = self._api_client.get(path)
         if output:
             return json.loads(output.get("value"))
         else:
@@ -50,8 +41,8 @@ class Brain(object):
 
 
     def list(self):
-        uri = self.make_uri("")
-        return self.api_client.get(uri)
+        path = self.__get_path("")
+        return self._api_client.get(path)
 
 
     def write(self, key, value):
@@ -64,9 +55,9 @@ class Brain(object):
             key (str): The lookup key for the object.
             value (object): The string or object to store in Abbot's brain. This data is JSON serialized.
         """
-        uri = self.make_uri(key)
+        path = self.__get_path(key)
         data = {"value": json.dumps(value)}
-        return self.api_client.post(uri, data)
+        return self._api_client.post(path, data)
 
 
     def search(self, term):
@@ -80,17 +71,13 @@ class Brain(object):
         Args:
             key (str): The lookup key for the object to delete.
         """
-        uri = self.make_uri(key)
-        return self.api_client.delete(uri)
+        path = self.__get_path(key)
+        return self._api_client.delete(path)
 
-
-    def test(self, key):
-        return "You sent '{}' to the brain.".format(key)
-    
 
     def __str__(self):
-        return "Brain for {} skill.".format(self.skill)
+        return "Brain for the skill."
 
 
     def __repr__(self):
-        return "Brain for {} skill.".format(self.skill)
+        return "Brain for the skill."

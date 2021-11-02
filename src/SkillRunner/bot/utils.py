@@ -1,9 +1,7 @@
 import jsonpickle
 import os
 import re
-import requests
-from .urls import get_skill_api_url
-from . import apiclient
+import urllib.parse
 
 class Geocode(object):
     """
@@ -32,15 +30,8 @@ class Utilities(object):
 
     This has already been instantiated for you in ``bot.utils``.
     """
-    def __init__(self, skill_id, user_id, api_token, timestamp):
-        self.skill_id = skill_id
-        self.request_uri = get_skill_api_url(skill_id)
-
-        if self.request_uri.startswith("https://localhost"):
-            self.verify_ssl = False
-        else:
-            self.verify_ssl = True
-        self.api_client = apiclient.ApiClient(self.request_uri, user_id, api_token, timestamp)
+    def __init__(self, api_client):
+        self._api_client = api_client
 
     
     def geocode(self, address, include_timezone=False):
@@ -51,9 +42,9 @@ class Utilities(object):
             address (str): the address to geocode.
             include_timezone (bool, optional): If True, include time zone information in the result. Defaults to False.
         """
-        clean_address = requests.utils.requote_uri(address)
-        uri = self.request_uri + "/geo?address={}&includeTimezone={}".format(clean_address, include_timezone)
-        result = self.api_client.get(uri)
+        clean_address = urllib.parse.quote_plus(address)
+        path = "/geo?address={}&includeTimezone={}".format(clean_address, include_timezone)
+        result = self._api_client.get(path)
         # This will return an object that contains a string called Address, and an (int, int) tuple called Geocode 
         # representing the lat/lng of the point.
         # example:
@@ -63,14 +54,6 @@ class Utilities(object):
         g = Geocode(result.get("coordinate"), result.get("formattedAddress"), result.get("timeZoneId"))
         return g
 
-
-    def __str__(self):
-        return "Utilities object for {} skill.".format(self.skill)
-
-
-    def __repr__(self):
-        return "Utilities object for {} skill.".format(self.skill)
-    
 
 def camel_to_snake_case(input):
     """
