@@ -5,5 +5,5 @@ class ApiResult(object):
     def __init__(self, response):
         self.ok = response.get('ok', False)
         """ Whether the operation succeeded. """
-        self.error = response.get('error', None)
+        self.error = response.get('error')
         """ The error message if the operation failed. """
