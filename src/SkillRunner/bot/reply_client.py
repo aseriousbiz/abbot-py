@@ -1,6 +1,10 @@
-import logging
-
 class ReplyClient(object):
+    """
+    Used to send replies back to chat. If we have a valid ConversationReference, then we send 
+    the reply as a direct message. Rreplies are sent asynchronously at the time bot.reply is
+    called. Otherwise replies are returned synchrously in the response to the request that
+    calls this skill.
+    """
     def __init__(self, api_client, conversation_reference, skill_id, responses):
         self._api_client = api_client
         self._conversation_reference = conversation_reference

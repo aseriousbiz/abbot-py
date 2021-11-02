@@ -13,6 +13,10 @@ except AttributeError:
     pass
 
 class ApiClient(object):
+    """
+    Api Client for the skill runner APIs hosted on abbot-web. This class understands the 
+    authentication mechanism when calling a skill runner API.
+    """
     def __init__(self, skill_id, user_id, api_token, timestamp, trace_parent):
         self.user_id = user_id
 
