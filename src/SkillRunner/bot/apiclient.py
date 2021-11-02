@@ -13,7 +13,7 @@ except AttributeError:
     pass
 
 class ApiClient(object):
-    def __init__(self, skill_id, user_id, api_token, timestamp):
+    def __init__(self, skill_id, user_id, api_token, timestamp, trace_parent):
         self.user_id = user_id
 
         base_url = os.environ.get('AbbotApiBaseUrl', 'https://localhost:4979/api')
@@ -28,8 +28,10 @@ class ApiClient(object):
                 'Content-Type': 'application/json',
                 'X-Abbot-SkillApiToken': api_token, 
                 'X-Abbot-PlatformUserId': str(user_id),
-                'X-Abbot-Timestamp': str(timestamp)
+                'X-Abbot-Timestamp': str(timestamp),
+                'traceparent': trace_parent
             }
+        logging.info(f'ApiClient created with traceparent: {trace_parent}')
         
         # In order to prevent users from accessing sensitive data, we encrypt it using Fernet, 
         # then decrypt in the accessors. 

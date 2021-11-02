@@ -1,11 +1,8 @@
-import logging
-
 class ApiResult(object):
     """
     A class to represent the result of an API call.
     """
     def __init__(self, response):
-        logging.info(f"ApiResult: {response}")
         self.ok = response.get('ok', False)
         """ Whether the operation succeeded. """
         self.error = response.get('error', None)

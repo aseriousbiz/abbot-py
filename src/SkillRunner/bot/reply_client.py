@@ -6,8 +6,6 @@ class ReplyClient(object):
         self._conversation_reference = conversation_reference
         self._skill_id = skill_id
         self._reply_url = "/reply"
-        logging.info("Reply URL: %s", self._reply_url)
-
         self._responses = responses
 
 

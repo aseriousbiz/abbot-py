@@ -279,7 +279,7 @@ class Bot(object):
     :var skill_name: The name of the skill being run.
     :var skill_url: The URL to the edit screen of the skill being run.
     """
-    def __init__(self, req, api_token):
+    def __init__(self, req, api_token, trace_parent):
         self.responses = []
 
         skillInfo = req.get('SkillInfo')
@@ -294,7 +294,7 @@ class Bot(object):
         self.code = runnerInfo.get('Code')
 
         # Clients
-        api_client = ApiClient(self.skill_id, self.user_id, api_token, self.timestamp)
+        api_client = ApiClient(self.skill_id, self.user_id, api_token, self.timestamp, trace_parent)
         self.brain = Brain(api_client) 
         self.secrets = Secrets(api_client)
         self.utils = Utilities(api_client)

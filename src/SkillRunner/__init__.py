@@ -41,10 +41,10 @@ def deny_os_modules():
             setattr(os, attr, lambda self: PermissionError("Access to this module (os.{}) is denied".format(attr)))    
 
 
-def run_code(req, api_token):
+def run_code(req, api_token, trace_parent):
     # Instantiate a bot object
     try:
-        bot = _bot.Bot(req, api_token)
+        bot = _bot.Bot(req, api_token, trace_parent)
         bot.run_user_script()
         return bot
     except Exception as e:
@@ -62,7 +62,8 @@ def main(req: func.HttpRequest) -> func.HttpResponse:
         req_body = req.get_json()
         # The token is necessary for using the data API
         api_token = req.headers.get('x-abbot-skillapitoken')
-        bot = run_code(req_body, api_token)
+        trace_parent = req.headers.get('traceparent')
+        bot = run_code(req_body, api_token, trace_parent)
         for response in bot.responses:
             rm.add(response)
         if bot.is_request:

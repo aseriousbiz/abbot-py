@@ -54,5 +54,4 @@ class Signaler(object):
             }
         }
 
-        logging.info(data)
         return ApiResult(self._api_client.post('/signal', data))
