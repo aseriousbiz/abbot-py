@@ -19,7 +19,7 @@ class Pattern(object):
 
 
     def __str__(self):
-        return f'{self.pattern_type} `{self.pattern}` (case sensitive: {self.case_sensitive})'
+        return f'{self.pattern_type.name} `{self.pattern}` (case sensitive: {self.case_sensitive})'
 
 
 class PatternType(IntEnum):
@@ -28,3 +28,15 @@ class PatternType(IntEnum):
     ENDS_WITH = 2
     CONTAINS = 3
     REGULAR_EXPRESSION = 4
+    EXACT_MATCH = 5
+
+    @property
+    def name(self):
+        return {
+            0: 'None',
+            1: 'Starts With',
+            2: 'Ends With',
+            3: 'Contains',
+            4: 'Regular Expression',
+            5: 'Exact Match'
+        }.get(self.value)
