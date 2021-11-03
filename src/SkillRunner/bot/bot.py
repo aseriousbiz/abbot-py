@@ -19,6 +19,8 @@ from .storage import Brain
 from .secrets import Secrets
 from .utils import Utilities
 from .mention import Mention
+from .room import Room
+from .platform_type import PlatformType
 from .trigger_event import TriggerEvent
 from . import pattern
 from . import signal_event
@@ -28,22 +30,6 @@ from .reply_client import ReplyClient
 from . import exceptions
 from .apiclient import ApiClient
 from types import SimpleNamespace
-
-
-class Room(object):
-    """
-    A room is a place where people can chat.
-
-    :var id: The room ID.
-    :var name: The room name.
-    """
-    def __init__(self, room_id, room_name):
-        self.id = room_id
-        self.name = room_name
-        self.cache_key = room_id if room_id else room_name
-
-    def __str__(self):
-        return self.name
 
 
 class TriggerResponse(object):
@@ -98,9 +84,6 @@ class TriggerResponse(object):
     @content_type.deleter
     def content_type(self):
         del self._content_type
-
-
-
 
 
 class Argument(object):
@@ -207,8 +190,8 @@ class Bot(object):
         self.pattern = None if patternRequest is None else pattern.Pattern(patternRequest)
         self.is_pattern_match = self.pattern is not None
         self.platform_id = skillInfo.get('PlatformId')
-        self.platform_type = skillInfo.get('PlatformType')
-        self.room = Room(skillInfo.get('RoomId'), skillInfo.get('Room'))
+        self.platform_type = PlatformType(skillInfo.get('PlatformType'))
+        self.room = Room.from_json(skillInfo)
         self.skill_name = skillInfo.get('SkillName')
         self.skill_url = skillInfo.get('SkillUrl')
         self.from_user = Mention.from_json(skillInfo.get('From'))
