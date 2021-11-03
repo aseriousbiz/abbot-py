@@ -1,3 +1,5 @@
+from .pattern import Pattern
+
 class SignalEvent(object):
     """
     A signal raised by a skill.
@@ -74,4 +76,5 @@ class RootSourceSkill(SignalSource):
         self.is_interaction = root_source_message.get('IsInteraction')
         self.is_chat = root_source_message.get('IsChat')
         self.is_pattern_match = root_source_message.get('IsPatternMatch')
-        self.pattern = root_source_message.get('Pattern')
+        pattern = root_source_message.get('Pattern')
+        self.pattern = Pattern(pattern) if pattern is not None else None
