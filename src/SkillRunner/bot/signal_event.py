@@ -1,3 +1,8 @@
+from .pattern import Pattern
+from .trigger_event import TriggerEvent
+from .mention import Mention
+
+
 class SignalEvent(object):
     """
     A signal raised by a skill.
@@ -43,7 +48,7 @@ class SignalSource(object):
         self.skill_url = signal_source_message.get('SkillUrl')
         self.arguments = signal_source_message.get('Arguments')
         self.args = self.arguments
-        self.mentions = signal_source_message.get('Mentions')
+        self.mentions = Mention.load_mentions(signal_source_message.get('Mentions'))
 
 
 class SourceSkill(SignalSource):
@@ -69,9 +74,11 @@ class RootSourceSkill(SignalSource):
     """
     def __init__(self, root_source_message):
         super().__init__(root_source_message)
-        self.request = root_source_message.get('Request')
+        request = root_source_message.get('Request')
+        self.request = TriggerEvent(request) if request is not None else None
         self.is_request = root_source_message.get('IsRequest')
         self.is_interaction = root_source_message.get('IsInteraction')
         self.is_chat = root_source_message.get('IsChat')
         self.is_pattern_match = root_source_message.get('IsPatternMatch')
-        self.pattern = root_source_message.get('Pattern')
+        pattern = root_source_message.get('Pattern')
+        self.pattern = Pattern(pattern) if pattern is not None else None

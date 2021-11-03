@@ -18,6 +18,10 @@ import octokit
 from .storage import Brain
 from .secrets import Secrets
 from .utils import Utilities
+from .mention import Mention
+from .room import Room
+from .platform_type import PlatformType
+from .trigger_event import TriggerEvent
 from . import pattern
 from . import signal_event
 from .signaler import Signaler
@@ -26,53 +30,6 @@ from .reply_client import ReplyClient
 from . import exceptions
 from .apiclient import ApiClient
 from types import SimpleNamespace
-
-class Room(object):
-    """
-    A room is a place where people can chat.
-
-    :var id: The room ID.
-    :var name: The room name.
-    """
-    def __init__(self, room_id, room_name):
-        self.id = room_id
-        self.name = room_name
-        self.cache_key = room_id if room_id else room_name
-
-    def __str__(self):
-        return self.name
-
-
-class TriggerEvent(object):
-    """
-    A request triggered by an external event.
-
-    :var content_type: The Content Type of the request.
-    :var http_method: The Http Method of the request.
-    :var is_form: True if the request is a form. Otherwise False.
-    :var is_json: True if the request contains json data. Otherwise False.
-    :var headers: The request headers.
-    :var form: Form data, if it exists.
-    :var query: QueryString data, if it exists.
-    :var url: The request url.
-    :var raw_body: The raw body of the request.
-    """
-    def __init__(self, request):
-        self.content_type = request.get('ContentType')
-        self.http_method = request.get('HttpMethod')
-        self.is_form = request.get('IsForm')
-        self.is_json = request.get('IsJson')
-        self.headers = request.get('Headers')
-        self.form = request.get('Form')
-        self.query = request.get('Query')
-        self.url = request.get('Url')
-        self.raw_body = request.get('RawBody')
-
-    def json(self):
-        return json.loads(self.raw_body, object_hook=lambda d: SimpleNamespace(**d))
-
-    def toJSON(self):
-        return jsonpickle.encode(self)
 
 
 class TriggerResponse(object):
@@ -127,84 +84,6 @@ class TriggerResponse(object):
     @content_type.deleter
     def content_type(self):
         del self._content_type
-
-
-class Mention(object):
-    """
-    A user mention.
-
-    :var id: The user's Id.
-    :var user_name: The user's user name.
-    :var name: The user's name.
-    :var email: The user's email if known
-    :var location: The user's location if known.
-    :var timezone: The user's timezone if known
-    """
-    def __init__(self, id, user_name, name, email, location, timezone):
-        self.id = id
-        self.user_name = user_name
-        self.name = name
-        self.email = email
-        self.location = location
-        self.timezone = timezone
-
-
-    def toJSON(self):
-        return json.dumps(self, default=lambda o: o.__dict__, 
-            sort_keys=True, indent=4)
-
-    def __repr__(self):
-        return "<@{}>".format(self.user_name) 
-
-    def __str__(self):
-        return "<@{}>".format(self.user_name)
-
-
-class Coordinate(object):
-    """
-    Represents a geographic coordinate.
-
-    :var latitude: The latitude. Those are the lines that are the belts of the earth.
-    :var longitude: The longitude. Those are the pin stripes of the earth.
-    """
-    def __init__(self, latitude, longitude):
-        self.latitude = latitude
-        self.longitude = longitude
-
-    def __str__(self):
-        return "lat: {}, lon: {}".format(self.latitude, self.longitude)
-
-
-class Location(object):
-    """
-    A geo-coded location
-
-    :var coordinate: The coordinates of the location.
-    :var formatted_address: The formatted address of the location.
-    """
-    def __init__(self, coordinate, formatted_address):
-        self.coordinate = coordinate
-        self.formatted_address = formatted_address
-
-    def __str__(self):
-        return "coordinate: {}, address: {}".format(self.coordinate, self.formatted_address)
-
-
-class TimeZone(object):
-    """
-    Information about a user's timezone
-
-    :var id: The provider's ID for the timezone. Could be IANA or BCL.
-    :var min_offset: Gets the least (most negative) offset within this time zone, over all time.
-    :var max_offset: Gets the greatest (most positive) offset within this time zone, over all time.
-    """
-    def __init__(self, id, min_offset=None, max_offset=None):
-        self.id = id
-        self.min_offset = min_offset
-        self.max_offset = max_offset
-
-    def __str__(self):
-        return "id: {}, min_offset: {}, max_offset: {}".format(self.id, self.min_offset, self.max_offset)
 
 
 class Argument(object):
@@ -311,12 +190,12 @@ class Bot(object):
         self.pattern = None if patternRequest is None else pattern.Pattern(patternRequest)
         self.is_pattern_match = self.pattern is not None
         self.platform_id = skillInfo.get('PlatformId')
-        self.platform_type = skillInfo.get('PlatformType')
-        self.room = Room(skillInfo.get('RoomId'), skillInfo.get('Room'))
+        self.platform_type = PlatformType(skillInfo.get('PlatformType'))
+        self.room = Room.from_json(skillInfo)
         self.skill_name = skillInfo.get('SkillName')
         self.skill_url = skillInfo.get('SkillUrl')
-        self.from_user = self.load_mention(skillInfo.get('From'))
-        self.mentions = self.load_mentions(skillInfo.get('Mentions'))
+        self.from_user = Mention.from_json(skillInfo.get('From'))
+        self.mentions = Mention.load_mentions(skillInfo.get('Mentions'))
         self.tokenized_arguments = self.load_arguments(skillInfo.get('TokenizedArguments', []))
 
         self.is_interaction = skillInfo.get('IsInteraction')
@@ -416,42 +295,11 @@ class Bot(object):
         self._reply_client.reply_later(response, delay_in_seconds)
 
 
-    def load_coordinate(self, coordinate_arg):
-        return None if coordinate_arg is None else Coordinate(coordinate_arg.get('Latitude'), coordinate_arg.get('Longitude'))
-
-
-    def load_location(self, location_arg):
-        coordinate_arg = location_arg.get('Coordinate')
-        coordinate = self.load_coordinate(coordinate_arg)
-        return Location(coordinate, location_arg.get('FormattedAddress'))
-
-
-    def load_timezone(self, tz_arg):
-        return TimeZone(tz_arg.get('Id'), tz_arg.get('MinOffset'), tz_arg.get('MaxOffset'))
-
-
-    def load_mention(self, mention):
-        location_arg = mention.get('Location')
-        timezone_arg = mention.get('TimeZone')
-        location = self.load_location(location_arg) if location_arg is not None else None
-        timezone = self.load_timezone(timezone_arg) if timezone_arg is not None else None
-        # Special case for PlatformUser mentions
-        if (location_arg is not None and timezone is None):
-            tz_id = location_arg.get('TimeZoneId')
-            if tz_id is not None:
-                timezone = TimeZone(tz_id)
-        return Mention(mention.get('Id'), mention.get('UserName'), mention.get('Name'), mention.get('Email'), location, timezone)
-
-
-    def load_mentions(self, mentions):
-        return [self.load_mention(m) for m in mentions]
-
-
     def load_argument(self, argument):
         value = argument.get('Value')
         original_text = argument.get('OriginalText')
         mentioned_arg = argument.get('Mentioned')
-        mentioned = self.load_mention(mentioned_arg) if mentioned_arg is not None else None
+        mentioned = Mention.from_json(mentioned_arg)
         return Argument(value, original_text) if mentioned is None else MentionArgument(value, original_text, mentioned)
 
 
