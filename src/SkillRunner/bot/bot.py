@@ -29,6 +29,7 @@ from . import exceptions
 from .apiclient import ApiClient
 from types import SimpleNamespace
 
+
 class Room(object):
     """
     A room is a place where people can chat.
@@ -109,6 +110,14 @@ class Coordinate(object):
     def __init__(self, latitude, longitude):
         self.latitude = latitude
         self.longitude = longitude
+
+
+    @classmethod
+    def from_json(cls, coordinate_arg):
+        if coordinate_arg is None:
+            return None
+        return cls(coordinate_arg.get('Latitude'), coordinate_arg.get('Longitude'))
+
 
     def __str__(self):
         return "lat: {}, lon: {}".format(self.latitude, self.longitude)
@@ -355,13 +364,9 @@ class Bot(object):
         self._reply_client.reply_later(response, delay_in_seconds)
 
 
-    def load_coordinate(self, coordinate_arg):
-        return None if coordinate_arg is None else Coordinate(coordinate_arg.get('Latitude'), coordinate_arg.get('Longitude'))
-
-
     def load_location(self, location_arg):
         coordinate_arg = location_arg.get('Coordinate')
-        coordinate = self.load_coordinate(coordinate_arg)
+        coordinate = Coordinate.from_json(coordinate_arg)
         return Location(coordinate, location_arg.get('FormattedAddress'))
 
 
