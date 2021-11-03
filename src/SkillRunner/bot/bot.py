@@ -134,6 +134,16 @@ class Location(object):
         self.coordinate = coordinate
         self.formatted_address = formatted_address
 
+
+    @classmethod
+    def from_json(cls, location_arg):
+        if location_arg is None:
+            return None
+        coordinate_arg = location_arg.get('Coordinate')
+        coordinate = Coordinate.from_json(coordinate_arg)
+        return cls(coordinate, location_arg.get('FormattedAddress'))
+
+
     def __str__(self):
         return "coordinate: {}, address: {}".format(self.coordinate, self.formatted_address)
 
@@ -364,12 +374,6 @@ class Bot(object):
         self._reply_client.reply_later(response, delay_in_seconds)
 
 
-    def load_location(self, location_arg):
-        coordinate_arg = location_arg.get('Coordinate')
-        coordinate = Coordinate.from_json(coordinate_arg)
-        return Location(coordinate, location_arg.get('FormattedAddress'))
-
-
     def load_timezone(self, tz_arg):
         return TimeZone(tz_arg.get('Id'), tz_arg.get('MinOffset'), tz_arg.get('MaxOffset'))
 
@@ -377,7 +381,7 @@ class Bot(object):
     def load_mention(self, mention):
         location_arg = mention.get('Location')
         timezone_arg = mention.get('TimeZone')
-        location = self.load_location(location_arg) if location_arg is not None else None
+        location = Location.from_json(location_arg)
         timezone = self.load_timezone(timezone_arg) if timezone_arg is not None else None
         # Special case for PlatformUser mentions
         if (location_arg is not None and timezone is None):
