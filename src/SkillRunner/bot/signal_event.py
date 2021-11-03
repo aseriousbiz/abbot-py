@@ -1,4 +1,5 @@
 from .pattern import Pattern
+from .trigger_event import TriggerEvent
 
 class SignalEvent(object):
     """
@@ -71,7 +72,8 @@ class RootSourceSkill(SignalSource):
     """
     def __init__(self, root_source_message):
         super().__init__(root_source_message)
-        self.request = root_source_message.get('Request')
+        request = root_source_message.get('Request')
+        self.request = TriggerEvent(request) if request is not None else None
         self.is_request = root_source_message.get('IsRequest')
         self.is_interaction = root_source_message.get('IsInteraction')
         self.is_chat = root_source_message.get('IsChat')
