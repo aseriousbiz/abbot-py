@@ -1,5 +1,7 @@
 from .pattern import Pattern
 from .trigger_event import TriggerEvent
+from .mention import Mention
+
 
 class SignalEvent(object):
     """
@@ -46,7 +48,7 @@ class SignalSource(object):
         self.skill_url = signal_source_message.get('SkillUrl')
         self.arguments = signal_source_message.get('Arguments')
         self.args = self.arguments
-        self.mentions = signal_source_message.get('Mentions')
+        self.mentions = Mention.load_mentions(signal_source_message.get('Mentions'))
 
 
 class SourceSkill(SignalSource):
