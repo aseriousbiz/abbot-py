@@ -212,7 +212,7 @@ class Bot(object):
         self.skill_name = skillInfo.get('SkillName')
         self.skill_url = skillInfo.get('SkillUrl')
         self.from_user = Mention.from_json(skillInfo.get('From'))
-        self.mentions = self.load_mentions(skillInfo.get('Mentions'))
+        self.mentions = Mention.load_mentions(skillInfo.get('Mentions'))
         self.tokenized_arguments = self.load_arguments(skillInfo.get('TokenizedArguments', []))
 
         self.is_interaction = skillInfo.get('IsInteraction')
@@ -310,10 +310,6 @@ class Bot(object):
             delay_in_seconds (int): The number of seconds to delay before sending the response.
         """
         self._reply_client.reply_later(response, delay_in_seconds)
-
-
-    def load_mentions(self, mentions):
-        return [Mention.from_json(m) for m in mentions]
 
 
     def load_argument(self, argument):

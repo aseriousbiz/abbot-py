@@ -20,12 +20,17 @@ class Mention(object):
         self.timezone = timezone
 
 
+    @staticmethod
+    def load_mentions(mentions_json):
+        return [Mention.from_json(m) for m in mentions_json]
+
+
     @classmethod
-    def from_json(cls, mention_arg):
-        if mention_arg is None:
+    def from_json(cls, mention_json):
+        if mention_json is None:
             return None
-        location_arg = mention_arg.get('Location')
-        timezone_arg = mention_arg.get('TimeZone')
+        location_arg = mention_json.get('Location')
+        timezone_arg = mention_json.get('TimeZone')
         location = Location.from_json(location_arg)
         timezone = TimeZone.from_json(timezone_arg)
         # Special case for PlatformUser mentions
@@ -33,7 +38,7 @@ class Mention(object):
             tz_id = location_arg.get('TimeZoneId')
             if tz_id is not None:
                 timezone = TimeZone(tz_id)
-        return cls(mention_arg.get('Id'), mention_arg.get('UserName'), mention_arg.get('Name'), mention_arg.get('Email'), location, timezone)
+        return cls(mention_json.get('Id'), mention_json.get('UserName'), mention_json.get('Name'), mention_json.get('Email'), location, timezone)
 
 
     def toJSON(self):
@@ -62,10 +67,10 @@ class Coordinate(object):
 
 
     @classmethod
-    def from_json(cls, coordinate_arg):
-        if coordinate_arg is None:
+    def from_json(cls, coordinate_json):
+        if coordinate_json is None:
             return None
-        return cls(coordinate_arg.get('Latitude'), coordinate_arg.get('Longitude'))
+        return cls(coordinate_json.get('Latitude'), coordinate_json.get('Longitude'))
 
 
     def __str__(self):
@@ -85,12 +90,12 @@ class Location(object):
 
 
     @classmethod
-    def from_json(cls, location_arg):
-        if location_arg is None:
+    def from_json(cls, location_json):
+        if location_json is None:
             return None
-        coordinate_arg = location_arg.get('Coordinate')
+        coordinate_arg = location_json.get('Coordinate')
         coordinate = Coordinate.from_json(coordinate_arg)
-        return cls(coordinate, location_arg.get('FormattedAddress'))
+        return cls(coordinate, location_json.get('FormattedAddress'))
 
 
     def __str__(self):
@@ -112,10 +117,10 @@ class TimeZone(object):
 
 
     @classmethod
-    def from_json(cls, tz_arg):
-        if tz_arg is None:
+    def from_json(cls, tz_json):
+        if tz_json is None:
             return None
-        return cls(tz_arg.get('Id'), tz_arg.get('MinOffset'), tz_arg.get('MaxOffset'))
+        return cls(tz_json.get('Id'), tz_json.get('MinOffset'), tz_json.get('MaxOffset'))
 
 
     def __str__(self):
