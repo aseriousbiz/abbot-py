@@ -100,69 +100,7 @@ class TriggerResponse(object):
         del self._content_type
 
 
-class Coordinate(object):
-    """
-    Represents a geographic coordinate.
 
-    :var latitude: The latitude. Those are the lines that are the belts of the earth.
-    :var longitude: The longitude. Those are the pin stripes of the earth.
-    """
-    def __init__(self, latitude, longitude):
-        self.latitude = latitude
-        self.longitude = longitude
-
-
-    @classmethod
-    def from_json(cls, coordinate_arg):
-        if coordinate_arg is None:
-            return None
-        return cls(coordinate_arg.get('Latitude'), coordinate_arg.get('Longitude'))
-
-
-    def __str__(self):
-        return "lat: {}, lon: {}".format(self.latitude, self.longitude)
-
-
-class Location(object):
-    """
-    A geo-coded location
-
-    :var coordinate: The coordinates of the location.
-    :var formatted_address: The formatted address of the location.
-    """
-    def __init__(self, coordinate, formatted_address):
-        self.coordinate = coordinate
-        self.formatted_address = formatted_address
-
-
-    @classmethod
-    def from_json(cls, location_arg):
-        if location_arg is None:
-            return None
-        coordinate_arg = location_arg.get('Coordinate')
-        coordinate = Coordinate.from_json(coordinate_arg)
-        return cls(coordinate, location_arg.get('FormattedAddress'))
-
-
-    def __str__(self):
-        return "coordinate: {}, address: {}".format(self.coordinate, self.formatted_address)
-
-
-class TimeZone(object):
-    """
-    Information about a user's timezone
-
-    :var id: The provider's ID for the timezone. Could be IANA or BCL.
-    :var min_offset: Gets the least (most negative) offset within this time zone, over all time.
-    :var max_offset: Gets the greatest (most positive) offset within this time zone, over all time.
-    """
-    def __init__(self, id, min_offset=None, max_offset=None):
-        self.id = id
-        self.min_offset = min_offset
-        self.max_offset = max_offset
-
-    def __str__(self):
-        return "id: {}, min_offset: {}, max_offset: {}".format(self.id, self.min_offset, self.max_offset)
 
 
 class Argument(object):
@@ -273,7 +211,7 @@ class Bot(object):
         self.room = Room(skillInfo.get('RoomId'), skillInfo.get('Room'))
         self.skill_name = skillInfo.get('SkillName')
         self.skill_url = skillInfo.get('SkillUrl')
-        self.from_user = self.load_mention(skillInfo.get('From'))
+        self.from_user = Mention.from_json(skillInfo.get('From'))
         self.mentions = self.load_mentions(skillInfo.get('Mentions'))
         self.tokenized_arguments = self.load_arguments(skillInfo.get('TokenizedArguments', []))
 
@@ -374,32 +312,15 @@ class Bot(object):
         self._reply_client.reply_later(response, delay_in_seconds)
 
 
-    def load_timezone(self, tz_arg):
-        return TimeZone(tz_arg.get('Id'), tz_arg.get('MinOffset'), tz_arg.get('MaxOffset'))
-
-
-    def load_mention(self, mention):
-        location_arg = mention.get('Location')
-        timezone_arg = mention.get('TimeZone')
-        location = Location.from_json(location_arg)
-        timezone = self.load_timezone(timezone_arg) if timezone_arg is not None else None
-        # Special case for PlatformUser mentions
-        if (location_arg is not None and timezone is None):
-            tz_id = location_arg.get('TimeZoneId')
-            if tz_id is not None:
-                timezone = TimeZone(tz_id)
-        return Mention(mention.get('Id'), mention.get('UserName'), mention.get('Name'), mention.get('Email'), location, timezone)
-
-
     def load_mentions(self, mentions):
-        return [self.load_mention(m) for m in mentions]
+        return [Mention.from_json(m) for m in mentions]
 
 
     def load_argument(self, argument):
         value = argument.get('Value')
         original_text = argument.get('OriginalText')
         mentioned_arg = argument.get('Mentioned')
-        mentioned = self.load_mention(mentioned_arg) if mentioned_arg is not None else None
+        mentioned = Mention.from_json(mentioned_arg)
         return Argument(value, original_text) if mentioned is None else MentionArgument(value, original_text, mentioned)
 
 
