@@ -14,7 +14,6 @@ class Room(object):
         self.name = room_name
         self.cache_key = room_id if room_id else room_name
         self._platform_type = platform_type
-        logging.error(platform_type)
 
 
     @classmethod
