@@ -83,7 +83,6 @@ def main(req: func.HttpRequest) -> func.HttpResponse:
     except Exception as e: 
         logging.error(e)
         rm.addError({ "errorId": type(e).__name__, "description": str(e) })
-
     finally:
         if rm.Success:
             status_code=200
