@@ -39,6 +39,7 @@ six==1.15.0
 soupsieve==2.0.1
 SQLAlchemy==1.4.19
 tabulate==0.8.9
+textblob==0.17.1
 tqdm==4.62.3
 twilio==6.63.0
 urllib3==1.25.9
