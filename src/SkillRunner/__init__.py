@@ -22,6 +22,7 @@ MIN_CORPORA = [
 for corpora in MIN_CORPORA:
     nltk.download(corpora)
 
+
 class ResponseManager:
     def __init__(self):
         self.ContentType = None
