@@ -9,18 +9,7 @@ from .bot import exceptions
 from .bot.bot import Button
 from .bot.pattern import PatternType
 
-import nltk
 
-MIN_CORPORA = [
-    'brown',  # Required for FastNPExtractor
-    'punkt',  # Required for WordTokenizer
-    'wordnet',  # Required for lemmatization
-    'averaged_perceptron_tagger',  # Required for NLTKTagger
-]
-
-# Download the minimum corpora required for NLTK / TextBlob
-for corpora in MIN_CORPORA:
-    nltk.download(corpora)
 
 class ResponseManager:
     def __init__(self):
