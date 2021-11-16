@@ -1,4 +1,6 @@
 import json
+from .platform_type import PlatformType
+
 
 class Mention(object):
     """
@@ -10,23 +12,25 @@ class Mention(object):
     :var email: The user's email if known
     :var location: The user's location if known.
     :var timezone: The user's timezone if known
+    :var platform_type: The platform type of the user.
     """
-    def __init__(self, id, user_name, name, email, location, timezone):
+    def __init__(self, id, user_name, name, email, location, timezone, platform_type=None):
         self.id = id
         self.user_name = user_name
         self.name = name
         self.email = email
         self.location = location
         self.timezone = timezone
+        self.__platform_type = platform_type
 
 
     @staticmethod
-    def load_mentions(mentions_json):
-        return [Mention.from_json(m) for m in mentions_json]
+    def load_mentions(mentions_json, platform_type=None):
+        return [Mention.from_json(m, platform_type) for m in mentions_json]
 
 
     @classmethod
-    def from_json(cls, mention_json):
+    def from_json(cls, mention_json, platform_type=None):
         if mention_json is None:
             return None
         location_arg = mention_json.get('Location')
@@ -38,7 +42,14 @@ class Mention(object):
             tz_id = location_arg.get('TimeZoneId')
             if tz_id is not None:
                 timezone = TimeZone(tz_id)
-        return cls(mention_json.get('Id'), mention_json.get('UserName'), mention_json.get('Name'), mention_json.get('Email'), location, timezone)
+        return cls(
+            mention_json.get('Id'),
+             mention_json.get('UserName'),
+             mention_json.get('Name'),
+             mention_json.get('Email'),
+             location,
+             timezone,
+             platform_type)
 
 
     def toJSON(self):
@@ -47,11 +58,12 @@ class Mention(object):
 
 
     def __repr__(self):
-        return "<@{}>".format(self.user_name) 
+        return str(self)
 
 
     def __str__(self):
-        return "<@{}>".format(self.user_name)
+        return f"<at>{self.name}</at>" if self.__platform_type == PlatformType.MS_TEAMS \
+            else f"<@{self.id}>"
 
 
 class Coordinate(object):

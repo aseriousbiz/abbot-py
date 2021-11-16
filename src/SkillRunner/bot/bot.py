@@ -32,38 +32,8 @@ from . import exceptions
 from .apiclient import ApiClient
 from .trigger_response import TriggerResponse
 from .button import Button
+from .arguments import Argument, MentionArgument, Arguments, RoomArgument
 from types import SimpleNamespace
-
-
-class Argument(object):
-    """
-    An argument parsed from the bot.arguments property. Arguments may be delimited by a space or 
-    by a matching pair of quotes.
-
-    :var value: The normalized argument value
-    :var original_text: The original argument value. For quoted values this would include the surrounding quotes.
-    """
-    def __init__(self, value, original_text):
-        self.value = value
-        self.original_text = original_text
-
-    def __repr__(self):
-        return self.value
-
-    def __str__(self):
-        return self.value
-
-
-class MentionArgument(Argument):
-    """
-    An argument that represents a mentioned user.
-    """
-    def __init__(self, value, original_text, mentioned):
-        super().__init__(value, original_text)
-        self.mentioned = mentioned
-
-    def __str__(self):
-        return "mentioned: {}".format(self.mentioned)
 
 
 class Bot(object):
@@ -127,7 +97,7 @@ class Bot(object):
         self.skill_url = skillInfo.get('SkillUrl')
         self.from_user = Mention.from_json(skillInfo.get('From'))
         self.mentions = Mention.load_mentions(skillInfo.get('Mentions'))
-        self.tokenized_arguments = self.load_arguments(skillInfo.get('TokenizedArguments', []))
+        self.tokenized_arguments = self.load_arguments(skillInfo.get('TokenizedArguments', []), self.platform_type)
 
         self.is_interaction = skillInfo.get('IsInteraction')
         self.is_request = skillInfo.get('IsRequest')
@@ -150,7 +120,15 @@ class Bot(object):
         Run the code the user has submitted.
         """
         try:
-            script_locals = { "bot": self, "args": self.args, "Button": Button, "PatternType": pattern.PatternType }
+            script_locals = {
+                "bot": self,
+                "args": self.args,
+                "Button": Button,
+                "PatternType": pattern.PatternType,
+                "Argument": Argument,
+                "MentionArgument": MentionArgument,
+                "RoomArgument": RoomArgument
+            }
             out = None
             
             with patch.dict("os.environ", {}):
@@ -226,20 +204,13 @@ class Bot(object):
         self._reply_client.reply_later(response, delay_in_seconds)
 
 
-    def load_argument(self, argument):
-        value = argument.get('Value')
-        original_text = argument.get('OriginalText')
-        mentioned_arg = argument.get('Mentioned')
-        mentioned = Mention.from_json(mentioned_arg)
-        return Argument(value, original_text) if mentioned is None else MentionArgument(value, original_text, mentioned)
-
-
-    def load_arguments(self, tokenized_arguments):
-        return [self.load_argument(arg) for arg in tokenized_arguments]
+    def load_arguments(self, tokenized_arguments, platform_type=None):
+        return [Argument.load_argument(arg, platform_type) for arg in tokenized_arguments]
 
 
     def __str__(self):
         return f"<@{self.id}>" if self.platform_type == PlatformType.SLACK else f"@{self.name}"
+
 
     def __repr__(self):
         response = "Abbot: "
