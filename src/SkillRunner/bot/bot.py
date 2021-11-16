@@ -17,6 +17,7 @@ import octokit
 
 from .storage import Brain
 from .secrets import Secrets
+from .rooms import Rooms
 from .utils import Utilities
 from .mention import Mention
 from .room import Room
@@ -163,19 +164,24 @@ class Bot(object):
 
         skillInfo = req.get('SkillInfo')
         runnerInfo = req.get('RunnerInfo')
+        self.platform_type = PlatformType(skillInfo.get('PlatformType'))
+        
         self._signal_info = req.get('SignalInfo')
         self._signal_event = None
 
-        self.id = runnerInfo.get('Id')
+        self.id = skillInfo.get('Bot').get('Id')
+        self.name = skillInfo.get('Bot').get('Name')
         self.skill_id = runnerInfo.get('SkillId')
         self.user_id = runnerInfo.get('UserId')
         self.timestamp = runnerInfo.get('Timestamp')
         self.code = runnerInfo.get('Code')
+        self.room = Room.from_json(skillInfo)
 
         # Clients
         api_client = ApiClient(self.skill_id, self.user_id, api_token, self.timestamp, trace_parent)
         self.brain = Brain(api_client) 
         self.secrets = Secrets(api_client)
+        self.rooms = Rooms(api_client, self.platform_type)
         self.utils = Utilities(api_client)
         self._reply_client = ReplyClient(api_client, runnerInfo.get('ConversationReference'), self.skill_id, self.responses)
         self._signaler = Signaler(api_client, req)
@@ -190,8 +196,6 @@ class Bot(object):
         self.pattern = None if patternRequest is None else pattern.Pattern(patternRequest)
         self.is_pattern_match = self.pattern is not None
         self.platform_id = skillInfo.get('PlatformId')
-        self.platform_type = PlatformType(skillInfo.get('PlatformType'))
-        self.room = Room.from_json(skillInfo)
         self.skill_name = skillInfo.get('SkillName')
         self.skill_url = skillInfo.get('SkillUrl')
         self.from_user = Mention.from_json(skillInfo.get('From'))
@@ -306,6 +310,9 @@ class Bot(object):
     def load_arguments(self, tokenized_arguments):
         return [self.load_argument(arg) for arg in tokenized_arguments]
 
+
+    def __str__(self):
+        return f"<@{self.id}>" if self.platform_type == PlatformType.SLACK else f"@{self.name}"
 
     def __repr__(self):
         response = "Abbot: "
