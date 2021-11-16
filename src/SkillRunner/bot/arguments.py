@@ -1,6 +1,4 @@
-import logging
-import jsonpickle
-from collections import MutableSequence
+from collections.abc import Sequence
 from .mention import Mention
 from .room import Room
 
@@ -27,14 +25,13 @@ class Argument(object):
 
     @staticmethod
     def load_argument(arg_json, platform_type=None):
-        logging.info(f"arg_json: {jsonpickle.encode(arg_json)}")
         value = arg_json.get('Value')
         original_text = arg_json.get('OriginalText')
         mentioned_arg = arg_json.get('Mentioned')
         room_arg = arg_json.get('Room')
         mentioned = Mention.from_json(mentioned_arg, platform_type)
         return MentionArgument(value, original_text, mentioned) if mentioned \
-            else RoomArgument(value, original_text, Room.from_json(room_arg, platform_type)) if room_arg \
+            else RoomArgument(value, original_text, Room.from_arg_json(room_arg, platform_type)) if room_arg \
             else Argument(value, original_text)
 
 
@@ -61,3 +58,34 @@ class RoomArgument(Argument):
 
     def __str__(self):
         return str(self.room)
+
+
+class Arguments(Sequence):
+    """
+    Represents the arguments to the skill parsed into a collection of tokens.
+    """
+    def __init__(self, args, value):
+        self.value = value
+        self._inner_list = list(args)
+
+
+    def __len__(self):
+        return len(self._inner_list)
+
+
+    def __getitem__(self, index):
+        subset = self._inner_list.__getitem__(index)
+        if isinstance(index, slice):
+            value = " ".join([arg.original_text for arg in subset])
+            return Arguments(subset, value)
+        return subset
+
+
+    @classmethod
+    def from_json(cls, args_json, arguments, platform_type):
+        args = [Argument.load_argument(arg, platform_type) for arg in args_json]
+        return cls(args, arguments)
+
+
+
+
