@@ -43,7 +43,6 @@ class ApiClient(object):
         cipher = Fernet(safe_key)
         self._request_header = cipher.encrypt(obj)
 
-
     def get(self, path):
         """
         Makes a GET request to the Abbot API.
@@ -70,7 +69,6 @@ class ApiClient(object):
         """
         return self.send(path, 'PUT', data)
 
-
     def send(self, path, method, data=None):
         """
         Sends a request to the Abbot API.
@@ -91,7 +89,6 @@ class ApiClient(object):
         except Exception as e:
             logging.error("There was an error {}ing to {}".format(method, url))
             logging.error(e)
-
 
     def delete(self, path):
         """

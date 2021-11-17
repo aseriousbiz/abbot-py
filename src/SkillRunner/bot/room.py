@@ -16,7 +16,6 @@ class Room(object):
         self.topic = topic
         self.purpose = purpose
 
-
     @classmethod
     def from_json(cls, room_json, platform_type=None):
         platform_type = platform_type if platform_type else PlatformType(room_json.get('PlatformType'))
@@ -27,7 +26,6 @@ class Room(object):
         platform_type = platform_type if platform_type else PlatformType(room_json.get('PlatformType'))
         return cls(room_json.get('Id'), room_json.get('Name'), platform_type)
 
-
     @classmethod
     def from_conversation_info(cls, room_json, platform_type=None):
         platform_type = platform_type if platform_type else PlatformType(room_json.get('PlatformType'))
@@ -37,7 +35,6 @@ class Room(object):
             platform_type,
             room_json.get('topic').get('Value'),
             room_json.get('purpose').get('Value'))
-
 
     def __str__(self):
         return f"<#{self.id}|{self.name}>" if self._platform_type == PlatformType.SLACK \

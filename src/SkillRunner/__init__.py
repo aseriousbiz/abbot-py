@@ -32,10 +32,10 @@ class ResponseManager:
         self.Errors = []
         self.Replies = []
         self.Headers = None
-    
+
     def add(self, message):
         self.Replies.append(message)
-    
+
     def addError(self, error):
         self.Errors.append(error)
         self.Success = False

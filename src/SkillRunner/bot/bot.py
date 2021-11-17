@@ -115,7 +115,6 @@ class Bot(object):
         del skillInfo['From'] # `from` is a protected Python keyword, and can't be converted to an object
         self.skill_data = obj(skillInfo)
 
-
     def run_user_script(self):
         """
         Run the code the user has submitted.
@@ -154,7 +153,6 @@ class Bot(object):
             logging.error(e)
             raise e
 
-
     def reply(self, response, direct_message=False):
         """
         Send a reply. If direct_message is True, then the reply is sent as a direct message to the caller.
@@ -163,7 +161,6 @@ class Bot(object):
             response (str): The response to send back to chat.
         """
         self._reply_client.reply(response, direct_message)
-
 
     def reply_with_buttons(self, response, buttons, buttons_label=None, image_url=None, title=None, color=None):
         """
@@ -179,7 +176,6 @@ class Bot(object):
         """
         self._reply_client.reply_with_buttons(response, buttons, buttons_label, image_url, title, color)
 
-
     def reply_with_image(self, image, response=None, title=None, title_url=None, color=None):
         """
         Sends a reply along with an image attachment. The image can be a URL to an image or a base64 encoded image.
@@ -193,7 +189,6 @@ class Bot(object):
         """
         self._reply_client.reply_with_image(image, response, title, title_url, color)
 
-
     def reply_later(self, response, delay_in_seconds):
         """
         Reply after a delay.
@@ -204,10 +199,8 @@ class Bot(object):
         """
         self._reply_client.reply_later(response, delay_in_seconds)
 
-
     def __str__(self):
         return f"<@{self.id}>" if self.platform_type == PlatformType.SLACK else f"@{self.name}"
-
 
     def __repr__(self):
         response = "Abbot: "
@@ -215,7 +208,6 @@ class Bot(object):
         response += "    raw: " + self.raw
 
         return response
-
 
     @property
     def signal_event(self):
@@ -225,7 +217,6 @@ class Bot(object):
         if (self._signal_event is None):
             self._signal_event = signal_event.SignalEvent(self._signal_info) if self._signal_info is not None else None
         return self._signal_event
-
 
     def signal(self, name, args):
         """

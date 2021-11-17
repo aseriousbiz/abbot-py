@@ -33,7 +33,6 @@ class Utilities(object):
     def __init__(self, api_client):
         self._api_client = api_client
 
-    
     def geocode(self, address, include_timezone=False):
         """
         Geocode an address. 
@@ -71,6 +70,5 @@ class obj(object):
             else:
                setattr(self, camel_to_snake_case(a), obj(b) if isinstance(b, dict) else b)
 
-    
     def __str__(self):
         return jsonpickle.dumps(self, unpicklable=False)

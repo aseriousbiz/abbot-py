@@ -23,11 +23,9 @@ class Mention(object):
         self.timezone = timezone
         self.__platform_type = platform_type
 
-
     @staticmethod
     def load_mentions(mentions_json, platform_type=None):
         return [Mention.from_json(m, platform_type) for m in mentions_json]
-
 
     @classmethod
     def from_json(cls, mention_json, platform_type=None):
@@ -51,15 +49,12 @@ class Mention(object):
              timezone,
              platform_type)
 
-
     def toJSON(self):
         return json.dumps(self, default=lambda o: o.__dict__, 
             sort_keys=True, indent=4)
 
-
     def __repr__(self):
         return str(self)
-
 
     def __str__(self):
         return f"<at>{self.name}</at>" if self.__platform_type == PlatformType.MS_TEAMS \
@@ -77,13 +72,11 @@ class Coordinate(object):
         self.latitude = latitude
         self.longitude = longitude
 
-
     @classmethod
     def from_json(cls, coordinate_json):
         if coordinate_json is None:
             return None
         return cls(coordinate_json.get('Latitude'), coordinate_json.get('Longitude'))
-
 
     def __str__(self):
         return "lat: {}, lon: {}".format(self.latitude, self.longitude)
@@ -100,7 +93,6 @@ class Location(object):
         self.coordinate = coordinate
         self.formatted_address = formatted_address
 
-
     @classmethod
     def from_json(cls, location_json):
         if location_json is None:
@@ -108,7 +100,6 @@ class Location(object):
         coordinate_arg = location_json.get('Coordinate')
         coordinate = Coordinate.from_json(coordinate_arg)
         return cls(coordinate, location_json.get('FormattedAddress'))
-
 
     def __str__(self):
         return "coordinate: {}, address: {}".format(self.coordinate, self.formatted_address)
@@ -127,13 +118,11 @@ class TimeZone(object):
         self.min_offset = min_offset
         self.max_offset = max_offset
 
-
     @classmethod
     def from_json(cls, tz_json):
         if tz_json is None:
             return None
         return cls(tz_json.get('Id'), tz_json.get('MinOffset'), tz_json.get('MaxOffset'))
-
 
     def __str__(self):
         return self.id

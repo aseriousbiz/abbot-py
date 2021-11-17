@@ -14,14 +14,11 @@ class Argument(object):
         self.value = value
         self.original_text = original_text
 
-
     def __repr__(self):
         return self.value
 
-
     def __str__(self):
         return self.value
-
 
     @staticmethod
     def load_argument(arg_json, platform_type=None):
@@ -68,10 +65,8 @@ class Arguments(Sequence):
         self.value = value
         self._inner_list = list(args)
 
-
     def __len__(self):
         return len(self._inner_list)
-
 
     def __getitem__(self, index):
         subset = self._inner_list.__getitem__(index)
@@ -79,7 +74,6 @@ class Arguments(Sequence):
             value = " ".join([arg.original_text for arg in subset])
             return Arguments(subset, value)
         return subset
-
 
     @classmethod
     def from_json(cls, args_json, arguments, platform_type):

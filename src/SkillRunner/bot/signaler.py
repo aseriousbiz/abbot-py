@@ -13,7 +13,6 @@ class Signaler(object):
         self._signal_info = skill_message.get('SignalInnfo')
         self._api_client = api_client
 
-
     def signal(self, name, args):
         """
         Raises a signal from the skill with the specified name and arguments.

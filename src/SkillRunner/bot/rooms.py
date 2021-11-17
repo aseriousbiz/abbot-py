@@ -13,7 +13,6 @@ class Rooms(object):
         self._api_client = api_client
         self._platform_type = platform_type
 
-
     def create(self, name, is_private=False):
         """
         Creates a Room and returns a Result that indicates whether the operation succeeded or not, 
@@ -32,7 +31,6 @@ class Rooms(object):
         else:
             return Result(response.get("error"))
 
-
     def archive(self, room):
         """
         Archives a Room and returns a result if it succeeded.
@@ -49,7 +47,6 @@ class Rooms(object):
             return Result(None)
         else:
             return Result(response.get("error"))
-
 
     def invite_users(self, room, users):
         """
@@ -70,7 +67,6 @@ class Rooms(object):
         else:
             return Result(response.get("error"))
 
-
     def set_topic(self, room, topic):
         """
         Sets the topic for a Room and returns a result if it succeeded.
@@ -89,7 +85,6 @@ class Rooms(object):
         else:
             return Result(response.get("error"))
 
-
     def set_purpose(self, room, purpose):
         """
         Sets the purpose for a Room and returns a result if it succeeded.
@@ -107,7 +102,6 @@ class Rooms(object):
             return Result(None)
         else:
             return Result(response.get("error"))
-
 
     def __room_url(self, room):
         """
