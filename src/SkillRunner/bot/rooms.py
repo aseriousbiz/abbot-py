@@ -16,7 +16,8 @@ class Rooms(object):
 
     def create(self, name, is_private=False):
         """
-        Creates a Room and returns the created Id of the room.
+        Creates a Room and returns a Result that indicates whether the operation succeeded or not, 
+        and contains information about the created room if it was success.
 
         Args: 
             name (str): The name of the room.
