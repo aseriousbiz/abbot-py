@@ -12,7 +12,6 @@ class ReplyClient(object):
         self._reply_url = "/reply"
         self._responses = responses
 
-
     def reply(self, response, direct_message=False):
         """
         Send a reply. If direct_message is True, then the reply is sent as a direct message to the caller.
@@ -30,7 +29,6 @@ class ReplyClient(object):
             self._api_client.post(self._reply_url, body)
         else:
             self._responses.append(str(response))
-
 
     def reply_with_image(self, image, response, title, title_url, color):
         if self._conversation_reference:
@@ -51,7 +49,6 @@ class ReplyClient(object):
             self._api_client.post(self._reply_url, body)
         else:
             self._responses.append(str(response))
-
 
     def reply_with_buttons(self, response, buttons, buttons_label=None, image_url=None, title=None, color=None):
         """
@@ -83,7 +80,6 @@ class ReplyClient(object):
             self._api_client.post(self._reply_url, body)
         else:
             self._responses.append(str(response))
-
 
     def reply_later(self, response, delay_in_seconds):
         """

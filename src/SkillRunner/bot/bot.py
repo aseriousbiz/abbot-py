@@ -17,6 +17,7 @@ import octokit
 
 from .storage import Brain
 from .secrets import Secrets
+from .rooms import Rooms
 from .utils import Utilities
 from .mention import Mention
 from .room import Room
@@ -29,113 +30,10 @@ from .utils import obj
 from .reply_client import ReplyClient
 from . import exceptions
 from .apiclient import ApiClient
+from .trigger_response import TriggerResponse
+from .button import Button
+from .arguments import Argument, MentionArgument, Arguments, RoomArgument
 from types import SimpleNamespace
-
-
-class TriggerResponse(object):
-    """
-    A response to an HTTP request triggered by an external event.
-
-    :var raw_content: The raw content to return as the body of the response. Cannot be set if content is set.
-    :var content: The content to return as the body of the response. This will be serialized as JSON. Cannot be set if raw_content is set.
-    :var content_type: The Content Type of the response. If null, Abbot will choose the best content type using content negotiation.
-    :var headers: The request Headers as defined in RFC 2616 that should be sent in the response.
-    """
-    def __init__(self):
-        self.headers = {}
-        self._content = None
-        self._raw_content = None
-        self._content_type = None
-
-    @property
-    def content(self):
-        return self._content
-
-    @content.setter
-    def content(self, value):
-        self._content = value
-        self._raw_content = str(jsonpickle.encode(value))
-
-    @content.deleter
-    def content(self):
-        del self._content
-
-    @property
-    def raw_content(self):
-        return self._raw_content
-
-    @raw_content.setter
-    def raw_content(self, value):
-        self._content = None
-        self._raw_content = value if type(value) == str else str(value)
-
-    @raw_content.deleter
-    def raw_content(self):
-        del self._raw_content
-
-    @property
-    def content_type(self):
-        return self._content_type
-
-    @content_type.setter
-    def content_type(self, value):
-        self._content_type = value
-
-    @content_type.deleter
-    def content_type(self):
-        del self._content_type
-
-
-class Argument(object):
-    """
-    An argument parsed from the bot.arguments property. Arguments may be delimited by a space or 
-    by a matching pair of quotes.
-
-    :var value: The normalized argument value
-    :var original_text: The original argument value. For quoted values this would include the surrounding quotes.
-    """
-    def __init__(self, value, original_text):
-        self.value = value
-        self.original_text = original_text
-
-    def __repr__(self):
-        return self.value
-
-    def __str__(self):
-        return self.value
-
-
-class MentionArgument(Argument):
-    """
-    An argument that represents a mentioned user.
-    """
-    def __init__(self, value, original_text, mentioned):
-        super().__init__(value, original_text)
-        self.mentioned = mentioned
-
-    def __str__(self):
-        return "mentioned: {}".format(self.mentioned)
-
-
-class Button(object):
-    """
-    A button presented to the user.
-
-    :var title: The title displayed on the button.
-    :var args: The arguments to pass back to this skill when the button is clicked.
-    :var style: (optional) The style to apply to the button. Allowed values are 'default', 'primary', and 'danger'. Use 'primary' and 'danger' sparingly.
-    """
-    def __init__(self, title, args=None, style="default"):
-        self.title = title
-        self.arguments = args if args is not None else title
-        self.style = style
-
-    def toJSON(self):
-        return {
-            "Title": self.title,
-            "Arguments": self.arguments,
-            "Style": self.style
-        }
 
 
 class Bot(object):
@@ -163,19 +61,24 @@ class Bot(object):
 
         skillInfo = req.get('SkillInfo')
         runnerInfo = req.get('RunnerInfo')
+        self.platform_type = PlatformType(skillInfo.get('PlatformType'))
+        
         self._signal_info = req.get('SignalInfo')
         self._signal_event = None
 
-        self.id = runnerInfo.get('Id')
+        self.id = skillInfo.get('Bot').get('Id')
+        self.name = skillInfo.get('Bot').get('Name')
         self.skill_id = runnerInfo.get('SkillId')
         self.user_id = runnerInfo.get('UserId')
         self.timestamp = runnerInfo.get('Timestamp')
         self.code = runnerInfo.get('Code')
+        self.room = Room.from_json(skillInfo)
 
         # Clients
         api_client = ApiClient(self.skill_id, self.user_id, api_token, self.timestamp, trace_parent)
         self.brain = Brain(api_client) 
         self.secrets = Secrets(api_client)
+        self.rooms = Rooms(api_client, self.platform_type)
         self.utils = Utilities(api_client)
         self._reply_client = ReplyClient(api_client, runnerInfo.get('ConversationReference'), self.skill_id, self.responses)
         self._signaler = Signaler(api_client, req)
@@ -190,13 +93,12 @@ class Bot(object):
         self.pattern = None if patternRequest is None else pattern.Pattern(patternRequest)
         self.is_pattern_match = self.pattern is not None
         self.platform_id = skillInfo.get('PlatformId')
-        self.platform_type = PlatformType(skillInfo.get('PlatformType'))
-        self.room = Room.from_json(skillInfo)
         self.skill_name = skillInfo.get('SkillName')
         self.skill_url = skillInfo.get('SkillUrl')
         self.from_user = Mention.from_json(skillInfo.get('From'))
         self.mentions = Mention.load_mentions(skillInfo.get('Mentions'))
-        self.tokenized_arguments = self.load_arguments(skillInfo.get('TokenizedArguments', []))
+        args_json = skillInfo.get('TokenizedArguments', [])
+        self.tokenized_arguments = Arguments.from_json(args_json, self.arguments, self.platform_type)
 
         self.is_interaction = skillInfo.get('IsInteraction')
         self.is_request = skillInfo.get('IsRequest')
@@ -213,13 +115,20 @@ class Bot(object):
         del skillInfo['From'] # `from` is a protected Python keyword, and can't be converted to an object
         self.skill_data = obj(skillInfo)
 
-
     def run_user_script(self):
         """
         Run the code the user has submitted.
         """
         try:
-            script_locals = { "bot": self, "args": self.args, "Button": Button, "PatternType": pattern.PatternType }
+            script_locals = {
+                "bot": self,
+                "args": self.args,
+                "Button": Button,
+                "PatternType": pattern.PatternType,
+                "Argument": Argument,
+                "MentionArgument": MentionArgument,
+                "RoomArgument": RoomArgument
+            }
             out = None
             
             with patch.dict("os.environ", {}):
@@ -244,7 +153,6 @@ class Bot(object):
             logging.error(e)
             raise e
 
-
     def reply(self, response, direct_message=False):
         """
         Send a reply. If direct_message is True, then the reply is sent as a direct message to the caller.
@@ -253,7 +161,6 @@ class Bot(object):
             response (str): The response to send back to chat.
         """
         self._reply_client.reply(response, direct_message)
-
 
     def reply_with_buttons(self, response, buttons, buttons_label=None, image_url=None, title=None, color=None):
         """
@@ -269,7 +176,6 @@ class Bot(object):
         """
         self._reply_client.reply_with_buttons(response, buttons, buttons_label, image_url, title, color)
 
-
     def reply_with_image(self, image, response=None, title=None, title_url=None, color=None):
         """
         Sends a reply along with an image attachment. The image can be a URL to an image or a base64 encoded image.
@@ -283,7 +189,6 @@ class Bot(object):
         """
         self._reply_client.reply_with_image(image, response, title, title_url, color)
 
-
     def reply_later(self, response, delay_in_seconds):
         """
         Reply after a delay.
@@ -294,18 +199,8 @@ class Bot(object):
         """
         self._reply_client.reply_later(response, delay_in_seconds)
 
-
-    def load_argument(self, argument):
-        value = argument.get('Value')
-        original_text = argument.get('OriginalText')
-        mentioned_arg = argument.get('Mentioned')
-        mentioned = Mention.from_json(mentioned_arg)
-        return Argument(value, original_text) if mentioned is None else MentionArgument(value, original_text, mentioned)
-
-
-    def load_arguments(self, tokenized_arguments):
-        return [self.load_argument(arg) for arg in tokenized_arguments]
-
+    def __str__(self):
+        return f"<@{self.id}>" if self.platform_type == PlatformType.SLACK else f"@{self.name}"
 
     def __repr__(self):
         response = "Abbot: "
@@ -313,7 +208,6 @@ class Bot(object):
         response += "    raw: " + self.raw
 
         return response
-
 
     @property
     def signal_event(self):
@@ -323,7 +217,6 @@ class Bot(object):
         if (self._signal_event is None):
             self._signal_event = signal_event.SignalEvent(self._signal_info) if self._signal_info is not None else None
         return self._signal_event
-
 
     def signal(self, name, args):
         """

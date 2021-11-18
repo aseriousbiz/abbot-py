@@ -9,7 +9,6 @@ class Secrets(object):
     def __init__(self, api_client):
         self._api_client = api_client
 
-
     def read(self, key):
         """
         Read a secret from the vault. 
@@ -26,10 +25,8 @@ class Secrets(object):
         else:
             return None
 
-
     def __str__(self):
         return "Secret store for skills."
-
 
     def __repr__(self):
         return "Secret store for skills."

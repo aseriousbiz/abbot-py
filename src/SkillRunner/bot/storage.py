@@ -10,10 +10,8 @@ class Brain(object):
     def __init__(self, api_client):
         self._api_client = api_client
 
-
     def __get_path(self, key):
         return f"/brain?key={urllib.parse.quote_plus(key)}"
-
 
     def get(self, key):
         """
@@ -31,7 +29,6 @@ class Brain(object):
             return json.loads(output.get("value"))
         else:
             return None
-    
 
     def read(self, key):
         """
@@ -39,11 +36,9 @@ class Brain(object):
         """
         return self.get(key)
 
-
     def list(self):
         path = self.__get_path("")
         return self._api_client.get(path)
-
 
     def write(self, key, value):
         """
@@ -59,10 +54,8 @@ class Brain(object):
         data = {"value": json.dumps(value)}
         return self._api_client.post(path, data)
 
-
     def search(self, term):
         raise NotImplementedError
-    
 
     def delete(self, key):
         """
@@ -74,10 +67,8 @@ class Brain(object):
         path = self.__get_path(key)
         return self._api_client.delete(path)
 
-
     def __str__(self):
         return "Brain for the skill."
-
 
     def __repr__(self):
         return "Brain for the skill."

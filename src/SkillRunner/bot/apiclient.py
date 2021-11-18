@@ -43,55 +43,58 @@ class ApiClient(object):
         cipher = Fernet(safe_key)
         self._request_header = cipher.encrypt(obj)
 
-
-    def get(self, path, body=None):
+    def get(self, path):
         """
         Makes a GET request to the Abbot API.
         Arguments:
             path: The path to the resource to GET. This is the part after https://ab.bot/api/skills/{skill_id}
         """
-        cipher = Fernet(safe_key)
-        obj = cipher.decrypt(self._request_header)
-        headers = json.loads(obj)
+        return self.send(path, 'GET')
 
-        url = self.base_url + path
-        response = requests.get(url, headers=headers, verify=self.verify_ssl)
-        if response.status_code == 200:
-            output = response.json()
-            return output
-        elif response.status_code == 404:
-            return None
-        else:
-            raise Exception("Failed with a status of {}".format(response.status_code))
+    def post(self, path, data=None):
+        """
+        Makes a POST request to the Abbot API.
+        Arguments:
+            path: The path to the resource to POST. This is the part after https://ab.bot/api/skills/{skill_id}
+            data: The data to POST.
+        """
+        return self.send(path, 'POST', data)
 
-    """
-    Makes a POST request to the Abbot API.
-    Arguments:
-        path: The path to the resource to GET. This is the part after https://ab.bot/api/skills/{skill_id}
-        data: The data to POST.
-    """
-    def post(self, path, data):
+    def put(self, path, data=None):
+        """
+        Makes a PUT request to the Abbot API.
+        Arguments:
+            path: The path to the resource to PUT. This is the part after https://ab.bot/api/skills/{skill_id}
+            data: The data to PUT.
+        """
+        return self.send(path, 'PUT', data)
+
+    def send(self, path, method, data=None):
+        """
+        Sends a request to the Abbot API.
+        Arguments:
+            path: The path to the resource to POST. This is the part after https://ab.bot/api/skills/{skill_id}
+            method: The HTTP method to use.
+            data: The data to POST.
+        """
         url = self.base_url + path
         cipher = Fernet(safe_key)
         obj = cipher.decrypt(self._request_header)
         headers = json.loads(obj)
 
         try:
-            result = requests.post(url, headers=headers, verify=self.verify_ssl, json=data)
+            result = requests.request(method, url, headers=headers, verify=self.verify_ssl, json=data)
             result.raise_for_status()
             return result.json()
         except Exception as e:
-            logging.error("There was an error POSTing to {}".format(url))
+            logging.error("There was an error {}ing to {}".format(method, url))
             logging.error(e)
 
-    """
-    Makes a DELETE request to the Abbot API.
-    Arguments:
-        path: The path to the resource to GET. This is the part after https://ab.bot/api/skills/{skill_id}
-    """
     def delete(self, path):
-        url = self.base_url + path
-        cipher = Fernet(safe_key)
-        obj = cipher.decrypt(self._request_header)
-        headers = json.loads(obj)
-        return requests.delete(url, headers=headers, verify=self.verify_ssl)
+        """
+        Makes a DELETE request to the Abbot API.
+        Arguments:
+            path: The path to the resource to DELETE. This is the part after https://ab.bot/api/skills/{skill_id}
+        """
+        return self.send(path, 'DELETE')
+

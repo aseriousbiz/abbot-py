@@ -16,7 +16,6 @@ class InterpreterError(Exception):
         self.spanStart = offset
         self.spanEnd = offset+1
         self.description = description
-    
-    
+
     def __str__(self):
         return "{} at line {}, character {}".format(self.description, self.lineStart, self.spanStart)

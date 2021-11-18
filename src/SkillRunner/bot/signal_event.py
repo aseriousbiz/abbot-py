@@ -15,7 +15,6 @@ class SignalEvent(object):
         self._source = None
         self._root_source = None
 
-
     @property
     def source(self):
         if self._source is None:
@@ -23,13 +22,11 @@ class SignalEvent(object):
 
         return self._source
 
-
     @property
     def root_source(self):
         if self._root_source is None:
             self._root_source = self.__get_root_source()
         return self._root_source
-
 
     def __get_root_source(self):
         source = self._signal_message.get('Source')
@@ -59,7 +56,6 @@ class SourceSkill(SignalSource):
         super().__init__(signal_source_message)
         self._signal_event_message = signal_source_message.get('SignalEvent')
         self._signal_event = None
-
 
     @property
     def signal_event(self):
