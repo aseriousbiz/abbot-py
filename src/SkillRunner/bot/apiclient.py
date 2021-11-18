@@ -97,3 +97,4 @@ class ApiClient(object):
             path: The path to the resource to DELETE. This is the part after https://ab.bot/api/skills/{skill_id}
         """
         return self.send(path, 'DELETE')
+
