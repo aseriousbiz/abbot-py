@@ -3,7 +3,6 @@ obj
 csx
 .vs
 edge
-Publish
 .DS_Store
 
 *.user
@@ -43,3 +42,4 @@ __pycache__/
 *.py[cod]
 *$py.class
 blob/
+build/

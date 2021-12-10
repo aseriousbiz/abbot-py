@@ -1,1 +1,9 @@
 src/.venv
+src/.python_packages
+.git
+.github
+.gitignore
+.gitattributes
+*.md
+script
+build/

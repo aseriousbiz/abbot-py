@@ -1,0 +1,16 @@
+#!/bin/bash -u
+
+{ set +x; } 2>/dev/null
+SOURCE=$0
+DIR="$( cd -P "$( dirname "$SOURCE" )" >/dev/null 2>&1 && pwd )"
+ROOTDIR="$(cd $DIR && cd ../ && pwd)"
+
+OS="Mac"
+if [[ -e "/c/" ]]; then
+  OS="Windows"
+fi
+
+pushd "$ROOTDIR"
+rm -rf build/
+DOCKER_BUILDKIT=1 docker build --file docker/abbot-skills-python-build.Dockerfile --output build .
+popd
