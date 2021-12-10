@@ -1,6 +1,18 @@
-#! /bin/bash
+#!/bin/bash -u
+{ set +x; } 2>/dev/null
+SOURCE=$0
+DIR="$( cd -P "$( dirname "$SOURCE" )" >/dev/null 2>&1 && pwd )"
+ROOTDIR=$(cd $DIR && cd ../ && pwd)
 
-pushd './src'
+if [[ "$(uname)" = "Darwin" ]]; then
+    OS="Mac"
+elif [[ -e "/c/" ]]; then
+    OS="Windows"
+else
+    OS="Linux"
+fi
+
+
+cd "$ROOTDIR/src"
 python3 -m pip install --upgrade pip
 python3 -m pip install -r requirements.txt --target="./.python_packages/lib/site-packages"
-popd
