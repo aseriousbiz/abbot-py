@@ -1,4 +1,16 @@
-#!/bin/sh
+#!/bin/bash -u
+{ set +x; } 2>/dev/null
+SOURCE=$0
+DIR="$( cd -P "$( dirname "$SOURCE" )" >/dev/null 2>&1 && pwd )"
+ROOTDIR=$(cd $DIR && cd ../ && pwd)
+
+if [[ "$(uname)" = "Darwin" ]]; then
+    OS="Mac"
+elif [[ -e "/c/" ]]; then
+    OS="Windows"
+else
+    OS="Linux"
+fi
 
 echo @"
    _____ ___.  ___.           __   
@@ -14,27 +26,34 @@ echo "It will ensure that brew, azure/functions, and azurite are installed."
 echo "It will create a virtual environment for the Python function runner."
 echo "It will also make sure your system has the correct development client secrets configured."
 echo "If anything is installed or set, it won't try to install them again."
-echo "If you don't want to continue, just hit Enter at the prompt."
-echo "Otherwise, hit 'y' and then Enter to continue."
-echo ""
 
-read -p 'Continue? (y + Enter to continue, or anything else + Enter to stop):' toContinue
-
-if [[ $toContinue != "Y" && $toContinue != "y" ]]; then
-    echo "No problem, perhaps you want to install all this manually. No hard feelings."
-    echo "Done!"
-    exit 0
-fi
-
-if which brew > /dev/null
-then
-    echo "brew is installed, skipping…"
+if [[ "$AUTOCONFIRM" = "1" ]]; then
+    echo "Auto-confirm enabled!"
 else
-    /usr/bin/ruby -e "$(curl -fsSL https://raw.githubusercontent.com/Homebrew/install/master/install)"
+    echo "If you don't want to continue, just hit Enter at the prompt."
+    echo "Otherwise, hit 'y' and then Enter to continue."
+    echo ""
+
+    read -p 'Continue? (y + Enter to continue, or anything else + Enter to stop):' toContinue
+
+    if [[ $toContinue != "Y" && $toContinue != "y" ]]; then
+        echo "No problem, perhaps you want to install all this manually. No hard feelings."
+        echo "Done!"
+        exit 0
+    fi
 fi
 
-brew tap azure/functions
-brew list azure-functions-core-tools@3 || brew install azure-functions-core-tools@3
+if [[ x"$OS" == x"Mac" ]]; then
+    if which brew > /dev/null
+    then
+        echo "brew is installed, skipping…"
+    else
+        /usr/bin/ruby -e "$(curl -fsSL https://raw.githubusercontent.com/Homebrew/install/master/install)"
+    fi
+
+    brew tap azure/functions
+    brew list azure-functions-core-tools@3 || brew install azure-functions-core-tools@3
+fi
 
 python3 -m venv src/env
 source src/env/bin/activate

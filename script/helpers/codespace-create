@@ -2,7 +2,7 @@
 { set +x; } 2>/dev/null
 SOURCE=$0
 DIR="$( cd -P "$( dirname "$SOURCE" )" >/dev/null 2>&1 && pwd )"
-ROOTDIR=$(cd $DIR && cd ../ && pwd)
+ROOTDIR=$(cd $DIR && cd ../../ && pwd)
 
 if [[ "$(uname)" = "Darwin" ]]; then
     OS="Mac"
@@ -12,4 +12,6 @@ else
     OS="Linux"
 fi
 
-docker build -t abbot-skills-python-dev -f docker/abbot-skills-python-dev.Dockerfile .
+cd "$ROOTDIR"
+AUTOCONFIRM=1 script/bootstrap
+script/build
