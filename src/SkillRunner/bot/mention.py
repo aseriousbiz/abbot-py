@@ -1,8 +1,19 @@
 import json
+
+from .conversation_address import ConversationAddress, ConversationType
 from .platform_type import PlatformType
 
+class UserConversation(object):
+    def __init__(self, id):
+        self.id = id
 
-class Mention(object):
+    def get_conversation_address(self):
+        return ConversationAddress(ConversationType.USER, self.id)
+
+    def get_thread(self, thread_id: str):
+        return ConversationAddress(ConversationType.USER, self.id, thread_id)
+
+class Mention(UserConversation):
     """
     A user mention.
 
@@ -15,7 +26,7 @@ class Mention(object):
     :var platform_type: The platform type of the user.
     """
     def __init__(self, id, user_name, name, email, location, timezone, platform_type=None):
-        self.id = id
+        super().__init__(id)
         self.user_name = user_name
         self.name = name
         self.email = email
@@ -25,7 +36,10 @@ class Mention(object):
 
     @staticmethod
     def load_mentions(mentions_json, platform_type=None):
-        return [Mention.from_json(m, platform_type) for m in mentions_json]
+        if mentions_json is None:
+            return []
+        else:
+            return [Mention.from_json(m, platform_type) for m in mentions_json]
 
     @classmethod
     def from_json(cls, mention_json, platform_type=None):

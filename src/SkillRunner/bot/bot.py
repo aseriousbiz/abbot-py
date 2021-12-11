@@ -1,6 +1,7 @@
+# pylint: disable=unused-import
 import os
 import json
-from typing import Pattern
+from typing import Optional, Pattern
 import jsonpickle
 import requests
 import logging
@@ -13,11 +14,13 @@ import bs4
 import soupsieve
 import boto3
 import octokit
+
 # End of user skill imports
 
 from .storage import Brain
 from .secrets import Secrets
 from .rooms import Rooms
+from .users import Users
 from .utils import Utilities
 from .mention import Mention
 from .room import Room
@@ -34,6 +37,7 @@ from .trigger_response import TriggerResponse
 from .button import Button
 from .arguments import Argument, MentionArgument, Arguments, RoomArgument
 from types import SimpleNamespace
+from .message_options import MessageOptions
 
 
 class Bot(object):
@@ -55,8 +59,10 @@ class Bot(object):
     :var room: The room the skill is being run in.
     :var skill_name: The name of the skill being run.
     :var skill_url: The URL to the edit screen of the skill being run.
+    :var message_id: The platform-specific id of the message.
+    :var thread: A Conversation that represents the thread containing the message, usable in the 'to' argument to the reply method.
     """
-    def __init__(self, req, api_token, trace_parent):
+    def __init__(self, req, api_token, trace_parent=None, reply_client=None):
         self.responses = []
 
         skillInfo = req.get('SkillInfo')
@@ -73,15 +79,22 @@ class Bot(object):
         self.timestamp = runnerInfo.get('Timestamp')
         self.code = runnerInfo.get('Code')
         self.room = Room.from_json(skillInfo)
+        self.message_id = skillInfo.get('MessageId')
+        self.thread = self.room.get_thread(self.message_id)
 
         # Clients
         api_client = ApiClient(self.skill_id, self.user_id, api_token, self.timestamp, trace_parent)
         self.brain = Brain(api_client) 
         self.secrets = Secrets(api_client)
         self.rooms = Rooms(api_client, self.platform_type)
+        self.users = Users()
         self.utils = Utilities(api_client)
-        self._reply_client = ReplyClient(api_client, runnerInfo.get('ConversationReference'), self.skill_id, self.responses)
         self._signaler = Signaler(api_client, req)
+
+        if reply_client is None:
+            self._reply_client = ReplyClient(api_client, runnerInfo.get('ConversationReference'), self.skill_id, self.responses)
+        else:
+            self._reply_client = reply_client
 
         self.raw = skillInfo
 
@@ -153,16 +166,21 @@ class Bot(object):
             logging.error(e)
             raise e
 
-    def reply(self, response, direct_message=False):
+    def reply(self, response, direct_message=False, **kwargs):
         """
         Send a reply. If direct_message is True, then the reply is sent as a direct message to the caller.
         
         Args:
             response (str): The response to send back to chat.
+            to (Room|User|ConversationAddress): The recipient of the reply.
         """
-        self._reply_client.reply(response, direct_message)
+        if direct_message:
+            kwargs['to'] = self.from_user
+        options = MessageOptions(**kwargs)
 
-    def reply_with_buttons(self, response, buttons, buttons_label=None, image_url=None, title=None, color=None):
+        self._reply_client.reply(response, options)
+
+    def reply_with_buttons(self, response, buttons, buttons_label=None, image_url=None, title=None, color=None, **kwargs):
         """
         Sends a reply with a set of buttons. Clicking a button will call back into this skill.
 
@@ -173,10 +191,12 @@ class Bot(object):
             image_url (str): An image to render before the set of buttons (optional).
             title (str): A title to render (optional).
             color (str): The color to use for the sidebar (Slack Only) in hex (ex. #3AA3E3) (optional).
+            to (Room|User|ConversationAddress): The recipient of the reply.
         """
-        self._reply_client.reply_with_buttons(response, buttons, buttons_label, image_url, title, color)
+        options = MessageOptions(**kwargs)
+        self._reply_client.reply_with_buttons(response, buttons, buttons_label, image_url, title, color, options)
 
-    def reply_with_image(self, image, response=None, title=None, title_url=None, color=None):
+    def reply_with_image(self, image, response=None, title=None, title_url=None, color=None, **kwargs):
         """
         Sends a reply along with an image attachment. The image can be a URL to an image or a base64 encoded image.
 
@@ -186,18 +206,22 @@ class Bot(object):
             title (str): An image title to render (optional).
             title_url (str): If specified, makes the title a link to this URL. Ignored if title is not set. (optional).
             color (str): The color to use for the sidebar (Slack Only) in hex (ex. #3AA3E3) (optional).
+            to (Room|User|ConversationAddress): The recipient of the reply.
         """
-        self._reply_client.reply_with_image(image, response, title, title_url, color)
+        options = MessageOptions(**kwargs)
+        self._reply_client.reply_with_image(image, response, title, title_url, color, options)
 
-    def reply_later(self, response, delay_in_seconds):
+    def reply_later(self, response, delay_in_seconds, **kwargs):
         """
         Reply after a delay.
 
         Args:
             response (str): The response to send back to chat.
             delay_in_seconds (int): The number of seconds to delay before sending the response.
+            to (Room|User|ConversationAddress): The recipient of the reply.
         """
-        self._reply_client.reply_later(response, delay_in_seconds)
+        options = MessageOptions(**kwargs)
+        self._reply_client.reply_later(response, delay_in_seconds, options)
 
     def __str__(self):
         return f"<@{self.id}>" if self.platform_type == PlatformType.SLACK else f"@{self.name}"

@@ -2,6 +2,32 @@ import jsonpickle
 import os
 import re
 import urllib.parse
+import sys
+
+class Environment(object):
+    __current = None
+
+    TEST = "test"
+    PROD = "production"
+
+    @staticmethod
+    def get():
+        if Environment.__current is None:
+            Environment.__current = Environment.__detect_env()
+        return Environment.__current
+
+    @staticmethod
+    def is_test():
+        return Environment.get() == Environment.TEST
+
+    @staticmethod
+    def __detect_env():
+        if os.environ.get('ABBOT_ENV') is not None:
+            return os.environ.get('ABBOT_ENV')
+        if 'unittest' in sys.modules.keys():
+            return Environment.TEST
+        return Environment.PROD
+
 
 class Geocode(object):
     """

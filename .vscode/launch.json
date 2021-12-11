@@ -7,6 +7,14 @@
       "request": "attach",
       "port": 9091,
       "preLaunchTask": "func: host start"
+    },
+    {
+      "name": "Python: Debug Test",
+      "type": "python",
+      "request": "launch",
+      "program": "${file}",
+      "purpose": ["debug-test"],
+      "cwd": "${workspaceFolder}/src"
     }
   ]
 }

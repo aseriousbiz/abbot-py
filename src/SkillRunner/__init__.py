@@ -19,10 +19,10 @@ MIN_CORPORA = [
     'averaged_perceptron_tagger',  # Required for NLTKTagger
 ]
 
-# Download the minimum corpora required for NLTK / TextBlob
-for corpora in MIN_CORPORA:
-    nltk.download(corpora)
-
+if os.environ.get('ABBOT_ENV') != 'test':
+    # Download the minimum corpora required for NLTK / TextBlob
+    for corpora in MIN_CORPORA:
+        nltk.download(corpora)
 
 class ResponseManager:
     def __init__(self):

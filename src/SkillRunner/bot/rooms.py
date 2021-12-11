@@ -1,7 +1,9 @@
 import logging
 import jsonpickle
 import urllib.parse
-from .room import Room
+
+from .conversation_address import ConversationAddress
+from .room import Room, RoomConversation
 
 class Rooms(object):
     """
@@ -102,6 +104,21 @@ class Rooms(object):
             return Result(None)
         else:
             return Result(response.get("error"))
+
+    def get_conversation(self, room_id: str) -> RoomConversation:
+        """
+        Gets a room conversation given it's platform-specific ID (for example, the Channel ID 'Cnnnnnnn' in Slack).
+
+        This method does not confirm that the room exists.
+        If the room does not exist, sending a message to it will fail silently.
+
+        Args:
+            id (str): The platform-specific ID of the conversation.
+
+        Returns: 
+            RoomConversation: The room conversation.
+        """
+        return RoomConversation(room_id)
 
     def __room_url(self, room):
         """
