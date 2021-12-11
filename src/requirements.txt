@@ -43,3 +43,4 @@ textblob==0.17.1
 tqdm==4.62.3
 twilio==6.63.0
 urllib3==1.25.9
+pylint==2.12.2

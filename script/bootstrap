@@ -27,7 +27,7 @@ echo "It will create a virtual environment for the Python function runner."
 echo "It will also make sure your system has the correct development client secrets configured."
 echo "If anything is installed or set, it won't try to install them again."
 
-if [[ "$AUTOCONFIRM" = "1" ]]; then
+if [[ "${AUTOCONFIRM-}" = "1" ]]; then
     echo "Auto-confirm enabled!"
 else
     echo "If you don't want to continue, just hit Enter at the prompt."
@@ -55,8 +55,8 @@ if [[ x"$OS" == x"Mac" ]]; then
     brew list azure-functions-core-tools@3 || brew install azure-functions-core-tools@3
 fi
 
-python3 -m venv src/env
-source src/env/bin/activate
+python3 -m venv .venv
+source .venv/bin/activate
 python3 -m pip install -r src/requirements.txt
 
 echo "If you run into failures related to clang and openssl or libcrypt, check out this post for ideas: https://gist.github.com/aklap/e885721ef15c8668ed0a1dd64d2ea1a7"
