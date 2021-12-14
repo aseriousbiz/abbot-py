@@ -10,15 +10,6 @@
       "options": {
         "cwd": "${workspaceFolder}/src"
       }
-    },
-    {
-      "label": "build",
-      "type": "shell",
-      "command": "script/build",
-      "problemMatcher": [],
-      "options": {
-        "cwd": "${workspaceFolder}"
-      }
     }
   ]
 }

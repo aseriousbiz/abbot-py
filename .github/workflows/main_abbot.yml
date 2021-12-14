@@ -6,7 +6,7 @@ on:
       - main
     paths:
       - 'src/**'
-      - 'script/build'
+      - 'script/cibuild'
       - 'script/test'
       - '.github/workflows/main_abbot.yml'
   pull_request:

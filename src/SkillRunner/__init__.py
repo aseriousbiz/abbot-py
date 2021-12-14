@@ -9,6 +9,7 @@ from .bot import exceptions
 from .bot.bot import Button
 from .bot.arguments import Argument, MentionArgument, RoomArgument
 from .bot.pattern import PatternType
+from .bot.utils import Environment
 
 import nltk
 
@@ -19,7 +20,7 @@ MIN_CORPORA = [
     'averaged_perceptron_tagger',  # Required for NLTKTagger
 ]
 
-if os.environ.get('ABBOT_ENV') != 'test':
+if not Environment.is_test():
     # Download the minimum corpora required for NLTK / TextBlob
     for corpora in MIN_CORPORA:
         nltk.download(corpora)

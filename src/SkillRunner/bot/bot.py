@@ -1,7 +1,6 @@
 # pylint: disable=unused-import
 import os
 import json
-from typing import Optional, Pattern
 import jsonpickle
 import requests
 import logging
@@ -62,7 +61,7 @@ class Bot(object):
     :var message_id: The platform-specific id of the message.
     :var thread: A Conversation that represents the thread containing the message, usable in the 'to' argument to the reply method.
     """
-    def __init__(self, req, api_token, trace_parent=None, reply_client=None):
+    def __init__(self, req, api_token, trace_parent=None):
         self.responses = []
 
         skillInfo = req.get('SkillInfo')
@@ -90,11 +89,7 @@ class Bot(object):
         self.users = Users()
         self.utils = Utilities(api_client)
         self._signaler = Signaler(api_client, req)
-
-        if reply_client is None:
-            self._reply_client = ReplyClient(api_client, runnerInfo.get('ConversationReference'), self.skill_id, self.responses)
-        else:
-            self._reply_client = reply_client
+        self._reply_client = ReplyClient(api_client, runnerInfo.get('ConversationReference'), self.skill_id, self.responses)
 
         self.raw = skillInfo
 
