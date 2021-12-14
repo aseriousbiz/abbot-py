@@ -4,6 +4,8 @@ SOURCE=$0
 DIR="$( cd -P "$( dirname "$SOURCE" )" >/dev/null 2>&1 && pwd )"
 ROOTDIR=$(cd $DIR && cd ../ && pwd)
 
+set -euo pipefail
+
 if [[ "$(uname)" = "Darwin" ]]; then
     OS="Mac"
 elif [[ -e "/c/" ]]; then
@@ -12,7 +14,16 @@ else
     OS="Linux"
 fi
 
-
 cd "$ROOTDIR/src"
+
+echo "*** Updating pip ***"
 python3 -m pip install --upgrade pip
+
+echo "*** Installing requirements ***"
+python3 -m pip install -r requirements.dev.txt
+
+echo "*** Running tests ***"
+python3 -m unittest discover -s "tests"
+
+echo "*** Installing requirements for deployment ***"
 python3 -m pip install -r requirements.txt --target="./.python_packages/lib/site-packages"

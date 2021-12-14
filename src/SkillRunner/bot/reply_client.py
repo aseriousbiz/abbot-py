@@ -16,7 +16,7 @@ class ReplyClient(object):
         self._reply_url = "/reply"
         self._responses = responses
 
-    def reply(self, response: str, message_options: MessageOptions):
+    def reply(self, response, message_options):
         """
         Send a reply. If direct_message is True, then the reply is sent as a direct message to the caller.
         
@@ -24,12 +24,12 @@ class ReplyClient(object):
             response (str): The response to send back to chat.
         """
         if self._conversation_reference:
-            body = self.__create_reply_payload(response, message_options)
+            body = self.__create_reply_payload(response, message_options, [])
             self._api_client.post(self._reply_url, body)
         else:
             self._responses.append(str(response))
 
-    def reply_with_image(self, image: str, response: str, title: str, title_url: str, color: str, message_options: MessageOptions):
+    def reply_with_image(self, image, response, title, title_url, color, message_options):
         if self._conversation_reference:
             body = self.__create_reply_payload(response, message_options, attachments=[
                 {
@@ -44,7 +44,7 @@ class ReplyClient(object):
         else:
             self._responses.append(str(response))
 
-    def reply_with_buttons(self, response: str, buttons: list[Button], buttons_label: str, image_url: str, title: str, color: str, message_options: MessageOptions):
+    def reply_with_buttons(self, response, buttons, buttons_label, image_url, title, color, message_options):
         """
         Sends a reply with a set of buttons. Clicking a button will call back into this skill.
 
@@ -70,7 +70,7 @@ class ReplyClient(object):
         else:
             self._responses.append(str(response))
 
-    def reply_later(self, response: str, delay_in_seconds: int, message_options: MessageOptions):
+    def reply_later(self, response, delay_in_seconds, message_options):
         """
         Reply after a delay.
 
