@@ -134,7 +134,6 @@ class BotTest(unittest.TestCase):
     @responses.activate
     def test_reply_with_buttons(self):
         self.mockReply()
-        self.maxDiff = None
 
         bot = self.create_test_bot()
         bot.reply_with_buttons("Which is better?",
@@ -158,7 +157,6 @@ class BotTest(unittest.TestCase):
     @responses.activate
     def test_reply_with_buttons_to(self):
         self.mockReply()
-        self.maxDiff = None
 
         bot = self.create_test_bot()
         bot.reply_with_buttons("Which is better?",
@@ -185,7 +183,6 @@ class BotTest(unittest.TestCase):
     @responses.activate
     def test_reply_with_image(self):
         self.mockReply()
-        self.maxDiff = None
 
         bot = self.create_test_bot()
         bot.reply_with_image("ImageUrl",
@@ -208,7 +205,6 @@ class BotTest(unittest.TestCase):
     @responses.activate
     def test_reply_with_image_to(self):
         self.mockReply()
-        self.maxDiff = None
 
         bot = self.create_test_bot()
         bot.reply_with_image("ImageUrl",
