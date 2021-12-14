@@ -14,6 +14,22 @@ fi
 
 cd "$ROOTDIR"
 
-source src/env/bin/activate
+source .venv/bin/activate
+
+if [[ ! -f "src/local.settings.json" ]]; then
+    cat <<EOF > "src/local.settings.json"
+{
+  "IsEncrypted": false,
+  "Host": {
+    "LocalHttpPort": 7072,
+  },
+  "Values": {
+    "FUNCTIONS_WORKER_RUNTIME": "python",
+    "AzureWebJobsStorage": ""
+  }
+}
+EOF
+
+fi
 
 func start --script-root src --port 7072

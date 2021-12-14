@@ -1,3 +1,7 @@
+from SkillRunner.bot.button import Button
+from SkillRunner.bot.message_options import MessageOptions
+
+
 class ReplyClient(object):
     """
     Used to send replies back to chat. If we have a valid ConversationReference, then we send 
@@ -12,7 +16,7 @@ class ReplyClient(object):
         self._reply_url = "/reply"
         self._responses = responses
 
-    def reply(self, response, direct_message=False):
+    def reply(self, response, message_options):
         """
         Send a reply. If direct_message is True, then the reply is sent as a direct message to the caller.
         
@@ -20,37 +24,27 @@ class ReplyClient(object):
             response (str): The response to send back to chat.
         """
         if self._conversation_reference:
-            body = {
-                "SkillId": self._skill_id,
-                "Message": str(response),
-                "ConversationReference": self._conversation_reference,
-                "DirectMessage": direct_message
-            }
+            body = self.__create_reply_payload(response, message_options, [])
             self._api_client.post(self._reply_url, body)
         else:
             self._responses.append(str(response))
 
-    def reply_with_image(self, image, response, title, title_url, color):
+    def reply_with_image(self, image, response, title, title_url, color, message_options):
         if self._conversation_reference:
-            body = {
-                "SkillId": self._skill_id,
-                "Message": str(response),
-                "ConversationReference": self._conversation_reference,
-                "Attachments": [
-                    {
-                        "Buttons": [],
-                        "ImageUrl": image,
-                        "Title": title,
-                        "TitleUrl": title_url,
-                        "Color": color
-                    }
-                ]
-            }
+            body = self.__create_reply_payload(response, message_options, attachments=[
+                {
+                    "Buttons": [],
+                    "ImageUrl": image,
+                    "Title": title,
+                    "TitleUrl": title_url,
+                    "Color": color
+                }
+            ])
             self._api_client.post(self._reply_url, body)
         else:
             self._responses.append(str(response))
 
-    def reply_with_buttons(self, response, buttons, buttons_label=None, image_url=None, title=None, color=None):
+    def reply_with_buttons(self, response, buttons, buttons_label, image_url, title, color, message_options):
         """
         Sends a reply with a set of buttons. Clicking a button will call back into this skill.
 
@@ -63,25 +57,20 @@ class ReplyClient(object):
             color (str): The color to use for the sidebar (Slack Only) in hex (ex. #3AA3E3) (optional).
         """
         if self._conversation_reference:
-            body = {
-                "SkillId": self._skill_id,
-                "Message": str(response),
-                "ConversationReference": self._conversation_reference,
-                "Attachments": [
-                    {
-                        "Buttons": [b.toJSON() for b in buttons],
-                        "ButtonsLabel": buttons_label,
-                        "ImageUrl": image_url,
-                        "Title": title,
-                        "Color": color
-                    }
-                ]
-            }
+            body = self.__create_reply_payload(response, message_options, attachments=[
+                {
+                    "Buttons": [b.toJSON() for b in buttons],
+                    "ButtonsLabel": buttons_label,
+                    "ImageUrl": image_url,
+                    "Title": title,
+                    "Color": color
+                }
+            ])
             self._api_client.post(self._reply_url, body)
         else:
             self._responses.append(str(response))
 
-    def reply_later(self, response, delay_in_seconds):
+    def reply_later(self, response, delay_in_seconds, message_options):
         """
         Reply after a delay.
 
@@ -90,12 +79,17 @@ class ReplyClient(object):
             delay_in_seconds (int): The number of seconds to delay before sending the response.
         """
         if self._conversation_reference:
-            body = {
-                "SkillId": self._skill_id,
-                "Message": str(response),
-                "ConversationReference": self._conversation_reference,
-                "Schedule": delay_in_seconds
-                }
+            body = self.__create_reply_payload(response, message_options, schedule=delay_in_seconds)
             self._api_client.post(self._reply_url, body)
         else:
             self._responses.append(str(response))
+
+    def __create_reply_payload(self, response: str, message_options: MessageOptions, attachments: list = [], schedule: int = 0):
+        return {
+            "SkillId": self._skill_id,
+            "Message": str(response),
+            "ConversationReference": self._conversation_reference,
+            "Options": message_options.toJSON(),
+            "Attachments": attachments,
+            "Schedule": schedule,
+        }

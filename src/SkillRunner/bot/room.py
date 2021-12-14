@@ -1,7 +1,17 @@
+from .conversation_address import ConversationAddress, ConversationType
 from .platform_type import PlatformType
 
+class RoomConversation(object):
+    def __init__(self, room_id):
+        self.id = room_id
 
-class Room(object):
+    def get_conversation_address(self):
+        return ConversationAddress(ConversationType.ROOM, self.id)
+
+    def get_thread(self, thread_id: str):
+        return ConversationAddress(ConversationType.ROOM, self.id, thread_id)
+
+class Room(RoomConversation):
     """
     A room is a place where people can chat.
 
@@ -9,7 +19,7 @@ class Room(object):
     :var name: The room name.
     """
     def __init__(self, room_id, room_name, platform_type=None, topic=None, purpose=None):
-        self.id = room_id
+        super().__init__(room_id)
         self.name = room_name
         self.cache_key = room_id if room_id else room_name
         self._platform_type = platform_type

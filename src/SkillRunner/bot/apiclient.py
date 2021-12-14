@@ -6,6 +6,8 @@ import os
 from cryptography.fernet import Fernet
 from urllib.error import HTTPError
 
+from SkillRunner.bot.utils import Environment
+
 try:
     safe_key = Fernet.generate_key()
 except AttributeError:
@@ -87,7 +89,9 @@ class ApiClient(object):
             result.raise_for_status()
             return result.json()
         except Exception as e:
-            logging.error("There was an error {}ing to {}".format(method, url))
+            if Environment.is_test():
+                raise e
+            logging.error(f"There was an error {method}ing to {url}")
             logging.error(e)
 
     def delete(self, path):

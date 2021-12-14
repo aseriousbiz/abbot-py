@@ -14,4 +14,3 @@ fi
 
 cd "$ROOTDIR"
 AUTOCONFIRM=1 script/bootstrap
-script/build

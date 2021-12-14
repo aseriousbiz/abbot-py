@@ -1,0 +1,3 @@
+-r requirements.txt
+pylint==2.12.2
+responses==0.16.0

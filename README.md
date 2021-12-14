@@ -4,9 +4,21 @@ This is the Python skill runner for Abbot hosted as an Azure Function (`abbot-sk
 
 ## Local Development
 
+Start with `script/bootstrap`.
+
 To run the Abbot Python runner locally:
 
 `script/server`.
+
+## Testing
+
+Add tests by adding files in `src/tests` that match the pattern `test_*.py`.
+We use the [`unittest` testing framework](https://docs.python.org/2/library/unittest.html).
+Tests can viewed, run, and debugged in VS Code.
+
+Run all tests from the command line with:
+
+`script/test`
 
 ## Related Repositories
 

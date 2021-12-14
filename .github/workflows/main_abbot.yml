@@ -6,7 +6,8 @@ on:
       - main
     paths:
       - 'src/**'
-      - 'script/build'
+      - 'script/cibuild'
+      - 'script/test'
       - '.github/workflows/main_abbot.yml'
   pull_request:
     branches:
@@ -25,9 +26,9 @@ jobs:
       with:
         python-version: '3.7'
     
-    - name: 'Install Python Packages'
+    - name: 'Run CI Build script'
       shell: bash
-      run: script/build
+      run: script/cibuild
 
     - name: 'Deploy abbot-skills-python'
       uses: Azure/functions-action@v1

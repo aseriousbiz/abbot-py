@@ -12,7 +12,8 @@ else
     OS="Linux"
 fi
 
-
 cd "$ROOTDIR/src"
-python3 -m pip install --upgrade pip
-python3 -m pip install -r requirements.txt --target="./.python_packages/lib/site-packages"
+
+source "../.venv/bin/activate"
+
+python3 -m unittest discover -s "tests" "$@"
