@@ -1,3 +1,9 @@
+from typing import Optional, Union
+
+from .mention import UserConversation
+from .room import RoomConversation
+from .conversation_address import ConversationAddress, ConversationType
+
 import jsonpickle
 import os
 import re
@@ -51,6 +57,8 @@ class Geocode(object):
 
 
 class Utilities(object):
+    __slack_url_regex = r"https?://[^\.]+\.slack\.com/(?:[a-z]+)/(?P<roomOrUser>[^/]*)(?:/p(?P<messageTs>\d+)(?:\?.*thread_ts=(?P<threadTs>\d+\.\d+).*)?)?"
+
     """
     Utilities to make development more convenient with Abbot. 
 
@@ -61,7 +69,7 @@ class Utilities(object):
 
     def geocode(self, address, include_timezone=False):
         """
-        Geocode an address. 
+        Geocode an address.
 
         Args:
             address (str): the address to geocode.
@@ -78,6 +86,37 @@ class Utilities(object):
         #  'formattedAddress': '9663 S Santa Monica Blvd, Beverly Hills, CA 90210, USA'}
         g = Geocode(result.get("coordinate"), result.get("formattedAddress"), result.get("timeZoneId"))
         return g
+
+    def parse_slack_url(self, url: str) -> Optional[Union[RoomConversation, UserConversation, ConversationAddress]]:
+        """
+        Attempts to parse a Slack URL into a chat conversation that can be used to send messages.
+
+        Args:
+            url (str): The URL to parse
+
+        Returns:
+            Optional[Union[RoomConversation, UserConversation, ConversationAddress]] If successful, a chat conversation that can be used to send messages. Otherwise, `None`.
+        """
+
+        m = re.match(Utilities.__slack_url_regex, url, re.IGNORECASE)
+        if not m:
+            return None
+        
+        (roomOrUser, messageTs, threadTs) = m.group('roomOrUser', 'messageTs', 'threadTs')
+
+        if not roomOrUser or len(roomOrUser) < 1:
+            return None
+        
+        baseConvo = RoomConversation(roomOrUser) if roomOrUser[0] == 'C' else UserConversation(roomOrUser)
+
+        if threadTs is not None:
+            return baseConvo.get_thread(threadTs)
+        elif messageTs is not None:
+            messageTs = f"{messageTs[0:10]}.{messageTs[10:]}"
+            return baseConvo.get_thread(messageTs)
+        else:
+            return baseConvo
+
 
 
 def camel_to_snake_case(input):

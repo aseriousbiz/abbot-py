@@ -1,6 +1,6 @@
 import unittest
-from SkillRunner.bot.conversation_address import ConversationAddress, ConversationType
 
+from SkillRunner.bot.conversation_address import ConversationAddress, ConversationType
 from SkillRunner.bot.room import Room
 
 TEST_SEND_ROOM = Room(1, "#midgar")
