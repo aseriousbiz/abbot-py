@@ -57,6 +57,11 @@ fi
 
 python3 -m venv .venv
 source .venv/bin/activate
+
+echo "Updating pip…"
+python3 -m pip install --upgrade pip
+
+echo "Installing dependencies…"
 python3 -m pip install -r src/requirements.dev.txt
 
 echo "If you run into failures related to clang and openssl or libcrypt, check out this post for ideas: https://gist.github.com/aklap/e885721ef15c8668ed0a1dd64d2ea1a7"
