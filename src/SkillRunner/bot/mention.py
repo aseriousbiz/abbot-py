@@ -4,6 +4,11 @@ from .conversation_address import ConversationAddress, ConversationType
 from .platform_type import PlatformType
 
 class UserConversation(object):
+    """
+    A user conversation is a handle that can be used to send messages to that user.
+
+    :var id: The user ID.
+    """
     def __init__(self, id):
         self.id = id
 
@@ -11,6 +16,12 @@ class UserConversation(object):
         return ConversationAddress(ConversationType.USER, self.id)
 
     def get_thread(self, thread_id: str):
+        """
+        Gets a handle to the specified thread in this user's conversation with Abbot.
+
+        Args:
+            thread_id (str): The platform-specific thread ID.
+        """
         return ConversationAddress(ConversationType.USER, self.id, thread_id)
 
 class Mention(UserConversation):

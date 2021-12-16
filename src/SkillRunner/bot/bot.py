@@ -45,21 +45,36 @@ class Bot(object):
     Abbot injects this object into your script as ``bot``.
 
     :var id: The Bot's Id.
-    :var user_name: The Bot's user name.
-    :var from_user: A User object that represents the person who called the skill.
-    :var args: Arguments from the user.
-    :var arguments: Arguments from the user.
-    :var mentions: A collection of user mentions.
-    :var is_interaction: True if the message came from a user interacting with a UI element in chat such as clicking on a button. False if not.
-    :var is_chat: True if the message came from chat. False if not. 
-    :var is_request: True if the message came from a trigger. False if not.
-    :var platform_id: The id of the team this skill is being run in. This would be your Team Id in Slack, for example.
-    :var platform_type: The type of platform, such as Slack, Teams, or Discord.
-    :var room: The room the skill is being run in.
-    :var skill_name: The name of the skill being run.
-    :var skill_url: The URL to the edit screen of the skill being run.
-    :var message_id: The platform-specific id of the message.
-    :var thread: A Conversation that represents the thread containing the message, usable in the 'to' argument to the reply method.
+    :var name: The Bot's user name.
+    :var skill_id: The ID of the skill being invoked.
+    :var user_id: The ID of the user invoking the skill.
+    :var timestamp: The timestamp of the invocation.
+    :var code: The code submitted by the user.
+    :var room: The room the user invoked the skill in.
+    :var message_id: The platform-specific ID of the message that triggered the invocation, if any
+    :var thread: The thread the user invoked the skill in.
+    :var brain: A client to access skill data in Abbot's Brain.
+    :var secrets: A client to access skill secrets.
+    :var rooms: A client to manage Rooms.
+    :var users: A client to manage Users.
+    :var utils: Some utilities for skill authors.
+    :var raw: The raw skillInfo object.
+    :var user_name: The user name of the user invoking the skill.
+    :var args: The arguments passed to the skill (alias for arguments).
+    :var arguments: The arguments passed to the skill.
+    :var pattern: The pattern that was matched, if any.
+    :var is_pattern_match: Whether or not the skill was invoked by a pattern.
+    :var platform_id: The ID of the team the skill was invoked by.
+    :var skill_name: The name of the skill being invoked.
+    :var skill_url: The URL of the skill being invoked.
+    :var from_user: The user invoking the skill.
+    :var mentions: The users mentioned in the message that triggered the skill.
+    :var tokenized_arguments: The arguments passed to the skill, tokenized.
+    :var is_interaction: Whether or not the skill was invoked as an interaction.
+    :var is_request: Whether or not the skill was invoked from an HTTP request.
+    :var is_chat: Whether or not the skill was invoked as a chat message.
+    :var request: The request that triggered the skill, if any.
+    :var response: The response that will be sent to the sender of the HTTP request, if any.
     """
     def __init__(self, req, api_token, trace_parent=None):
         self.responses = []
@@ -167,7 +182,9 @@ class Bot(object):
         
         Args:
             response (str): The response to send back to chat.
-            to (Room|User|ConversationAddress): The recipient of the reply.
+        
+        Keyword Args:
+            to (Union[RoomConversation,UserConversation,ConversationAddress]): The recipient of the reply.
         """
         if direct_message:
             kwargs['to'] = self.from_user
@@ -186,7 +203,9 @@ class Bot(object):
             image_url (str): An image to render before the set of buttons (optional).
             title (str): A title to render (optional).
             color (str): The color to use for the sidebar (Slack Only) in hex (ex. #3AA3E3) (optional).
-            to (Room|User|ConversationAddress): The recipient of the reply.
+        
+        Keyword Args:
+            to (Union[RoomConversation,UserConversation,ConversationAddress]): The recipient of the reply.
         """
         options = MessageOptions(**kwargs)
         self._reply_client.reply_with_buttons(response, buttons, buttons_label, image_url, title, color, options)
@@ -201,7 +220,9 @@ class Bot(object):
             title (str): An image title to render (optional).
             title_url (str): If specified, makes the title a link to this URL. Ignored if title is not set. (optional).
             color (str): The color to use for the sidebar (Slack Only) in hex (ex. #3AA3E3) (optional).
-            to (Room|User|ConversationAddress): The recipient of the reply.
+        
+        Keyword Args:
+            to (Union[RoomConversation,UserConversation,ConversationAddress]): The recipient of the reply.
         """
         options = MessageOptions(**kwargs)
         self._reply_client.reply_with_image(image, response, title, title_url, color, options)
@@ -213,7 +234,9 @@ class Bot(object):
         Args:
             response (str): The response to send back to chat.
             delay_in_seconds (int): The number of seconds to delay before sending the response.
-            to (Room|User|ConversationAddress): The recipient of the reply.
+        
+        Keyword Args:
+            to (Union[RoomConversation,UserConversation,ConversationAddress]): The recipient of the reply.
         """
         options = MessageOptions(**kwargs)
         self._reply_client.reply_later(response, delay_in_seconds, options)

@@ -1,6 +1,5 @@
-from SkillRunner.bot.button import Button
-from SkillRunner.bot.message_options import MessageOptions
-
+from .button import Button
+from .message_options import MessageOptions
 
 class ReplyClient(object):
     """

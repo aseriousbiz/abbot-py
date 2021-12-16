@@ -2,6 +2,11 @@ from .conversation_address import ConversationAddress, ConversationType
 from .platform_type import PlatformType
 
 class RoomConversation(object):
+    """
+    A room conversation is a handle that can be used to send messages to that room.
+
+    :var id: The room ID.
+    """
     def __init__(self, room_id):
         self.id = room_id
 
@@ -9,6 +14,12 @@ class RoomConversation(object):
         return ConversationAddress(ConversationType.ROOM, self.id)
 
     def get_thread(self, thread_id: str):
+        """
+        Gets a handle to the specified thread in this room's conversation with Abbot.
+
+        Args:
+            thread_id (str): The platform-specific thread ID.
+        """
         return ConversationAddress(ConversationType.ROOM, self.id, thread_id)
 
 class Room(RoomConversation):

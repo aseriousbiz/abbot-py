@@ -6,7 +6,7 @@ import os
 from cryptography.fernet import Fernet
 from urllib.error import HTTPError
 
-from SkillRunner.bot.utils import Environment
+from .utils import Environment
 
 try:
     safe_key = Fernet.generate_key()

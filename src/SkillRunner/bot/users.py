@@ -1,6 +1,5 @@
 
-from SkillRunner.bot.mention import UserConversation
-
+from .mention import UserConversation
 
 class Users(object):
     def __init__(self):
