@@ -184,7 +184,7 @@ class Bot(object):
             response (str): The response to send back to chat.
         
         Keyword Args:
-            to (Union[RoomConversation,UserConversation,ConversationAddress]): The recipient of the reply.
+            to (Union[RoomMessageTarget,UserMessageTarget,ChatAddress]): The recipient of the reply.
         """
         if direct_message:
             kwargs['to'] = self.from_user
@@ -205,7 +205,7 @@ class Bot(object):
             color (str): The color to use for the sidebar (Slack Only) in hex (ex. #3AA3E3) (optional).
         
         Keyword Args:
-            to (Union[RoomConversation,UserConversation,ConversationAddress]): The recipient of the reply.
+            to (Union[RoomMessageTarget,UserMessageTarget,ChatAddress]): The recipient of the reply.
         """
         options = MessageOptions(**kwargs)
         self._reply_client.reply_with_buttons(response, buttons, buttons_label, image_url, title, color, options)
@@ -222,7 +222,7 @@ class Bot(object):
             color (str): The color to use for the sidebar (Slack Only) in hex (ex. #3AA3E3) (optional).
         
         Keyword Args:
-            to (Union[RoomConversation,UserConversation,ConversationAddress]): The recipient of the reply.
+            to (Union[RoomMessageTarget,UserMessageTarget,ChatAddress]): The recipient of the reply.
         """
         options = MessageOptions(**kwargs)
         self._reply_client.reply_with_image(image, response, title, title_url, color, options)
@@ -236,7 +236,7 @@ class Bot(object):
             delay_in_seconds (int): The number of seconds to delay before sending the response.
         
         Keyword Args:
-            to (Union[RoomConversation,UserConversation,ConversationAddress]): The recipient of the reply.
+            to (Union[RoomMessageTarget,UserMessageTarget,ChatAddress]): The recipient of the reply.
         """
         options = MessageOptions(**kwargs)
         self._reply_client.reply_later(response, delay_in_seconds, options)

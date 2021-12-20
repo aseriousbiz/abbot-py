@@ -1,8 +1,8 @@
 from typing import Optional, Union
 
-from .mention import UserConversation
-from .room import RoomConversation
-from .conversation_address import ConversationAddress, ConversationType
+from .mention import UserMessageTarget
+from .room import RoomMessageTarget
+from .chat_address import ChatAddress, ChatAddressType
 
 import jsonpickle
 import os
@@ -87,7 +87,7 @@ class Utilities(object):
         g = Geocode(result.get("coordinate"), result.get("formattedAddress"), result.get("timeZoneId"))
         return g
 
-    def parse_slack_url(self, url: str) -> Optional[Union[RoomConversation, UserConversation, ConversationAddress]]:
+    def parse_slack_url(self, url: str) -> Optional[Union[RoomMessageTarget, UserMessageTarget, ChatAddress]]:
         """
         Attempts to parse a Slack URL into a chat conversation that can be used to send messages.
 
@@ -95,7 +95,7 @@ class Utilities(object):
             url (str): The URL to parse
 
         Returns:
-            Optional[Union[RoomConversation, UserConversation, ConversationAddress]] If successful, a chat conversation that can be used to send messages. Otherwise, `None`.
+            Optional[Union[RoomMessageTarget, UserMessageTarget, ChatAddress]] If successful, a chat conversation that can be used to send messages. Otherwise, `None`.
         """
 
         m = re.match(Utilities.__slack_url_regex, url, re.IGNORECASE)
@@ -107,7 +107,7 @@ class Utilities(object):
         if not roomOrUser or len(roomOrUser) < 1:
             return None
         
-        baseConvo = RoomConversation(roomOrUser) if roomOrUser[0] == 'C' else UserConversation(roomOrUser)
+        baseConvo = RoomMessageTarget(roomOrUser) if roomOrUser[0] == 'C' else UserMessageTarget(roomOrUser)
 
         if threadTs is not None:
             return baseConvo.get_thread(threadTs)
