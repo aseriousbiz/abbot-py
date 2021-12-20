@@ -1,13 +1,12 @@
-
-from .mention import UserConversation
+from .mention import UserMessageTarget
 
 class Users(object):
     def __init__(self):
         pass
 
-    def get_conversation(self, user_id: str) -> UserConversation:
+    def get_target(self, user_id: str) -> UserMessageTarget:
         """
-        Gets a user conversation given it's platform-specific ID (for example, the User ID 'Unnnnnnn' in Slack).
+        Gets a chat address, suitable for sending to with `to`, for a user, given it's platform-specific ID (for example, the User ID 'Unnnnnnn' in Slack).
 
         This method does not confirm that the user exists.
         If the user does not exist, sending a message to it will fail silently.
@@ -16,6 +15,6 @@ class Users(object):
             id (str): The platform-specific ID of the user.
 
         Returns: 
-            UserConversation: The user conversation.
+            UserMessageTarget: The user message target.
         """
-        return UserConversation(user_id)
+        return UserMessageTarget(user_id)

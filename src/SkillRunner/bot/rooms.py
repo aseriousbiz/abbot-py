@@ -2,8 +2,8 @@ import logging
 import jsonpickle
 import urllib.parse
 
-from .conversation_address import ConversationAddress
-from .room import Room, RoomConversation
+from .chat_address import ChatAddress
+from .room import Room, RoomMessageTarget
 
 class Rooms(object):
     """
@@ -105,9 +105,9 @@ class Rooms(object):
         else:
             return Result(response.get("error"))
 
-    def get_conversation(self, room_id: str) -> RoomConversation:
+    def get_target(self, room_id: str) -> RoomMessageTarget:
         """
-        Gets a room conversation given it's platform-specific ID (for example, the Channel ID 'Cnnnnnnn' in Slack).
+        Gets a chat address, suitable for sending to with `to`, for a room, given it's platform-specific ID (for example, the Channel ID 'Cnnnnnnn' in Slack).
 
         This method does not confirm that the room exists.
         If the room does not exist, sending a message to it will fail silently.
@@ -116,9 +116,9 @@ class Rooms(object):
             id (str): The platform-specific ID of the conversation.
 
         Returns: 
-            RoomConversation: The room conversation.
+            RoomMessageTarget: The room conversation.
         """
-        return RoomConversation(room_id)
+        return RoomMessageTarget(room_id)
 
     def __room_url(self, room):
         """

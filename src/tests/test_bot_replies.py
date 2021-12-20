@@ -7,7 +7,7 @@ from responses import matchers
 
 from SkillRunner.bot.bot import Bot
 from SkillRunner.bot.button import Button
-from SkillRunner.bot.conversation_address import ConversationType
+from SkillRunner.bot.chat_address import ChatAddressType
 from SkillRunner.bot.mention import TimeZone, Mention
 from SkillRunner.bot.room import Room
 
@@ -44,7 +44,7 @@ class BotTest(unittest.TestCase):
 
         self.assertEqual(1, len(responses.calls))
         self.assertReplyCall(responses.calls[0], message="Hello, World!", options={
-            "to": { "Type": ConversationType.USER.value, "Id": TEST_FROM_USER }
+            "to": { "Type": ChatAddressType.USER.value, "Id": TEST_FROM_USER }
         })
 
     @responses.activate
@@ -55,7 +55,7 @@ class BotTest(unittest.TestCase):
         bot.reply("Hello, World!", to=TEST_SEND_USER)
         self.assertEqual(1, len(responses.calls))
         self.assertReplyCall(responses.calls[0], message="Hello, World!", options={
-            "to": { "Type": ConversationType.USER.value, "Id": TEST_SEND_USER.id }
+            "to": { "Type": ChatAddressType.USER.value, "Id": TEST_SEND_USER.id }
         })
 
     @responses.activate
@@ -66,7 +66,7 @@ class BotTest(unittest.TestCase):
         bot.reply("Hello, World!", to=TEST_SEND_USER.get_thread("1234.5678"))
         self.assertEqual(1, len(responses.calls))
         self.assertReplyCall(responses.calls[0], message="Hello, World!", options={
-            "to": { "Type": ConversationType.USER.value, "Id": TEST_SEND_USER.id, "ThreadId": "1234.5678" }
+            "to": { "Type": ChatAddressType.USER.value, "Id": TEST_SEND_USER.id, "ThreadId": "1234.5678" }
         })
 
     @responses.activate
@@ -78,7 +78,7 @@ class BotTest(unittest.TestCase):
 
         self.assertEqual(1, len(responses.calls))
         self.assertReplyCall(responses.calls[0], message="Hello, World!", options={
-            "to": { "Type": ConversationType.ROOM.value, "Id": TEST_SEND_ROOM.id }
+            "to": { "Type": ChatAddressType.ROOM.value, "Id": TEST_SEND_ROOM.id }
         })
 
     @responses.activate
@@ -90,7 +90,7 @@ class BotTest(unittest.TestCase):
 
         self.assertEqual(1, len(responses.calls))
         self.assertReplyCall(responses.calls[0], message="Hello, World!", options={
-            "to": { "Type": ConversationType.ROOM.value, "Id": TEST_ROOM.id, "ThreadId": TEST_MESSAGE_ID }
+            "to": { "Type": ChatAddressType.ROOM.value, "Id": TEST_ROOM.id, "ThreadId": TEST_MESSAGE_ID }
         })
 
     @responses.activate
@@ -102,7 +102,7 @@ class BotTest(unittest.TestCase):
 
         self.assertEqual(1, len(responses.calls))
         self.assertReplyCall(responses.calls[0], message="Hello, World!", options={
-            "to": { "Type": ConversationType.ROOM.value, "Id": TEST_SEND_ROOM.id, "ThreadId": "1234.5678" }
+            "to": { "Type": ChatAddressType.ROOM.value, "Id": TEST_SEND_ROOM.id, "ThreadId": "1234.5678" }
         })
 
     @responses.activate
@@ -110,12 +110,12 @@ class BotTest(unittest.TestCase):
         self.mockReply()
 
         bot = self.create_test_bot()
-        room = bot.rooms.get_conversation("C1234")
+        room = bot.rooms.get_target("C1234")
         bot.reply("Hello, World!", to=room.get_thread("1234.5678"))
 
         self.assertEqual(1, len(responses.calls))
         self.assertReplyCall(responses.calls[0], message="Hello, World!", options={
-            "to": { "Type": ConversationType.ROOM.value, "Id": "C1234", "ThreadId": "1234.5678" }
+            "to": { "Type": ChatAddressType.ROOM.value, "Id": "C1234", "ThreadId": "1234.5678" }
         })
 
     @responses.activate
@@ -123,12 +123,12 @@ class BotTest(unittest.TestCase):
         self.mockReply()
 
         bot = self.create_test_bot()
-        user = bot.users.get_conversation("U1234")
+        user = bot.users.get_target("U1234")
         bot.reply("Hello, World!", to=user.get_thread("1234.5678"))
 
         self.assertEqual(1, len(responses.calls))
         self.assertReplyCall(responses.calls[0], message="Hello, World!", options={
-            "to": { "Type": ConversationType.USER.value, "Id": "U1234", "ThreadId": "1234.5678" }
+            "to": { "Type": ChatAddressType.USER.value, "Id": "U1234", "ThreadId": "1234.5678" }
         })
 
     @responses.activate
@@ -177,7 +177,7 @@ class BotTest(unittest.TestCase):
                 "Color": "#BEEFCAFE"
             }
         ], options={
-            "to": { "Type": ConversationType.USER.value, "Id": TEST_SEND_USER.id }
+            "to": { "Type": ChatAddressType.USER.value, "Id": TEST_SEND_USER.id }
         })
 
     @responses.activate
@@ -224,7 +224,7 @@ class BotTest(unittest.TestCase):
                 "Color": "#BEEFCAFE"
             }
         ], options={
-            "to": { "Type": ConversationType.ROOM.value, "Id": TEST_SEND_ROOM.id }
+            "to": { "Type": ChatAddressType.ROOM.value, "Id": TEST_SEND_ROOM.id }
         })
 
     

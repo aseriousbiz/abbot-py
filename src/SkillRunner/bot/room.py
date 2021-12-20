@@ -1,28 +1,28 @@
-from .conversation_address import ConversationAddress, ConversationType
+from .chat_address import ChatAddress, ChatAddressType
 from .platform_type import PlatformType
 
-class RoomConversation(object):
+class RoomMessageTarget(object):
     """
-    A room conversation is a handle that can be used to send messages to that room.
+    A room message target is a handle that can be used to send messages to that room.
 
     :var id: The room ID.
     """
     def __init__(self, room_id):
         self.id = room_id
 
-    def get_conversation_address(self):
-        return ConversationAddress(ConversationType.ROOM, self.id)
+    def get_chat_address(self):
+        return ChatAddress(ChatAddressType.ROOM, self.id)
 
     def get_thread(self, thread_id: str):
         """
-        Gets a handle to the specified thread in this room's conversation with Abbot.
+        Gets a handle to the specified thread in this room.
 
         Args:
             thread_id (str): The platform-specific thread ID.
         """
-        return ConversationAddress(ConversationType.ROOM, self.id, thread_id)
+        return ChatAddress(ChatAddressType.ROOM, self.id, thread_id)
 
-class Room(RoomConversation):
+class Room(RoomMessageTarget):
     """
     A room is a place where people can chat.
 

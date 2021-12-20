@@ -1,17 +1,17 @@
 from enum import IntEnum
 from typing import Optional
 
-class ConversationType(IntEnum):
+class ChatAddressType(IntEnum):
     USER = 0
     ROOM = 1
 
-class ConversationAddress(object):
-    def __init__(self, type: ConversationType, id: str, thread_id: Optional[str] = None):
+class ChatAddress(object):
+    def __init__(self, type: ChatAddressType, id: str, thread_id: Optional[str] = None):
         self.type = type
         self.id = id
         self.thread_id = thread_id
     
-    def get_conversation_address(self):
+    def get_chat_address(self):
         return self
 
     def __eq__(self, other):

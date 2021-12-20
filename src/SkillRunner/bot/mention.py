@@ -1,30 +1,30 @@
 import json
 
-from .conversation_address import ConversationAddress, ConversationType
+from .chat_address import ChatAddress, ChatAddressType
 from .platform_type import PlatformType
 
-class UserConversation(object):
+class UserMessageTarget(object):
     """
-    A user conversation is a handle that can be used to send messages to that user.
+    A user message target is a handle that can be used to send messages to that user.
 
     :var id: The user ID.
     """
     def __init__(self, id):
         self.id = id
 
-    def get_conversation_address(self):
-        return ConversationAddress(ConversationType.USER, self.id)
+    def get_chat_address(self):
+        return ChatAddress(ChatAddressType.USER, self.id)
 
     def get_thread(self, thread_id: str):
         """
-        Gets a handle to the specified thread in this user's conversation with Abbot.
+        Gets a handle to the specified thread in this user's DMs with Abbot.
 
         Args:
             thread_id (str): The platform-specific thread ID.
         """
-        return ConversationAddress(ConversationType.USER, self.id, thread_id)
+        return ChatAddress(ChatAddressType.USER, self.id, thread_id)
 
-class Mention(UserConversation):
+class Mention(UserMessageTarget):
     """
     A user mention.
 
