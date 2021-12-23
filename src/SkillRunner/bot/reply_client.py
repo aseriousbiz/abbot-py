@@ -1,3 +1,4 @@
+from .platform_type import PlatformType
 from .button import Button
 from .message_options import MessageOptions
 
@@ -8,9 +9,10 @@ class ReplyClient(object):
     called. Otherwise replies are returned synchrously in the response to the request that
     calls this skill.
     """
-    def __init__(self, api_client, conversation_reference, skill_id, responses):
+    def __init__(self, api_client, conversation_reference, message_platform_type, skill_id, responses):
         self._api_client = api_client
         self._conversation_reference = conversation_reference
+        self._message_platform_type = message_platform_type
         self._skill_id = skill_id
         self._reply_url = "/reply"
         self._responses = responses
@@ -91,4 +93,5 @@ class ReplyClient(object):
             "Options": message_options.toJSON(),
             "Attachments": attachments,
             "Schedule": schedule,
+            "MessagePlatformType": self._message_platform_type
         }
