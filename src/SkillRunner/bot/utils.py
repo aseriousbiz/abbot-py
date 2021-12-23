@@ -30,8 +30,6 @@ class Environment(object):
     def __detect_env():
         if os.environ.get('ABBOT_ENV') is not None:
             return os.environ.get('ABBOT_ENV')
-        if 'unittest' in sys.modules.keys():
-            return Environment.TEST
         return Environment.PROD
 
 
