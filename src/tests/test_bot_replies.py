@@ -6,6 +6,7 @@ import responses
 from responses import matchers
 
 from SkillRunner.bot.bot import Bot
+from SkillRunner.bot.platform_type import PlatformType
 from SkillRunner.bot.button import Button
 from SkillRunner.bot.chat_address import ChatAddressType
 from SkillRunner.bot.mention import TimeZone, Mention
@@ -231,7 +232,8 @@ class BotTest(unittest.TestCase):
     def create_test_bot(self, **kwargs):
         req = {
             "SkillInfo": {
-                "PlatformType": 0,
+                "PlatformType": PlatformType.UNIT_TEST,
+                "MessagePlatformType": PlatformType.UNIT_TEST,
                 "Bot": {
                 },
                 "From": {
@@ -259,14 +261,15 @@ class BotTest(unittest.TestCase):
             },
             status=status)
     
-    def assertReplyCall(self, response: responses.Call, message: Optional[str] = None, skillId: Optional[int]=None, conversationReference: Any=None, options={}, attachments=[], delayInSeconds=0):
+    def assertReplyCall(self, response: responses.Call, message: Optional[str] = None, skillId: Optional[int]=None, conversationReference: Any=None, options={}, attachments=[], delayInSeconds=0, messagePlatformType = PlatformType.UNIT_TEST):
         expected_json = {
             "SkillId": skillId or TEST_SKILL_ID,
             "Message": message,
             "ConversationReference": conversationReference or TEST_CONV_REFERENCE,
             "Options": options,
             "Attachments": attachments,
-            "Schedule": delayInSeconds
+            "Schedule": delayInSeconds,
+            "MessagePlatformType": messagePlatformType,
         }
 
         self.assertEqual(responses.POST, response.request.method)
