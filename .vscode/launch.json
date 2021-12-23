@@ -14,7 +14,10 @@
       "request": "launch",
       "program": "${file}",
       "purpose": ["debug-test"],
-      "cwd": "${workspaceFolder}/src"
+      "cwd": "${workspaceFolder}/src",
+      "env": {
+        "ABBOT_ENV": "test"
+      }
     }
   ]
 }
