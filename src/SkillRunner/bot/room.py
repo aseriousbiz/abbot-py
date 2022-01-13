@@ -37,6 +37,16 @@ class Room(RoomMessageTarget):
         self.topic = topic
         self.purpose = purpose
 
+    def __eq__(self, other):
+        return isinstance(other, Room) and \
+            self.id == other.id and \
+            self.name == other.name and \
+            self.cache_key == other.cache_key and \
+            self._platform_type == other._platform_type and \
+            self.topic == other.topic and \
+            self.purpose == other.purpose
+
+
     @classmethod
     def from_json(cls, room_json, platform_type=None):
         platform_type = platform_type if platform_type else PlatformType(room_json.get('PlatformType'))
