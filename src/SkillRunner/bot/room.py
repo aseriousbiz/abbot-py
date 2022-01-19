@@ -49,17 +49,21 @@ class Room(RoomMessageTarget):
 
     @classmethod
     def from_json(cls, room_json, platform_type=None):
-        platform_type = platform_type if platform_type else PlatformType(room_json.get('PlatformType'))
-        return cls(room_json.get('RoomId'), room_json.get('Room'), platform_type)
+        room = room_json.get('Room')
+        if isinstance(room, dict):
+            return cls.from_arg_json(room)
+        else:
+            platform_type = platform_type if platform_type is not None else PlatformType.parse(room_json.get('PlatformType'))
+            return cls(room_json.get('RoomId'), room_json.get('Room'), platform_type)
 
     @classmethod
     def from_arg_json(cls, room_json, platform_type=None):
-        platform_type = platform_type if platform_type else PlatformType(room_json.get('PlatformType'))
+        platform_type = platform_type if platform_type is not None else PlatformType.parse(room_json.get('PlatformType'))
         return cls(room_json.get('Id'), room_json.get('Name'), platform_type)
 
     @classmethod
     def from_conversation_info(cls, room_json, platform_type=None):
-        platform_type = platform_type if platform_type else PlatformType(room_json.get('PlatformType'))
+        platform_type = platform_type if platform_type is not None else PlatformType.parse(room_json.get('PlatformType'))
         return cls(
             room_json.get('id'),
             room_json.get('name'),

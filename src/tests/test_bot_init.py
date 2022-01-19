@@ -15,20 +15,39 @@ TEST_CONV_REFERENCE = {
         "Id": "test_conversation_id"
     }
 }
+
 TEST_SEND_USER = Mention("U777", "cloud", "Cloud Strife", "cstrife@ava.lanche", "Midgar", TimeZone("MST"))
 TEST_SEND_ROOM = Room("C777", "#midgar")
 
-
-class BotRepliesTest(unittest.TestCase):
+class BotInitTest(unittest.TestCase):
     def test_read_conversation_from_SkillInfo(self):
         bot = self.create_test_bot({
-            "SkillInfo": {
-                "Conversation": {
-                    "Id": "42"
-                }
+            "ConversationInfo": {
+                "Id": "42"
             }
         })
         self.assertEqual("42", bot.conversation.id)
+
+    def test_init_with_room_id_and_name(self):
+        req = {
+            "SkillInfo": {
+                "RoomId": "C999",
+                "Room": "midgar",
+            },
+        }
+        b = self.create_test_bot(req)
+        self.assertEqual("C999", b.room.id)
+        self.assertEqual("midgar", b.room.name)
+
+    def test_init_with_room_object(self):
+        req = {
+            "SkillInfo": {
+                "Room": { "Id": "C999", "Name": "midgar" },
+            },
+        }
+        b = self.create_test_bot(req)
+        self.assertEqual("C999", b.room.id)
+        self.assertEqual("midgar", b.room.name)
 
     def create_test_bot(self, additional_request_body = {}):
         req = {
@@ -51,6 +70,7 @@ class BotRepliesTest(unittest.TestCase):
             "SignalInfo": {
             }
         }
+
         dict_merge(req, additional_request_body)
         return Bot(req, "test_token")
 
@@ -58,13 +78,10 @@ def dict_merge(a, b, path=None):
     # Good ol' Stack Overflow: https://stackoverflow.com/a/7205107
     if path is None: path = []
     for key in b:
-        if key in a:
-            if isinstance(a[key], dict) and isinstance(b[key], dict):
-                dict_merge(a[key], b[key], path + [str(key)])
-            elif a[key] == b[key]:
-                pass # same leaf value
-            else:
-                raise Exception('Conflict at %s' % '.'.join(path + [str(key)]))
+        if key in a and isinstance(b[key], dict):
+            if not isinstance(a[key], dict):
+                a[key] = {}
+            dict_merge(a[key], b[key], path + [str(key)])
         else:
             a[key] = b[key]
     return a

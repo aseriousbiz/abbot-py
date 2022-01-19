@@ -5,6 +5,23 @@ class ChatAddressType(IntEnum):
     USER = 0
     ROOM = 1
 
+    @property
+    def name(self):
+        return {
+            0: 'User',
+            1: 'Room',
+        }.get(self.value)
+    
+    @classmethod
+    def parse(cls, val):
+        if isinstance(val, str):
+            return {
+                'user': cls.USER,
+                'room': cls.ROOM,
+            }.get(val.lower())
+        else:
+            cls(val)
+
 class ChatAddress(object):
     def __init__(self, type: ChatAddressType, id: str, thread_id: Optional[str] = None):
         self.type = type

@@ -25,7 +25,7 @@ TEST_CONV_REFERENCE = {
 TEST_SEND_USER = Mention("U777", "cloud", "Cloud Strife", "cstrife@ava.lanche", "Midgar", TimeZone("MST"))
 TEST_SEND_ROOM = Room("C777", "#midgar")
 
-class BotTest(unittest.TestCase):
+class BotRepliesTest(unittest.TestCase):
     @responses.activate
     def test_reply(self):
         self.mockReply()
@@ -240,7 +240,7 @@ class BotTest(unittest.TestCase):
                     "Id": TEST_FROM_USER
                 },
                 "RoomId": TEST_ROOM.id,
-                "RoomName": TEST_ROOM.name,
+                "Room": TEST_ROOM.name,
                 "MessageId": TEST_MESSAGE_ID,
             },
             "RunnerInfo": {
