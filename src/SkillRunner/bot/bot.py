@@ -37,7 +37,7 @@ from .button import Button
 from .arguments import Argument, MentionArgument, Arguments, RoomArgument
 from types import SimpleNamespace
 from .message_options import MessageOptions
-
+from .conversations import Conversation
 
 class Bot(object):
     """
@@ -75,6 +75,7 @@ class Bot(object):
     :var is_chat: Whether or not the skill was invoked as a chat message.
     :var request: The request that triggered the skill, if any.
     :var response: The response that will be sent to the sender of the HTTP request, if any.
+    :var conversation: The conversation this skill was invoked within, if any.
     """
     def __init__(self, req, api_token, trace_parent=None):
         self.responses = []
@@ -122,6 +123,7 @@ class Bot(object):
         self.mentions = Mention.load_mentions(skillInfo.get('Mentions'))
         args_json = skillInfo.get('TokenizedArguments', [])
         self.tokenized_arguments = Arguments.from_json(args_json, self.arguments, self.platform_type)
+        self.conversation = Conversation.from_json(skillInfo.get('Conversation'), self.platform_type)
 
         self.is_interaction = skillInfo.get('IsInteraction')
         self.is_request = skillInfo.get('IsRequest')

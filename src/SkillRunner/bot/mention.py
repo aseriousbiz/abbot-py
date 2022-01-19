@@ -45,6 +45,16 @@ class Mention(UserMessageTarget):
         self.timezone = timezone
         self.__platform_type = platform_type
 
+    def __eq__(self, other):
+        return isinstance(other, Mention) and \
+            self.id == other.id and \
+            self.user_name == other.user_name and \
+            self.name == other.name and \
+            self.email == other.email and \
+            self.location == other.location and \
+            self.timezone == other.timezone and \
+            self.__platform_type == other.__platform_type
+
     @staticmethod
     def load_mentions(mentions_json, platform_type=None):
         if mentions_json is None:
@@ -75,7 +85,7 @@ class Mention(UserMessageTarget):
              platform_type)
 
     def toJSON(self):
-        return json.dumps(self, default=lambda o: o.__dict__, 
+        return json.dumps(self, default=lambda o: o.__dict__,
             sort_keys=True, indent=4)
 
     def __repr__(self):
@@ -97,6 +107,11 @@ class Coordinate(object):
         self.latitude = latitude
         self.longitude = longitude
 
+    def __eq__(self, other):
+        return isinstance(other, Coordinate) and \
+            self.latitude == other.latitude and \
+            self.longitude == other.longitude
+
     @classmethod
     def from_json(cls, coordinate_json):
         if coordinate_json is None:
@@ -117,6 +132,11 @@ class Location(object):
     def __init__(self, coordinate, formatted_address):
         self.coordinate = coordinate
         self.formatted_address = formatted_address
+
+    def __eq__(self, other):
+        return isinstance(other, Location) and \
+            self.coordinate == other.coordinate and \
+            self.formatted_address == other.formatted_address
 
     @classmethod
     def from_json(cls, location_json):
@@ -142,6 +162,12 @@ class TimeZone(object):
         self.id = id
         self.min_offset = min_offset
         self.max_offset = max_offset
+
+    def __eq__(self, other):
+        return isinstance(other, TimeZone) and \
+            self.id == other.id and \
+            self.min_offset == other.min_offset and \
+            self.max_offset == other.max_offset
 
     @classmethod
     def from_json(cls, tz_json):
