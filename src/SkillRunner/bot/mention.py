@@ -36,13 +36,12 @@ class Mention(UserMessageTarget):
     :var timezone: The user's timezone if known
     :var platform_type: The platform type of the user.
     """
-    def __init__(self, id, user_name, name, email, location, timezone, platform_type=None):
+    def __init__(self, id, user_name, name, email, location, platform_type=None):
         super().__init__(id)
         self.user_name = user_name
         self.name = name
         self.email = email
         self.location = location
-        self.timezone = timezone
         self.__platform_type = platform_type
 
     def __eq__(self, other):
@@ -54,6 +53,10 @@ class Mention(UserMessageTarget):
             self.location == other.location and \
             self.timezone == other.timezone and \
             self.__platform_type == other.__platform_type
+
+    @property
+    def timezone(self):
+        return self.location.timezone if self.location is not None else None
 
     @staticmethod
     def load_mentions(mentions_json, platform_type=None):
@@ -67,22 +70,27 @@ class Mention(UserMessageTarget):
         if mention_json is None:
             return None
         location_arg = mention_json.get('Location')
-        timezone_arg = mention_json.get('TimeZone')
         location = Location.from_json(location_arg)
-        timezone = TimeZone.from_json(timezone_arg)
-        # Special case for PlatformUser mentions
-        if (location_arg is not None and timezone is None):
-            tz_id = location_arg.get('TimeZoneId')
-            if tz_id is not None:
-                timezone = TimeZone(tz_id)
+
+        if location is None or location.timezone is None:
+            timezone_arg = mention_json.get('TimeZone')
+            timezone = TimeZone.from_json(timezone_arg)
+            if timezone is None:
+                tz_id = mention_json.get('TimeZoneId')
+                if tz_id is not None:
+                    timezone = TimeZone(tz_id)
+
+            if location is None:
+                location = Location(None, None, timezone)
+            else:
+                location.timezone = timezone
         return cls(
             mention_json.get('Id'),
-             mention_json.get('UserName'),
-             mention_json.get('Name'),
-             mention_json.get('Email'),
-             location,
-             timezone,
-             platform_type)
+            mention_json.get('UserName'),
+            mention_json.get('Name'),
+            mention_json.get('Email'),
+            location,
+            platform_type)
 
     def toJSON(self):
         return json.dumps(self, default=lambda o: o.__dict__,
@@ -129,9 +137,18 @@ class Location(object):
     :var coordinate: The coordinates of the location.
     :var formatted_address: The formatted address of the location.
     """
-    def __init__(self, coordinate, formatted_address):
+    def __init__(self, coordinate, formatted_address, timezone):
         self.coordinate = coordinate
         self.formatted_address = formatted_address
+        self.__timezone = timezone
+
+    @property
+    def timezone(self):
+        return self.__timezone
+    
+    @timezone.setter
+    def timezone(self, val):
+        self.__timezone = val
 
     def __eq__(self, other):
         return isinstance(other, Location) and \
@@ -144,7 +161,15 @@ class Location(object):
             return None
         coordinate_arg = location_json.get('Coordinate')
         coordinate = Coordinate.from_json(coordinate_arg)
-        return cls(coordinate, location_json.get('FormattedAddress'))
+
+        timezone_arg = location_json.get('TimeZone')
+        if timezone_arg is None:
+            id = location_json.get('TimeZoneId')
+            timezone = TimeZone(id) if id is not None else None
+        else:
+            timezone = TimeZone.from_json(timezone_arg)
+
+        return cls(coordinate, location_json.get('FormattedAddress'), timezone)
 
     def __str__(self):
         return "coordinate: {}, address: {}".format(self.coordinate, self.formatted_address)
@@ -173,7 +198,15 @@ class TimeZone(object):
     def from_json(cls, tz_json):
         if tz_json is None:
             return None
-        return cls(tz_json.get('Id'), tz_json.get('MinOffset'), tz_json.get('MaxOffset'))
+        if isinstance(tz_json, str):
+            return cls(tz_json)
+        if isinstance(tz_json, dict):
+            return cls(tz_json.get('Id'), tz_json.get('MinOffset'), tz_json.get('MaxOffset'))
+
+        return None
 
     def __str__(self):
         return self.id
+        
+    def __eq__(self, other):
+        return self.id == other.id and self.min_offset == other.min_offset and self.max_offset == other.max_offset

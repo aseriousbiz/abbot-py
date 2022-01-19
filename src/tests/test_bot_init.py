@@ -15,11 +15,11 @@ TEST_CONV_REFERENCE = {
         "Id": "test_conversation_id"
     }
 }
+
 TEST_SEND_USER = Mention("U777", "cloud", "Cloud Strife", "cstrife@ava.lanche", "Midgar", TimeZone("MST"))
 TEST_SEND_ROOM = Room("C777", "#midgar")
 
-
-class BotRepliesTest(unittest.TestCase):
+class BotInitTest(unittest.TestCase):
     def test_read_conversation_from_SkillInfo(self):
         bot = self.create_test_bot({
             "SkillInfo": {
@@ -29,6 +29,58 @@ class BotRepliesTest(unittest.TestCase):
             }
         })
         self.assertEqual("42", bot.conversation.id)
+
+    def test_init_with_room_id_and_name(self):
+        req = {
+            "SkillInfo": {
+                "PlatformType": PlatformType.UNIT_TEST,
+                "MessagePlatformType": PlatformType.UNIT_TEST,
+                "Bot": {
+                },
+                "From": {
+                    "Id": "U123",
+                },
+                "RoomId": "C999",
+                "Room": "midgar",
+                "MessageId": "9999.9999"
+            },
+            "RunnerInfo": {
+                "SkillId": 42,
+                "ConversationReference": TEST_CONV_REFERENCE
+            },
+            "SignalInfo": {
+            }
+        }
+        b = Bot(req, "test_token")
+        self.assertEqual("C999", b.room.id)
+        self.assertEqual("midgar", b.room.name)
+
+    def test_init_with_room_object(self):
+        req = {
+            "SkillInfo": {
+                "PlatformType": PlatformType.UNIT_TEST,
+                "MessagePlatformType": PlatformType.UNIT_TEST,
+                "Bot": {
+                },
+                "From": {
+                    "Id": "U123",
+                },
+                "Room": { "Id": "C999", "Name": "midgar" },
+                "MessageId": "9999.9999"
+            },
+            "RunnerInfo": {
+                "SkillId": 42,
+                "ConversationReference": TEST_CONV_REFERENCE
+            },
+            "SignalInfo": {
+            }
+        }
+        b = Bot(req, "test_token")
+        self.assertEqual("C999", b.room.id)
+        self.assertEqual("midgar", b.room.name)
+        b = Bot(req, "test_token")
+        self.assertEqual("C999", b.room.id)
+        self.assertEqual("midgar", b.room.name)
 
     def create_test_bot(self, additional_request_body = {}):
         req = {
@@ -51,6 +103,7 @@ class BotRepliesTest(unittest.TestCase):
             "SignalInfo": {
             }
         }
+
         dict_merge(req, additional_request_body)
         return Bot(req, "test_token")
 

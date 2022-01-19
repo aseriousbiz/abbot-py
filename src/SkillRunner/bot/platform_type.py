@@ -18,3 +18,19 @@ class PlatformType(IntEnum):
             4: 'Direct Line',
             5: 'Bot Console'
         }.get(self.value)
+
+    @classmethod
+    def parse(cls, val):
+        if val is None:
+            return PlatformType.UNIT_TEST
+
+        if isinstance(val, str):
+            return {
+                'unittest': cls.UNIT_TEST,
+                'slack': cls.SLACK,
+                'discord': cls.DISCORD,
+                'msteams': cls.MS_TEAMS,
+                'directline': cls.DIRECT_LINE,
+                'botconsole': cls.BOT_CONSOLE,
+            }.get(val.lower())
+        return cls(val)

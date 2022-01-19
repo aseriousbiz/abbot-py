@@ -82,7 +82,7 @@ class Bot(object):
 
         skillInfo = req.get('SkillInfo')
         runnerInfo = req.get('RunnerInfo')
-        self.platform_type = PlatformType(skillInfo.get('PlatformType'))
+        self.platform_type = PlatformType.parse(skillInfo.get('PlatformType'))
         
         self._signal_info = req.get('SignalInfo')
         self._signal_event = None
