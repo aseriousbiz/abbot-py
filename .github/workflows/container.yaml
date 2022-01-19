@@ -72,16 +72,25 @@ jobs:
         docker build -t ${{ secrets.AZURE_ACR_SERVER }}/${{ env.APP_NAME }}:${{ env.THETAG }} -f docker/${{ env.APP_NAME }}.Dockerfile .
         docker push ${{ secrets.AZURE_ACR_SERVER }}/${{ env.APP_NAME }}:${{ env.THETAG }}
 
+    - name: GitHub App token
+      if: env.PUBLISH == 1 || env.DEPLOY == 1
+      id: generate_token
+      uses: tibdex/github-app-token@v1.5.0
+      with:
+        app_id: ${{ secrets.SERIOUSBOT_APPID }}
+        private_key: ${{ secrets.SERIOUSBOT_KEY }}
+        repository: "aseriousbiz/docker"
+
     - name: Publish ${{ env.THETAG }} containers to all orgs
       if: env.PUBLISH == 1
       env:
-        GH_BOT_TOKEN: ${{ secrets.GH_BOT_TOKEN }}
+        GH_BOT_TOKEN: ${{ steps.generate_token.outputs.token }}
       run: |
         ./.github/registry_publish.sh ${{env.RUNNER}} ${{ env.THETAG }} ${{ env.THETAG }}
 
     - name: Deploy ${{ env.THETAG }} to fly
       if: env.DEPLOY == 1
       env:
-        GH_BOT_TOKEN: ${{ secrets.GH_BOT_TOKEN }}
+        GH_BOT_TOKEN: ${{ steps.generate_token.outputs.token }}
       run: |
         ./.github/deploy_fly.sh ${{env.RUNNER}} ${{ env.THETAG }}
