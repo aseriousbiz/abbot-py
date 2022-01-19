@@ -24,6 +24,7 @@ on:
       - 'docker/abbot-skills-python.Dockerfile'
       - '.github/*.sh'
       - '.github/workflows/main_abbot.yml'
+      - '.github/workflows/container.yml'
 
 env:
   APP_NAME: abbot-skills-python
