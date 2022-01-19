@@ -51,7 +51,6 @@ class Mention(UserMessageTarget):
             self.name == other.name and \
             self.email == other.email and \
             self.location == other.location and \
-            self.timezone == other.timezone and \
             self.__platform_type == other.__platform_type
 
     @property
@@ -153,7 +152,8 @@ class Location(object):
     def __eq__(self, other):
         return isinstance(other, Location) and \
             self.coordinate == other.coordinate and \
-            self.formatted_address == other.formatted_address
+            self.formatted_address == other.formatted_address and \
+            self.__timezone == other.__timezone
 
     @classmethod
     def from_json(cls, location_json):

@@ -83,6 +83,7 @@ class Bot(object):
         skillInfo = req.get('SkillInfo')
         runnerInfo = req.get('RunnerInfo')
         self.platform_type = PlatformType.parse(skillInfo.get('PlatformType'))
+        self.conversation = Conversation.from_json(req.get('ConversationInfo'), self.platform_type)
         
         self._signal_info = req.get('SignalInfo')
         self._signal_event = None
@@ -123,7 +124,6 @@ class Bot(object):
         self.mentions = Mention.load_mentions(skillInfo.get('Mentions'))
         args_json = skillInfo.get('TokenizedArguments', [])
         self.tokenized_arguments = Arguments.from_json(args_json, self.arguments, self.platform_type)
-        self.conversation = Conversation.from_json(skillInfo.get('Conversation'), self.platform_type)
 
         self.is_interaction = skillInfo.get('IsInteraction')
         self.is_request = skillInfo.get('IsRequest')
