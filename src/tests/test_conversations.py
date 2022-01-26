@@ -15,6 +15,7 @@ class ConversationTest(unittest.TestCase):
             "Id": "42",
             "FirstMessageId": "1111.2222",
             "Title": "Mako Reactor Job",
+            "WebUrl": "https://ab.bot/conversations/42",
             "Room": {
                 "Id": "C001",
                 "Name": "avalanche-planning"
@@ -48,6 +49,7 @@ class ConversationTest(unittest.TestCase):
 
         self.assertEqual("42", convo.id)
         self.assertEqual("Mako Reactor Job", convo.title)
+        self.assertEqual("https://ab.bot/conversations/42", convo.web_url)
         self.assertEqual(Room("C001", "avalanche-planning", PlatformType.SLACK), convo.room)
         self.assertEqual(Mention("U001", "cloud", "Cloud Strife", None, Location(None, None, None), PlatformType.SLACK), convo.started_by)
         self.assertEqual(datetime(2022, 1, 1, 1, 2, 3, tzinfo=tzutc()), convo.created)

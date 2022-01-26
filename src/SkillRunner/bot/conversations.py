@@ -7,10 +7,11 @@ import json
 import dateutil
 
 class Conversation(object):
-    def __init__(self, id, first_message_id, title, room, started_by, created, last_message_posted_on, members):
+    def __init__(self, id, first_message_id, title, web_url, room, started_by, created, last_message_posted_on, members):
         self.id = id
         self.__first_message_id = first_message_id
         self.title = title
+        self.web_url = web_url
         self.room = room
         self.started_by = started_by
         self.created = created
@@ -41,6 +42,7 @@ class Conversation(object):
             conversation_json.get('Id'),
             conversation_json.get('FirstMessageId'),
             conversation_json.get('Title'),
+            conversation_json.get('WebUrl'),
             room,
             started_by,
             created,
