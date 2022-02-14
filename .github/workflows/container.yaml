@@ -22,9 +22,7 @@ on:
     paths:
       - 'src/**'
       - 'docker/abbot-skills-python.Dockerfile'
-      - '.github/*.sh'
-      - '.github/workflows/main_abbot.yml'
-      - '.github/workflows/container.yml'
+      - '.github/**'
 
 env:
   APP_NAME: abbot-skills-python
