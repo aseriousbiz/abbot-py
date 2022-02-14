@@ -70,7 +70,9 @@ jobs:
     - name: Build ${{env.THETAG}}
       if: env.THETAG != ''
       run: |
+        docker build --target build -t ${{ secrets.AZURE_ACR_SERVER }}/${{ env.APP_NAME }}-build:${{ env.THETAG }} -f docker/${{ env.APP_NAME }}.Dockerfile .
         docker build -t ${{ secrets.AZURE_ACR_SERVER }}/${{ env.APP_NAME }}:${{ env.THETAG }} -f docker/${{ env.APP_NAME }}.Dockerfile .
+        docker push ${{ secrets.AZURE_ACR_SERVER }}/${{ env.APP_NAME }}-build:${{ env.THETAG }}
         docker push ${{ secrets.AZURE_ACR_SERVER }}/${{ env.APP_NAME }}:${{ env.THETAG }}
 
     - name: GitHub App token
