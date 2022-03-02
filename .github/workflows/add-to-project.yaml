@@ -17,7 +17,7 @@ jobs:
         with:
           app_id: ${{ secrets.SERIOUS_APP_ID }}
           private_key: ${{ secrets.SERIOUS_APP_KEY }}
-      - uses: aseriousbiz/issue-actions/add-issue-to-project
+      - uses: aseriousbiz/issue-actions/add-issue-to-project@main
         with:
           project: https://github.com/orgs/aseriousbiz/projects/1
           token: ${{ steps.generate_token.outputs.token }}
