@@ -10,14 +10,22 @@ jobs:
   add-issue-to-project:
     runs-on: ubuntu-latest
     steps:
-      - uses: actions/checkout@v3
       - name: GitHub App token
         id: generate_token
         uses: tibdex/github-app-token@v1.5.0
         with:
           app_id: ${{ secrets.SERIOUSBOT_APPID }}
           private_key: ${{ secrets.SERIOUSBOT_KEY }}
-      - uses: aseriousbiz/issue-actions/add-issue-to-project@main
+      - name: Check out the repo
+        uses: actions/checkout@v3
+      - name: Check out issue-actions
+        uses: actions/checkout@v3
+        with:
+          repository: aseriousbiz/issue-actions
+          ref: main
+          token: ${{ steps.generate_token.outputs.token }}
+          path: ./.github/aseriousbiz/issue-actions
+      - uses: ./.github/aseriousbiz/issue-actions/add-issue-to-project
         with:
           project: https://github.com/orgs/aseriousbiz/projects/1
           token: ${{ steps.generate_token.outputs.token }}
