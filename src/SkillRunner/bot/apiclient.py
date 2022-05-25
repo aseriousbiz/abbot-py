@@ -35,6 +35,7 @@ class ApiClient(object):
                 'X-Abbot-SkillApiToken': api_token, 
                 'X-Abbot-PlatformUserId': str(user_id),
                 'X-Abbot-Timestamp': str(timestamp),
+                'Authorization': f'Bearer {api_token}',
                 'traceparent': trace_parent
             }
         logging.info(f'ApiClient created with traceparent: {trace_parent}')
