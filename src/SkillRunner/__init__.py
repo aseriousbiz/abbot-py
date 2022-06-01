@@ -1,3 +1,4 @@
+import subprocess
 import logging
 import jsonpickle
 import os 
@@ -41,6 +42,8 @@ class ResponseManager:
         self.Errors.append(error)
         self.Success = False
 
+def _denied(*args, **kwargs):
+    raise PermissionError("Access to this module is denied")
 
 def deny_os_modules():
     """
@@ -50,12 +53,15 @@ def deny_os_modules():
     deny = [
     '_execvpe', 'chmod', 'chown', 'chroot', 'execl', 'execle', 'execlp', 'execlpe', 'execv', 'execve', 'execvp', 
     'execvpe', 'kill', 'killpg', 'lchmod', 'lchown', 'link', 'posix_spawn', 'posix_spawnp','spawnl', 'spawnle', 
-    'spawnlp', 'spawnlpe', 'spawnv', 'spawnve', 'spawnvp', 'spawnvpe', 'symlink']
+    'spawnlp', 'spawnlpe', 'spawnv', 'spawnve', 'spawnvp', 'spawnvpe', 'symlink', 'subprocess']
 
     for attr, value in os.__dict__.items():
         if attr in deny:
-            setattr(os, attr, lambda self: PermissionError("Access to this module (os.{}) is denied".format(attr)))    
+            setattr(os, attr, _denied)
 
+def purge_module(module):
+    for attr, value in module.__dict__.items():
+        setattr(module, attr, _denied)
 
 def run_code(req, api_token, trace_parent):
     # Instantiate a bot object
@@ -75,6 +81,8 @@ def main(req: func.HttpRequest) -> func.HttpResponse:
 
     try:
         deny_os_modules()
+        purge_module(subprocess)
+
         req_body = req.get_json()
         # The token is necessary for using the data API
         api_token = req.headers.get('x-abbot-skillapitoken')
