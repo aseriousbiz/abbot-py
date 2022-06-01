@@ -53,6 +53,9 @@ def run_code(req, api_token, trace_parent):
     
 
 def main(req: func.HttpRequest) -> func.HttpResponse:
+    # Allow Debug logs through, Azure Functions will filter further
+    logging.Logger.root.level = 10
+
     rm = ResponseManager()
 
     if req.method == "GET":

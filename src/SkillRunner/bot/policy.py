@@ -1,3 +1,4 @@
+import logging
 from RestrictedPython import compile_restricted, safe_builtins, utility_builtins
 
 # This defines the builtins scripts are allowed to use
@@ -121,7 +122,8 @@ allowed_modules = [
     # struct NOT allowed (binary serialization)
     # subprocess NOT allowed (process management)
     # symtable NOT allowed (compiler internals)
-    # sys, sysconfig NOT allowed (customers could request, we need to go through it and choose what we're OK allowing access to)
+    # sys, sysconfig NOT allowed
+    #   (customers could request this, we need to go through it and choose what we're OK allowing access to)
     # syslog NOT allowed (I/O)
 
     "textwrap",
@@ -148,7 +150,7 @@ allowed_modules = [
     "boto3",
     # cffi NOT ALLOWED (skills using CFFI is bad news),
     "cryptography",
-    "dnspython",
+    "dns",
     "ecdsa",
     "google",
     "grpc",
@@ -171,8 +173,44 @@ allowed_modules = [
     "regex",
     "requests",
     "rsa",
-    "soupsieve"
-    "SQLAlchemy",
+    "soupsieve",
+    "sqlalchemy",
+    "toml",
+    "twilio",
+    "websocket"
+]
+
+# We allow any module that starts with any of these names followed by a '.' (like 'dns.resolver')
+allowed_module_prefixes = [
+    "azure",
+    "bs4",
+    "boto3",
+    "cryptography",
+    "dns",
+    "ecdsa",
+    "google",
+    "grpc",
+    "isodate",
+    "jmespath",
+    "jsonpickle",
+    "kubernetes",
+    "msal",
+    "mysql",
+    "mysqlx",
+    "nltk",
+    "nludb",
+    "numpy",
+    "octokit",
+    "octokit_routes",
+    "pandas",
+    "pandas_gbq",
+    "pyarrow",
+    "PyYAML",
+    "regex",
+    "requests",
+    "rsa",
+    "soupsieve",
+    "sqlalchemy",
     "toml",
     "twilio",
     "websocket"
@@ -184,9 +222,16 @@ def guarded_import(mname, *args, **kwargs):
     Here we can filter to only allow certain modules and then pass through to the built-in '__import__'.
     For modules we disallow, we can raise a useful error
     """
+    segments = mname.split('.')
+
     if mname in allowed_modules:
+        logging.debug(f"Import of '{mname}' allowed (direct import)")
+        return __import__(mname, *args, **kwargs)
+    elif segments[0] in allowed_module_prefixes:
+        logging.debug(f"Import of '{mname}' allowed (prefix '{segments[0]}' is allowed)")
         return __import__(mname, *args, **kwargs)
     else:
+        logging.debug(f"Import of '{mname}' denied")
         raise PermissionError(f"Skills are not permitted to import the {mname} module. Contact 'support@ab.bot' if you have questions or want to add a module to the allowed list.")
 
 script_builtins["__import__"] = guarded_import
@@ -196,6 +241,7 @@ def guarded_getattr(obj, name, default=None):
     Implementation of 'getattr' used in scripts.
     This can be used to ban access to certain properties of objects/modules
     """
+    logging.debug(f"Getattr '{type(obj).__name__}#{name}' allowed")
     return getattr(obj, name, default)
 
 script_builtins["_getattr_"] = guarded_getattr
@@ -210,14 +256,25 @@ def guarded_hasattr(obj, name):
     try:
         guarded_getattr(obj, name)
     except (AttributeError, PermissionError, TypeError):
+        logging.debug(f"Hasattr '{type(obj).__name__}#{name}' denied")
         return 0
+    logging.debug(f"Hasattr '{type(obj).__name__}#{name}' allowed")
     return 1
 
 script_builtins["hasattr"] = guarded_hasattr
 
+def guarded_getiter(*args):
+    return iter(*args)
+
+def guarded_any(seq):
+    return any(guarded_getiter(seq))
+
+script_builtins["any"] = guarded_any
+
 script_globals = {
     '__builtins__': script_builtins,
     '_getattr_': guarded_getattr,
+    '_getiter_': guarded_getiter,
     'getattr': guarded_getattr,
 }
 
