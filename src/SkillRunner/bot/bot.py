@@ -14,6 +14,8 @@ import soupsieve
 import boto3
 import octokit
 
+from SkillRunner.bot.policy import exec_with_policy
+
 # End of user skill imports
 
 from .storage import Brain
@@ -152,19 +154,16 @@ class Bot(object):
                 "PatternType": pattern.PatternType,
                 "Argument": Argument,
                 "MentionArgument": MentionArgument,
-                "RoomArgument": RoomArgument
+                "RoomArgument": RoomArgument,
             }
+
             out = None
-            
-            with patch.dict("os.environ", {}):
-                # Clear os.environ, then run the code
-                os.environ.clear()
-                exec(self.code, script_locals, script_locals)
 
-            out = script_locals.get('bot')
+            exec_with_policy(self.code, script_locals)
 
-            return out.responses
+            return self.responses
         except SyntaxError as e:
+            logging.exception("Compilation Error", exc_info=True)
             raise e
         except AttributeError as e:
             if not out:
@@ -175,7 +174,7 @@ class Bot(object):
             else:
                 pass
         except Exception as e:
-            logging.error(e)
+            logging.exception("Runtime Error", exc_info=True)
             raise e
 
     def reply(self, response, direct_message=False, **kwargs):
