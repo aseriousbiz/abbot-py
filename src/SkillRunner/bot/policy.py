@@ -172,6 +172,7 @@ allowed_modules = [
     "PyYAML",
     "regex",
     "requests",
+    "requests_oauthlib",    
     "rsa",
     "soupsieve",
     "sqlalchemy",
