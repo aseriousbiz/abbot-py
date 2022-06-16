@@ -146,8 +146,8 @@ allowed_modules = [
 
     # Dependency modules
     "azure",
-    "bs4",
     "boto3",
+    "bs4",
     # cffi NOT ALLOWED (skills using CFFI is bad news),
     "cryptography",
     "dns",
@@ -164,28 +164,28 @@ allowed_modules = [
     "nltk",
     "nludb",
     "numpy",
-    "octokit",
     "octokit_routes",
-    "pandas",
+    "octokit",
     "pandas_gbq",
+    "pandas",
     "pyarrow",
     "PyYAML",
     "regex",
+    "requests_oauthlib",
     "requests",
-    "requests_oauthlib",    
     "rsa",
     "soupsieve",
     "sqlalchemy",
     "toml",
     "twilio",
-    "websocket"
+    "websocket",
 ]
 
 # We allow any module that starts with any of these names followed by a '.' (like 'dns.resolver')
 allowed_module_prefixes = [
     "azure",
-    "bs4",
     "boto3",
+    "bs4",
     "cryptography",
     "dns",
     "ecdsa",
@@ -201,10 +201,10 @@ allowed_module_prefixes = [
     "nltk",
     "nludb",
     "numpy",
-    "octokit",
     "octokit_routes",
-    "pandas",
+    "octokit",
     "pandas_gbq",
+    "pandas",
     "pyarrow",
     "PyYAML",
     "regex",
@@ -214,7 +214,8 @@ allowed_module_prefixes = [
     "sqlalchemy",
     "toml",
     "twilio",
-    "websocket"
+    "websocket",
+    "urllib",
 ]
 
 def guarded_import(mname, *args, **kwargs):
@@ -237,16 +238,23 @@ def guarded_import(mname, *args, **kwargs):
 
 script_builtins["__import__"] = guarded_import
 
+def guarded_getitem(obj, index):
+    return obj[index]
+
+script_builtins["_getitem_"] = guarded_getitem
+
 def guarded_getattr(obj, name, default=None):
     """
     Implementation of 'getattr' used in scripts.
     This can be used to ban access to certain properties of objects/modules
     """
+    if name.startswith('_'):
+        raise AttributeError(f'"{name} is an invalid attribute name because it starts with "_"')
+
     logging.debug(f"Getattr '{type(obj).__name__}#{name}' allowed")
     return getattr(obj, name, default)
 
 script_builtins["_getattr_"] = guarded_getattr
-script_builtins["getattr"] = guarded_getattr
 
 def guarded_hasattr(obj, name):
     """
