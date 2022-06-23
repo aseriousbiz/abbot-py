@@ -37,3 +37,12 @@ jobs:
         package: src
         publish-profile: ${{ secrets.AZURE_PYTHON_NEW_FUNCTIONAPP_PUBLISH_PROFILE }}
       if: github.event_name != 'pull_request'
+
+    - name: 'Deploy abbot-skills-python (Backup)'
+      continue-on-error: true
+      uses: Azure/functions-action@v1
+      with:
+        app-name: abbot-skills-python
+        package: src
+        publish-profile: ${{ secrets.AZURE_PYTHON_FUNCTIONAPP_PUBLISH_PROFILE }}
+      if: github.event_name != 'pull_request'
