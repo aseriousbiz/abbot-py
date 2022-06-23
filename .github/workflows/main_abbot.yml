@@ -21,10 +21,10 @@ jobs:
     - name: Checkout main branch
       uses: actions/checkout@v2
 
-    - name: Setup Python 3.7 Environment
+    - name: Setup Python 3.9 Environment
       uses: actions/setup-python@v1
       with:
-        python-version: '3.7'
+        python-version: '3.9'
     
     - name: 'Run CI Build script'
       shell: bash
