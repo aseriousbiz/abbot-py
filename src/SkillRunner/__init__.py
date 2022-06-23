@@ -59,7 +59,7 @@ def main(req: func.HttpRequest) -> func.HttpResponse:
     rm = ResponseManager()
 
     if req.method == "GET":
-        rm.add("Ok! Running Abbot Python Runner v0.10.1.")
+        rm.add("Ok! Running Abbot Python Runner v0.10.2.")
 
     try:
         req_body = req.get_json()
