@@ -4,6 +4,7 @@ on:
   push:
     branches:
       - main
+      - anurse/deploy-alternates
     paths:
       - 'src/**'
       - 'script/cibuild'
@@ -31,18 +32,59 @@ jobs:
       run: script/cibuild
 
     - name: 'Deploy abbot-skills-python-main'
+      if: github.event_name != 'pull_request'
       uses: Azure/functions-action@v1
       with:
         app-name: abbot-skills-python-main
         package: src
         publish-profile: ${{ secrets.AZURE_PYTHON_NEW_FUNCTIONAPP_PUBLISH_PROFILE }}
-      if: github.event_name != 'pull_request'
 
     - name: 'Deploy abbot-skills-python (Backup)'
       continue-on-error: true
+      if: github.event_name != 'pull_request'
       uses: Azure/functions-action@v1
       with:
         app-name: abbot-skills-python
         package: src
         publish-profile: ${{ secrets.AZURE_PYTHON_FUNCTIONAPP_PUBLISH_PROFILE }}
       if: github.event_name != 'pull_request'
+
+    - name: Login to Azure
+      if: github.event_name != 'pull_request'
+      uses: Azure/login@v1
+      with:
+        creds: ${{ secrets.DEPLOYBOT_AZURE_CREDENTIAL }}
+    
+    - name: Fetch publish profile for abbot-runner-py-alt-westus3
+      id: westus3_profile
+      run: |
+        publishProfile=$(az webapp deployment list-publishing-profiles \
+          --name "abbot-runner-py-alt-westus3" \
+          --resource-group "serious-runners-westus3" \
+          --xml)
+        echo "::add-mask::$publishProfile"
+        echo "::set-output name=publishProfile::$publishProfile"
+    
+    - name: Fetch publish profile for abbot-runner-py-alt-centralus
+      id: centralus_profile
+      run: |
+        publishProfile=$(az webapp deployment list-publishing-profiles \
+          --name "abbot-runner-py-alt-centralus" \
+          --resource-group "serious-runners-centralus" \
+          --xml)
+        echo "::add-mask::$publishProfile"
+        echo "::set-output name=publishProfile::$publishProfile"
+
+    - name: Deploy to West US 3
+      uses: Azure/functions-action@v1
+      with:
+        app-name: abbot-runner-py-alt-westus3
+        package: src
+        publish-profile: ${{ steps.westus3_profile.outputs.publishProfile }}
+
+    - name: Deploy to Central US
+      uses: Azure/functions-action@v1
+      with:
+        app-name: abbot-runner-py-alt-centralus
+        package: src
+        publish-profile: ${{ steps.centralus_profile.outputs.publishProfile }}
