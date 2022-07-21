@@ -32,7 +32,7 @@ jobs:
       run: script/cibuild
 
     - name: 'Deploy abbot-skills-python-main'
-      if: github.event_name != 'pull_request'
+      if: github.event_name != 'pull_request' && github.ref_name == 'main'
       uses: Azure/functions-action@v1
       with:
         app-name: abbot-skills-python-main
@@ -41,13 +41,12 @@ jobs:
 
     - name: 'Deploy abbot-skills-python (Backup)'
       continue-on-error: true
-      if: github.event_name != 'pull_request'
+      if: github.event_name != 'pull_request' && github.ref_name == 'main'
       uses: Azure/functions-action@v1
       with:
         app-name: abbot-skills-python
         package: src
         publish-profile: ${{ secrets.AZURE_PYTHON_FUNCTIONAPP_PUBLISH_PROFILE }}
-      if: github.event_name != 'pull_request'
 
     - name: Login to Azure
       if: github.event_name != 'pull_request'
@@ -56,6 +55,7 @@ jobs:
         creds: ${{ secrets.DEPLOYBOT_AZURE_CREDENTIAL }}
     
     - name: Fetch publish profile for abbot-runner-py-alt-westus3
+      if: github.event_name != 'pull_request'
       id: westus3_profile
       run: |
         publishProfile=$(az webapp deployment list-publishing-profiles \
@@ -66,6 +66,7 @@ jobs:
         echo "::set-output name=publishProfile::$publishProfile"
     
     - name: Fetch publish profile for abbot-runner-py-alt-centralus
+      if: github.event_name != 'pull_request'
       id: centralus_profile
       run: |
         publishProfile=$(az webapp deployment list-publishing-profiles \
@@ -76,6 +77,7 @@ jobs:
         echo "::set-output name=publishProfile::$publishProfile"
 
     - name: Deploy to West US 3
+      if: github.event_name != 'pull_request'
       uses: Azure/functions-action@v1
       with:
         app-name: abbot-runner-py-alt-westus3
@@ -83,6 +85,7 @@ jobs:
         publish-profile: ${{ steps.westus3_profile.outputs.publishProfile }}
 
     - name: Deploy to Central US
+      if: github.event_name != 'pull_request'
       uses: Azure/functions-action@v1
       with:
         app-name: abbot-runner-py-alt-centralus
