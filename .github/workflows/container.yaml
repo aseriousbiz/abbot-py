@@ -20,6 +20,10 @@ on:
     branches:
       - main
 
+  pull_request:
+    branches:
+      - main
+
 env:
   APP_NAME: abbot-skills-python
   LATEST_TAG: latest
@@ -47,9 +51,9 @@ jobs:
     - run: echo "THETAG=${{env.CUSTOM_TAG}}" >> $GITHUB_ENV
       if: ${{ github.event_name == 'workflow_dispatch' && env.CUSTOM_TAG != '' }}
     - run: echo "DEPLOY=1" >> $GITHUB_ENV
-      if: (github.event.inputs.deploy == '1' && env.CUSTOM_TAG != '') || (github.event_name != 'workflow_dispatch' && env.THETAG != '')
+      if: (github.event.inputs.deploy == '1' && env.CUSTOM_TAG != '') || (github.event_name == 'push' && env.THETAG != '')
     - run: echo "PUBLISH=1" >> $GITHUB_ENV
-      if: (github.event.inputs.publish == '1' && env.CUSTOM_TAG != '') || (github.event_name != 'workflow_dispatch' && env.THETAG != '')
+      if: (github.event.inputs.publish == '1' && env.CUSTOM_TAG != '') || (github.event_name == 'push' && env.THETAG != '')
 
     - name: Checkout branch
       uses: actions/checkout@v2
