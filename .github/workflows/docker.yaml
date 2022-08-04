@@ -1,0 +1,87 @@
+name: Publish 'aseriousbiz/abbot/abbot-py/runner-py' image
+
+env:
+  IMAGE_TAG_BASE: abbotimages.azurecr.io/aseriousbiz/abbot-py/runner-py
+  DOCKERFILE: Dockerfile
+
+# The rest of this is basically generic and copy-pastable.
+# The 'env' vars above control which docker file is built and what name the image is published under.
+
+on:
+  # Run on every commit to 'main' or 'lab/**'
+  push:
+    branches:
+      - main
+      - lab/**
+
+  # And on every PR to 'main'
+  pull_request:
+    branches:
+      - main
+
+jobs:
+  build:
+    runs-on: ubuntu-latest
+    steps:
+      - name: Checkout branch
+        uses: actions/checkout@v2
+        with:
+          fetch-depth: 0
+
+      - name: Login to Azure
+        uses: azure/login@v1
+        with:
+          creds: ${{ secrets.DEPLOYBOT_AZURE_CREDENTIAL }}
+
+      - name: Login to abbotimages.azurecr.io
+        run: |
+          az acr login -n abbotimages -g abbot-global
+
+      - name: Set environment variables
+        run: |
+          if [ "${{ github.event_name }}" == "pull_request" ]; then
+            # For a PR, use the head branch.
+            BRANCH_TAG="$(echo "${{ github.head_ref }}" | sed 's@/@.@g')"
+            IMAGE_TAG="${IMAGE_TAG_BASE}:${BRANCH_TAG}"
+          else
+            IMAGE_TAG=$IMAGE_TAG_BASE
+            if [ "${{ github.ref_name }}" != "main" ]; then
+              # For a non-main branch, use the ref_name to generate a tag
+              BRANCH_TAG="$(echo "${{ github.ref_name }}" | sed 's@/@.@g')"
+              IMAGE_TAG="${IMAGE_TAG}:${BRANCH_TAG}"
+            fi
+          fi
+
+          # Save the IMAGE_TAG env var to the GITHUB_ENV file so future steps can use it.
+          echo "IMAGE_TAG=$IMAGE_TAG" >> $GITHUB_ENV
+
+      - name: Docker Build
+        run: |
+          docker build \
+            -t $IMAGE_TAG \
+            --build-arg "BUILD_BRANCH=${{ github.ref_name }}" \
+            --build-arg "BUILD_SHA=${{ github.sha }}" \
+            --label "github.sha=${{ github.sha }}" \
+            --label "github.ref_name=${{ github.ref_name }}" \
+            --label "github.actor=${{ github.actor }}" \
+            --label "github.run_id=${{ github.run_id }}" \
+            -f $DOCKERFILE \
+            .
+
+      # Push the container to ACR
+      # We _do_ run this even on Pull Requests!
+      # Storage ain't a concern for us right now, so let's build the containers and push them
+      # That makes moving to branch-deployment easier.
+      - name: Push the docker image
+        run: |
+          docker push $IMAGE_TAG
+
+      - name: Get the image manifest
+        run: |
+          docker image inspect "$IMAGE_TAG" > image_manifest.json
+      
+      - name: Publish image manifest artifact
+        uses: actions/upload-artifact@v3
+        with:
+          name: image_manifest
+          path: image_manifest.json

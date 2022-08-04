@@ -1,4 +1,5 @@
 import logging
+import json
 import jsonpickle
 import os 
 
@@ -58,8 +59,29 @@ def main(req: func.HttpRequest) -> func.HttpResponse:
 
     rm = ResponseManager()
 
+    func_root = os.path.dirname(os.path.dirname(os.path.realpath(__file__)))
+    branch_info_path = os.path.join(func_root, "branch_info.txt")
+
+    branch_info = { "branch": "unknown", "sha": "unknown" }
+    try:
+        with open(branch_info_path, "r") as f:
+            lines = f.readlines()
+            branch_info["branch"] = lines[0]
+            branch_info["sha"] = lines[1]
+    except:
+        # Ignore failures
+        pass
+
     if req.method == "GET":
-        rm.add("Ok! Running Abbot Python Runner v0.10.2.")
+        branch = branch_info["branch"]
+        sha = branch_info["sha"]
+        msg = f"Ok! Running Abbot Python Runner v0.10.2 from {branch} branch at {sha}"
+        rm.add(msg)
+        return func.HttpResponse(
+            body=jsonpickle.encode(rm, unpicklable=False),
+            mimetype="application/vnd.abbot.v1+json",
+            status_code=200
+        )
 
     try:
         req_body = req.get_json()
@@ -93,7 +115,7 @@ def main(req: func.HttpRequest) -> func.HttpResponse:
             status_code=500
 
         return func.HttpResponse(
-            body=jsonpickle.encode(rm),
+            body=jsonpickle.encode(rm, unpicklable=False),
             mimetype="application/vnd.abbot.v1+json",
             status_code=status_code
         )
