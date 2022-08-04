@@ -46,7 +46,7 @@ msrest==0.6.21
 mysql-connector-python==8.0.25
 nltk==3.6.5
 nludb==0.1.4
-numpy==1.19.4
+numpy==1.22.0
 oauthlib==3.1.0
 octokitpy==0.15.0
 octokitpy-routes==2.5.0
