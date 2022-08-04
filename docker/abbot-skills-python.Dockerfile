@@ -1,11 +1,12 @@
-FROM mcr.microsoft.com/azure-functions/python:3.0-python3.7-buildenv as build
+FROM mcr.microsoft.com/azure-functions/python:3.0-python3.9-buildenv as build
 
 # Upgrade any OS packages with outstanding upgrades, to ensure we've got security fixes.
 RUN apt-get update && apt-get upgrade -qyy && rm -rf /var/lib/apt/lists/*
 
 WORKDIR output
-COPY src/ .
+COPY src/requirements.txt .
 RUN pip install --target=./ -r ./requirements.txt
+COPY src/ .
 
 FROM mcr.microsoft.com/azure-functions/python:3.0-python3.7-slim
 
