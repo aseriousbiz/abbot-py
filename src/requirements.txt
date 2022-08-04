@@ -44,7 +44,7 @@ msal==1.16.0
 msal-extensions==0.3.1
 msrest==0.6.21
 mysql-connector-python==8.0.25
-nltk==3.6.5
+nltk==3.6.6
 nludb==0.1.4
 numpy==1.19.4
 oauthlib==3.1.0
