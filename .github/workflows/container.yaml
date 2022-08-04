@@ -58,12 +58,14 @@ jobs:
     - name: Checkout branch
       uses: actions/checkout@v2
 
-    - name: Login to docker
-      uses: docker/login-action@v1
+    - name: Login to Azure
+      uses: azure/login@v1
       with:
-        registry: ${{ secrets.AZURE_ACR_SERVER }}
-        username: ${{ secrets.AZURE_ACR_USER_CLIENTID }}
-        password: ${{ secrets.AZURE_ACR_USER_CLIENTSECRET }}
+        creds: ${{ secrets.DEPLOYBOT_AZURE_CREDENTIAL }}
+
+    - name: Login to abbotacr02.azurecr.io
+      run: |
+        az acr login -n abbotacr02 -g container-registry
 
     - name: Build ${{env.THETAG}}
       if: env.THETAG != ''
