@@ -1,4 +1,5 @@
 import logging
+import os
 from RestrictedPython import compile_restricted, safe_builtins, utility_builtins
 
 # This defines the builtins scripts are allowed to use
@@ -292,13 +293,20 @@ def exec_with_policy(skill_code, locals):
     Executes the provided python skill code under our restriction policy.
     """
 
-    globals = {
-        **script_globals,
-        **locals
-    }
+    if os.environ.get('ABBOT_SANDBOXED') == 'false':
+        # We're running outside a sandboxed environment, so go ahead and run the code directly
+        logging.info("executing skill code WITHOUT sandbox")
+        exec(skill_code, locals)
+    else:
+        logging.info("executing skill code WITH sandbox")
+        # We're running in a sandboxed environment. Run the code through RestrictedPython
+        globals = {
+            **script_globals,
+            **locals
+        }
 
-    byte_code = compile_restricted(
-        skill_code,
-        filename='<skill code>',
-        mode='exec')
-    exec(byte_code, globals)
+        byte_code = compile_restricted(
+            skill_code,
+            filename='<skill code>',
+            mode='exec')
+        exec(byte_code, globals)

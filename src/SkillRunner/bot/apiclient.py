@@ -25,7 +25,7 @@ class ApiClient(object):
         base_url = os.environ.get('AbbotApiBaseUrl', 'https://localhost:4979/api')
         self.base_url = f'{base_url}/skills/{skill_id}'
 
-        if self.base_url.startswith("https://localhost"):
+        if self.base_url.startswith("https://localhost") or self.base_url.startswith("https://host.docker.internal"):
             self.verify_ssl = False
         else:
             self.verify_ssl = True
