@@ -8,7 +8,7 @@ COPY src/requirements.txt .
 RUN pip install --target=./ -r ./requirements.txt
 COPY src/ .
 
-FROM mcr.microsoft.com/azure-functions/python:3.0-python3.7-slim
+FROM mcr.microsoft.com/azure-functions/python:3.0-python3.9-slim
 
 # Upgrade any OS packages with outstanding upgrades, to ensure we've got security fixes.
 RUN apt-get update && apt-get upgrade -qyy && rm -rf /var/lib/apt/lists/*
@@ -21,7 +21,7 @@ ENV \
     DOTNET_NOLOGO=true \
     FUNCTIONS_EXTENSION_VERSION=~3 \
     ASPNETCORE_URLS=http://+:8080 \
-    AbbotApiBaseUrl=https://ab.bot/api
+    AbbotApiBaseUrl=https://app.ab.bot/api
 
 EXPOSE 8080
 COPY --from=build ["./output", "/home/site/wwwroot"]

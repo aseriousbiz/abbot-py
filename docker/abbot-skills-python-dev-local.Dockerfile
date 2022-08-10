@@ -1,4 +1,4 @@
-FROM mcr.microsoft.com/azure-functions/python:3.0-python3.7-slim
+FROM mcr.microsoft.com/azure-functions/python:3.0-python3.9-slim
 
 # required container environment
 ENV \
