@@ -19,6 +19,17 @@ on:
     branches:
       - main
 
+  # Make sure images are built at least once a week.
+  schedule:
+    # https://crontab.guru/#22_16_*_*_1
+    # "At 16:22 UTC (09:22 PT) every Monday"
+    # GitHub recommends avoiding the top of the hour because it's commonly used by other actions.
+    # Scheduled actions may be skipped if there's high load.
+    - cron: '22 16 * * 1'
+
+  # Allow manually scheduling the build too.
+  workflow_dispatch:
+
 jobs:
   build:
     runs-on: ubuntu-latest
@@ -44,6 +55,7 @@ jobs:
             BRANCH_TAG="$(echo "${{ github.head_ref }}" | sed 's@/@.@g')"
             IMAGE_TAG="${IMAGE_TAG_BASE}:${BRANCH_TAG}"
           else
+            # For push or schedule events, we run on main
             IMAGE_TAG=$IMAGE_TAG_BASE
             if [ "${{ github.ref_name }}" != "main" ]; then
               # For a non-main branch, use the ref_name to generate a tag

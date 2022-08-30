@@ -24,6 +24,14 @@ on:
     branches:
       - main
 
+  # Make sure images are built at least once a week.
+  schedule:
+    # https://crontab.guru/#22_16_*_*_1
+    # "At 16:22 UTC (09:22 PT) every Monday"
+    # GitHub recommends avoiding the top of the hour because it's commonly used by other actions.
+    # Scheduled actions may be skipped if there's high load.
+    - cron: '22 16 * * 1'
+
 env:
   APP_NAME: abbot-skills-python
   LATEST_TAG: latest
