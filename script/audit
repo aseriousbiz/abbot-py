@@ -1,0 +1,41 @@
+#!/bin/bash -u
+{ set +x; } 2>/dev/null
+SOURCE=$0
+DIR="$( cd -P "$( dirname "$SOURCE" )" >/dev/null 2>&1 && pwd )"
+ROOTDIR=$(cd $DIR && cd ../ && pwd)
+
+if [[ "$(uname)" = "Darwin" ]]; then
+    OS="Mac"
+elif [[ -e "/c/" ]]; then
+    OS="Windows"
+else
+    OS="Linux"
+fi
+
+fix=false
+while (( "$#" )); do
+    key="$1"
+    shift
+    case "$key" in
+        --fix)
+            fix=true
+        ;;
+    esac
+done
+
+cd "$ROOTDIR"
+
+AUTOCONFIRM=1 script/bootstrap
+source .venv/bin/activate
+
+if $fix; then
+    echo "Applying security updates..."
+    pip-audit --fix --requirement src/requirements.txt --requirement src/requirements.dev.txt
+else
+    # Audit
+    if ! pip-audit --requirement src/requirements.txt --requirement src/requirements.dev.txt; then
+        echo "*** Security Updates Required ***"
+        echo "Run 'script/audit --fix' to attempt to auto-update!"
+        exit 1
+    fi
+fi

@@ -1,4 +1,5 @@
--r requirements.txt
+--requirement requirements.txt
 pylint==2.12.2
 responses==0.16.0
 parameterized==0.8.1
+pip-audit==2.4.5

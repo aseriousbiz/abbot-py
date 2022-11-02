@@ -39,6 +39,10 @@ jobs:
         with:
           fetch-depth: 0
 
+      - name: Run Security Update Audit
+        run: |
+          script/audit
+
       - name: Login to Azure
         uses: azure/login@v1
         with:

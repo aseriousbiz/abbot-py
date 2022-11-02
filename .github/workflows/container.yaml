@@ -59,12 +59,16 @@ jobs:
     - run: echo "THETAG=${{env.CUSTOM_TAG}}" >> $GITHUB_ENV
       if: ${{ github.event_name == 'workflow_dispatch' && env.CUSTOM_TAG != '' }}
     - run: echo "DEPLOY=1" >> $GITHUB_ENV
-      if: (github.event.inputs.deploy == '1' && env.CUSTOM_TAG != '') || (github.event_name == 'push' && env.THETAG != '')
+      if: (github.event.inputs.deploy == '1' && env.CUSTOM_TAG != '') || ((github.event_name == 'push' || github.event_name == 'schedule') && env.THETAG != '')
     - run: echo "PUBLISH=1" >> $GITHUB_ENV
-      if: (github.event.inputs.publish == '1' && env.CUSTOM_TAG != '') || (github.event_name == 'push' && env.THETAG != '')
+      if: (github.event.inputs.publish == '1' && env.CUSTOM_TAG != '') || ((github.event_name == 'push' || github.event_name == 'schedule') && env.THETAG != '')
 
     - name: Checkout branch
       uses: actions/checkout@v2
+
+    - name: Run Security Update Audit
+      run: |
+        script/audit
 
     - name: Login to Azure
       uses: azure/login@v1
