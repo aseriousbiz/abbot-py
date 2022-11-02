@@ -18,14 +18,7 @@ jobs:
           private_key: ${{ secrets.SERIOUSBOT_KEY }}
       - name: Check out the repo
         uses: actions/checkout@v3.1.0
-      - name: Check out issue-actions
-        uses: actions/checkout@v3.1.0
+      - uses: actions/add-to-project@v0.3.0
         with:
-          repository: aseriousbiz/issue-actions
-          ref: main
-          token: ${{ steps.generate_token.outputs.token }}
-          path: ./.github/aseriousbiz/issue-actions
-      - uses: ./.github/aseriousbiz/issue-actions/add-issue-to-project
-        with:
-          project: https://github.com/orgs/aseriousbiz/projects/1
-          token: ${{ steps.generate_token.outputs.token }}
+          project-url: https://github.com/orgs/aseriousbiz/projects/1
+          github-token: ${{ steps.generate_token.outputs.token }}
