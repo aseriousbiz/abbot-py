@@ -64,7 +64,7 @@ jobs:
       if: (github.event.inputs.publish == '1' && env.CUSTOM_TAG != '') || ((github.event_name == 'push' || github.event_name == 'schedule') && env.THETAG != '')
 
     - name: Checkout branch
-      uses: actions/checkout@v2
+      uses: actions/checkout@v3.1.0
 
     - name: Run Security Update Audit
       run: |
@@ -90,7 +90,7 @@ jobs:
     - name: GitHub App token
       if: env.PUBLISH == 1 || env.DEPLOY == 1
       id: generate_token
-      uses: tibdex/github-app-token@v1.5.0
+      uses: tibdex/github-app-token@v1.7.0
       with:
         app_id: ${{ secrets.SERIOUSBOT_APPID }}
         private_key: ${{ secrets.SERIOUSBOT_KEY }}
