@@ -15,7 +15,6 @@ cffi==1.14.2
 chardet==3.0.4
 charset-normalizer==2.0.9
 click==8.0.3
-cryptography==3.3.2
 db-dtypes==1.0.1
 dnspython==2.2.0
 ecdsa==0.14.1
