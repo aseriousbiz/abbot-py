@@ -19,8 +19,9 @@ class ApiClient(object):
     Api Client for the skill runner APIs hosted on abbot-web. This class understands the 
     authentication mechanism when calling a skill runner API.
     """
-    def __init__(self, skill_id, user_id, api_token, timestamp, trace_parent):
+    def __init__(self, skill_id, user_id, api_token, timestamp, trace_parent, logger=None):
         self.user_id = user_id
+        self.logger = logger or logging.getLogger("ApiClient")
 
         base_url = os.environ.get('AbbotApiBaseUrl', 'https://localhost:4979/api')
         self.base_url = f'{base_url}/skills/{skill_id}'
@@ -38,7 +39,7 @@ class ApiClient(object):
                 'Authorization': f'Bearer {api_token}',
                 'traceparent': trace_parent
             }
-        logging.info(f'ApiClient created with traceparent: {trace_parent}')
+        self.logger.info('ApiClient created with traceparent: %s', trace_parent)
         
         # In order to prevent users from accessing sensitive data, we encrypt it using Fernet, 
         # then decrypt in the accessors. 
@@ -92,8 +93,7 @@ class ApiClient(object):
         except Exception as e:
             if Environment.is_test():
                 raise e
-            logging.error(f"There was an error {method}ing to {url}")
-            logging.error(e)
+            self.logger.exception(f"There was an error {method}ing to {url}", e)
 
     def delete(self, path):
         """

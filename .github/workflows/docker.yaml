@@ -1,9 +1,5 @@
 name: Publish 'aseriousbiz/abbot/abbot-py/runner-py' image
 
-env:
-  IMAGE_TAG_BASE: abbotimages.azurecr.io/aseriousbiz/abbot-py/runner-py
-  DOCKERFILE: Dockerfile
-
 # The rest of this is basically generic and copy-pastable.
 # The 'env' vars above control which docker file is built and what name the image is published under.
 
@@ -57,31 +53,44 @@ jobs:
           if [ "${{ github.event_name }}" == "pull_request" ]; then
             # For a PR, use the head branch.
             BRANCH_TAG="$(echo "${{ github.head_ref }}" | sed 's@/@.@g')"
-            IMAGE_TAG="${IMAGE_TAG_BASE}:${BRANCH_TAG}"
+            IMAGE_VERSION="${BRANCH_TAG}"
           else
             # For push or schedule events, we run on main
-            IMAGE_TAG=$IMAGE_TAG_BASE
+            IMAGE_TAG="latest"
             if [ "${{ github.ref_name }}" != "main" ]; then
               # For a non-main branch, use the ref_name to generate a tag
               BRANCH_TAG="$(echo "${{ github.ref_name }}" | sed 's@/@.@g')"
-              IMAGE_TAG="${IMAGE_TAG}:${BRANCH_TAG}"
+              IMAGE_VERSION="${BRANCH_TAG}"
             fi
           fi
 
-          # Save the IMAGE_TAG env var to the GITHUB_ENV file so future steps can use it.
-          echo "IMAGE_TAG=$IMAGE_TAG" >> $GITHUB_ENV
+          # Save the IMAGE_VERSION env var to the GITHUB_ENV file so future steps can use it.
+          echo "IMAGE_VERSION=$IMAGE_VERSION" >> $GITHUB_ENV
 
       - name: Docker Build
         run: |
           docker build \
-            -t $IMAGE_TAG \
+            -t abbotimages.azurecr.io/aseriousbiz/abbot-py/runner-py-functions:$IMAGE_VERSION \
             --build-arg "BUILD_BRANCH=${{ github.ref_name }}" \
             --build-arg "BUILD_SHA=${{ github.sha }}" \
             --label "github.sha=${{ github.sha }}" \
             --label "github.ref_name=${{ github.ref_name }}" \
             --label "github.actor=${{ github.actor }}" \
             --label "github.run_id=${{ github.run_id }}" \
-            -f $DOCKERFILE \
+            -f functions.Dockerfile \
+            .
+
+      - name: Docker Build (Standalone)
+        run: |
+          docker build \
+            -t abbotimages.azurecr.io/aseriousbiz/abbot-py/runner-py:$IMAGE_VERSION \
+            --build-arg "BUILD_BRANCH=${{ github.ref_name }}" \
+            --build-arg "BUILD_SHA=${{ github.sha }}" \
+            --label "github.sha=${{ github.sha }}" \
+            --label "github.ref_name=${{ github.ref_name }}" \
+            --label "github.actor=${{ github.actor }}" \
+            --label "github.run_id=${{ github.run_id }}" \
+            -f Dockerfile \
             .
 
       # Push the container to ACR
@@ -90,14 +99,28 @@ jobs:
       # That makes moving to branch-deployment easier.
       - name: Push the docker image
         run: |
-          docker push $IMAGE_TAG
+          docker push abbotimages.azurecr.io/aseriousbiz/abbot-py/runner-py-functions:$IMAGE_VERSION
+          docker push abbotimages.azurecr.io/aseriousbiz/abbot-py/runner-py:$IMAGE_VERSION
 
       - name: Get the image manifest
         run: |
-          docker image inspect "$IMAGE_TAG" > image_manifest.json
+          docker image inspect "abbotimages.azurecr.io/aseriousbiz/abbot-py/runner-py-functions:$IMAGE_VERSION" > runner-py-functions.manifest.json
+          docker image inspect "abbotimages.azurecr.io/aseriousbiz/abbot-py/runner-py:$IMAGE_VERSION" > runner-py.manifest.json
       
       - name: Publish image manifest artifact
         uses: actions/upload-artifact@v3
         with:
-          name: image_manifest
-          path: image_manifest.json
+          name: runner-py-functions.manifest.json
+          path: runner-py-functions.manifest.json
+      
+      - name: Publish image manifest artifact
+        uses: actions/upload-artifact@v3
+        with:
+          name: runner-py.manifest.json
+          path: runner-py.manifest.json
+      
+      - name: Deploy Container to Azure Functions
+        uses: Azure/functions-container-action@v1
+        with:
+          app-name: abbot-skills-python-container-main
+          image: "abbotimages.azurecr.io/aseriousbiz/abbot-py/runner-py-functions:$IMAGE_VERSION"
