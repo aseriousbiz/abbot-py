@@ -14,8 +14,6 @@ import soupsieve
 import boto3
 import octokit
 
-from SkillRunner.bot.policy import exec_with_policy
-
 # End of user skill imports
 
 from .storage import Brain
@@ -40,6 +38,7 @@ from .arguments import Argument, MentionArgument, Arguments, RoomArgument
 from types import SimpleNamespace
 from .message_options import MessageOptions
 from .conversations import Conversation
+from .policy import Policy
 
 class Bot(object):
     """
@@ -79,8 +78,9 @@ class Bot(object):
     :var response: The response that will be sent to the sender of the HTTP request, if any.
     :var conversation: The conversation this skill was invoked within, if any.
     """
-    def __init__(self, req, api_token, trace_parent=None):
+    def __init__(self, req, api_token, trace_parent=None, logger=None):
         self.responses = []
+        self.logger = logger or logging.getLogger("Bot")
 
         skillInfo = req.get('SkillInfo')
         runnerInfo = req.get('RunnerInfo')
@@ -101,7 +101,7 @@ class Bot(object):
         self.thread = self.room.get_thread(self.message_id)
 
         # Clients
-        api_client = ApiClient(self.skill_id, self.user_id, api_token, self.timestamp, trace_parent)
+        api_client = ApiClient(self.skill_id, self.user_id, api_token, self.timestamp, trace_parent, self.logger.getChild("ApiClient"))
         self.brain = Brain(api_client) 
         self.secrets = Secrets(api_client)
         self.rooms = Rooms(api_client, self.platform_type)
@@ -159,11 +159,12 @@ class Bot(object):
 
             out = None
 
-            exec_with_policy(self.code, script_locals)
+            policy = Policy(self.logger.getChild("Policy"))
+            policy.exec(self.code, script_locals)
 
             return self.responses
         except SyntaxError as e:
-            logging.exception("Compilation Error", exc_info=True)
+            self.logger.exception("Compilation Error", exc_info=True)
             raise e
         except AttributeError as e:
             if not out:
@@ -174,7 +175,7 @@ class Bot(object):
             else:
                 pass
         except Exception as e:
-            logging.exception("Runtime Error", exc_info=True)
+            self.logger.exception("Runtime Error", exc_info=True)
             raise e
 
     def reply(self, response, direct_message=False, **kwargs):

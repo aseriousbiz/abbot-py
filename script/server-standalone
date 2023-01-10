@@ -12,4 +12,8 @@ else
     OS="Linux"
 fi
 
-docker build -t abbot-skills-python-dev -f docker/abbot-skills-python-dev.Dockerfile .
+cd "$ROOTDIR"
+
+source .venv/bin/activate
+
+ABBOT_SKILL_RUNNER_TOKEN="runnerdevsecret" ABBOT_ENV="dev" python3 ./src/runner.py
