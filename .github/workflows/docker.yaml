@@ -56,7 +56,7 @@ jobs:
             IMAGE_VERSION="${BRANCH_TAG}"
           else
             # For push or schedule events, we run on main
-            IMAGE_TAG="latest"
+            IMAGE_VERSION="main"
             if [ "${{ github.ref_name }}" != "main" ]; then
               # For a non-main branch, use the ref_name to generate a tag
               BRANCH_TAG="$(echo "${{ github.ref_name }}" | sed 's@/@.@g')"
@@ -119,9 +119,15 @@ jobs:
           name: runner-py.manifest.json
           path: runner-py.manifest.json
       
+      - name: Get image digest
+        run: |
+          FULL_IMAGE_ID=$(docker image inspect --format "{{index .RepoDigests 0}}" abbotimages.azurecr.io/aseriousbiz/abbot-py/runner-py-functions:$IMAGE_VERSION)
+          echo "Image ID: $FULL_IMAGE_ID"
+          echo "FULL_IMAGE_ID=$FULL_IMAGE_ID" >> $GITHUB_ENV
+      
       - name: Deploy Container to Azure Functions
         uses: Azure/functions-container-action@v1
         if: ${{ github.event_name == 'push' && github.ref_name == 'main' }}
         with:
           app-name: abbot-skills-python-container-main
-          image: "abbotimages.azurecr.io/aseriousbiz/abbot-py/runner-py-functions:$IMAGE_VERSION"
+          image: ${{ env.FULL_IMAGE_ID }}

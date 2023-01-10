@@ -10,8 +10,6 @@ from SkillRunner.bot.bot import Bot
 
 from flask import Flask,redirect,request,Response
 
-runner_path = "/api/v0/execute"
-
 secret = os.environ.get("ABBOT_SKILL_RUNNER_TOKEN")
 if secret is None:
     raise Exception("ABBOT_SKILL_RUNNER_TOKEN environment variable not set")
@@ -25,7 +23,7 @@ if len(secret) < 64 and env != "dev":
 app = Flask(__name__)
 
 my_path = os.path.realpath(__file__)
-branch_info_path = os.path.join(my_path, "metadata.json")
+branch_info_path = os.path.join(my_path, "build_info.txt")
 
 branch_info = { "branch": "unknown", "sha": "unknown" }
 
@@ -37,7 +35,7 @@ try:
         branch_info["sha"] = lines[1]
 except:
     # Ignore all failures
-    branch_info = { "branch": "<unknown>", "sha": "<unknown>", "version": "v0.0.0#unknown" }
+    branch_info = { "branch": "<unknown>", "sha": "<unknown>" }
 # pylint: enable=bare-except
 
 @app.route("/")
@@ -54,7 +52,6 @@ def status():
     """
     return {
         "status": "ok",
-        "version": branch_info["version"],
         "branch": branch_info["branch"],
         "sha": branch_info["sha"],
     }

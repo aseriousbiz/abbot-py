@@ -59,7 +59,7 @@ def main(req: func.HttpRequest) -> func.HttpResponse:
 
     rm = ResponseManager()
 
-    func_root = os.path.dirname(os.path.dirname(os.path.realpath(__file__)))
+    func_root = os.path.dirname(os.path.realpath(__file__))
     branch_info_path = os.path.join(func_root, "branch_info.txt")
 
     branch_info = { "branch": "unknown", "sha": "unknown" }
