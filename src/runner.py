@@ -38,7 +38,6 @@ try:
 except:
     # Ignore all failures
     branch_info = { "branch": "<unknown>", "sha": "<unknown>", "version": "v0.0.0#unknown" }
-    pass
 # pylint: enable=bare-except
 
 @app.route("/")
@@ -46,7 +45,7 @@ def index():
     """
     The root URL, just redirects to the status endpoint
     """
-    return redirect("/api/v1/status", 301)
+    return redirect("/api/v1/status")
 
 @app.route("/api/v1/status", methods=["GET"])
 def status():

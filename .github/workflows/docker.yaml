@@ -121,6 +121,7 @@ jobs:
       
       - name: Deploy Container to Azure Functions
         uses: Azure/functions-container-action@v1
+        if: ${{ github.event_name == 'push' && github.ref_name == 'main' }}
         with:
           app-name: abbot-skills-python-container-main
           image: "abbotimages.azurecr.io/aseriousbiz/abbot-py/runner-py-functions:$IMAGE_VERSION"
