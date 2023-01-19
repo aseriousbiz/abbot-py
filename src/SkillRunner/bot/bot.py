@@ -98,7 +98,8 @@ class Bot(object):
         self.code = runnerInfo.get('Code')
         self.room = Room.from_json(skillInfo)
         self.message_id = skillInfo.get('MessageId')
-        self.thread = self.room.get_thread(self.message_id)
+        thread_id = skillInfo.get('ThreadId') or self.message_id
+        self.thread = self.room.get_thread(thread_id)
 
         # Clients
         api_client = ApiClient(self.skill_id, self.user_id, api_token, self.timestamp, trace_parent, self.logger.getChild("ApiClient"))
