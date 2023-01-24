@@ -30,6 +30,7 @@ from . import signal_event
 from .signaler import Signaler
 from .utils import obj
 from .reply_client import ReplyClient
+from .tickets_client import TicketsClient
 from . import exceptions
 from .apiclient import ApiClient
 from .trigger_response import TriggerResponse
@@ -110,6 +111,7 @@ class Bot(object):
         self.utils = Utilities(api_client)
         self._signaler = Signaler(api_client, req)
         self._reply_client = ReplyClient(api_client, runnerInfo.get('ConversationReference'), skillInfo.get('MessagePlatformType'), self.skill_id, self.responses)
+        self._tickets_client = TicketsClient(api_client, self)
 
         self.raw = skillInfo
 
