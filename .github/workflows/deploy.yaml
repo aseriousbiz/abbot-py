@@ -14,6 +14,7 @@ on:
 
 env:
   APP_DESCRIPTION: "Python Skill Runner"
+  IMAGE_BASE_NAME: "abbotimages.azurecr.io/aseriousbiz/abbot-py/runner-py-functions"
 
 # Only allow one active deployment per environment
 concurrency:
@@ -42,4 +43,4 @@ jobs:
         uses: azure/webapps-deploy@v2
         with:
           app-name: "${{ vars.ABBOT_RUNNER_PY_APP_NAME }}"
-          images: "abbotimages.azurecr.io/aseriousbiz/abbot/runner-dotnet:${{ inputs.label }}"
+          images: "${{ env.IMAGE_BASE_NAME }}:${{ inputs.label }}"
