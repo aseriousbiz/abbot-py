@@ -1,0 +1,65 @@
+name: Deploy Python Skill Runner
+on:
+  workflow_dispatch:
+    inputs:
+      environment:
+        description: "Environment"
+        required: true
+        type: environment
+      label:
+        description: "Image label"
+        default: "latest"
+        required: true
+        type: string
+
+env:
+  APP_DESCRIPTION: "Python Skill Runner"
+
+# Only allow one active deployment per environment
+concurrency:
+  group: ${{ github.workflow }}-${{ inputs.environment }}
+  cancel-in-progress: false
+
+jobs:
+  deploy-fe:
+    runs-on: ubuntu-latest
+    environment:
+      name: "${{ inputs.environment }}"
+      url: "${{ vars.ABBOT_RUNNER_PY_URL }}"
+    steps:
+      - uses: actions/checkout@v3
+      - name: Notify that deployment is starting
+        env:
+          SLACK_WEBHOOK: ${{ secrets.SLACK_DEPLOY_NOTIFY_WEBHOOK }}
+        run: |
+          script/helpers/post-to-slack "*<https://github.com/${{ github.repository }}/deployments?environment=${{ inputs.environment }}|${{ inputs.environment }}>*: ${{ github.actor }} is <https://github.com/${{ github.repository }}/actions/runs/${{ github.run_id }}|deploying> ${{ env.APP_DESCRIPTION }}"
+
+      - name: Login to Azure
+        uses: azure/login@v1
+        with:
+          creds: '{ "clientId": "${{ secrets.DEPLOYBOT_AZURE_AD_CLIENT_ID }}", "clientSecret": "${{ secrets.DEPLOYBOT_AZURE_AD_CLIENT_SECRET }}", "subscriptionId": "${{ secrets.AZURE_SUBSCRIPTION_ID }}", "tenantId": "${{ secrets.AZURE_TENANT_ID }}" }'
+
+      - name: Generate a unique Deployment ID
+        run: |
+          echo "DEPLOYMENT_ID=$(uuidgen)" >> "$GITHUB_ENV"
+
+      - name: Deploy to Runner
+        uses: azure/webapps-deploy@v2
+        with:
+          app-name: "${{ vars.ABBOT_RUNNER_PY_APP_NAME }}"
+          slot-name: "deployment"
+          images: "abbotimages.azurecr.io/aseriousbiz/abbot/runner-dotnet:${{ inputs.label }}"
+
+      - name: Notify that deployment completed
+        if: success()
+        env:
+          SLACK_WEBHOOK: ${{ secrets.SLACK_DEPLOY_NOTIFY_WEBHOOK }}
+        run: |
+          script/helpers/post-to-slack "*<https://github.com/${{ github.repository }}/deployments?environment=${{ inputs.environment }}|${{ inputs.environment }}>*: ${{ github.actor }} has <https://github.com/${{ github.repository }}/actions/runs/${{ github.run_id }}|deployed> ${{ env.APP_DESCRIPTION }}"
+
+      - name: Notify that deployment failed
+        if: failure()
+        env:
+          SLACK_WEBHOOK: ${{ secrets.SLACK_DEPLOY_NOTIFY_WEBHOOK }}
+        run: |
+          script/helpers/post-to-slack "*<https://github.com/${{ github.repository }}/deployments?environment=${{ inputs.environment }}|${{ inputs.environment }}>*: ${{ github.actor }} has *<https://github.com/${{ github.repository }}/actions/runs/${{ github.run_id }}|failed to deploy>* ${{ env.APP_DESCRIPTION }}"
