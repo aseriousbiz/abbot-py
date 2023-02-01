@@ -66,6 +66,8 @@ jobs:
 
           # Save the IMAGE_VERSION env var to the GITHUB_ENV file so future steps can use it.
           echo "IMAGE_VERSION=$IMAGE_VERSION" >> $GITHUB_ENV
+          echo "COMMIT_LABEL=commit-${{ github.sha }}" >> $GITHUB_ENV
+          echo "COMMIT_TAG=${IMAGE_TAG_BASE}:commit-${{ github.sha }}" >> $GITHUB_ENV
 
       - name: Docker Build
         run: |
@@ -79,6 +81,7 @@ jobs:
             --label "github.run_id=${{ github.run_id }}" \
             -f functions.Dockerfile \
             .
+            docker tag abbotimages.azurecr.io/aseriousbiz/abbot-py/runner-py-functions:$IMAGE_VERSION abbotimages.azurecr.io/aseriousbiz/abbot-py/runner-py-functions:$COMMIT_LABEL
 
       - name: Docker Build (Standalone)
         run: |
@@ -92,6 +95,7 @@ jobs:
             --label "github.run_id=${{ github.run_id }}" \
             -f Dockerfile \
             .
+            docker tag abbotimages.azurecr.io/aseriousbiz/abbot-py/runner-py:$IMAGE_VERSION abbotimages.azurecr.io/aseriousbiz/abbot-py/runner-py:$COMMIT_LABEL
 
       # Push the container to ACR
       # We _do_ run this even on Pull Requests!
@@ -101,6 +105,8 @@ jobs:
         run: |
           docker push abbotimages.azurecr.io/aseriousbiz/abbot-py/runner-py-functions:$IMAGE_VERSION
           docker push abbotimages.azurecr.io/aseriousbiz/abbot-py/runner-py:$IMAGE_VERSION
+          docker push abbotimages.azurecr.io/aseriousbiz/abbot-py/runner-py-functions:$COMMIT_LABEL
+          docker push abbotimages.azurecr.io/aseriousbiz/abbot-py/runner-py:$COMMIT_LABEL
 
       - name: Get the image manifest
         run: |
