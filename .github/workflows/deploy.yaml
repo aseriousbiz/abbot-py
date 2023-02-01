@@ -47,7 +47,6 @@ jobs:
         uses: azure/webapps-deploy@v2
         with:
           app-name: "${{ vars.ABBOT_RUNNER_PY_APP_NAME }}"
-          slot-name: "deployment"
           images: "abbotimages.azurecr.io/aseriousbiz/abbot/runner-dotnet:${{ inputs.label }}"
 
       - name: Notify that deployment completed
