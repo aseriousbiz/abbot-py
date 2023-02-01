@@ -118,16 +118,10 @@ jobs:
         with:
           name: runner-py.manifest.json
           path: runner-py.manifest.json
-      
-      - name: Get image digest
+          
+      - name: Trigger deployment workflow (Main only)
+        if: github.event_name == 'push' && github.ref_name == 'main'
+        env:
+          GH_TOKEN: ${{ github.token }}
         run: |
-          FULL_IMAGE_ID=$(docker image inspect --format "{{index .RepoDigests 0}}" abbotimages.azurecr.io/aseriousbiz/abbot-py/runner-py-functions:$IMAGE_VERSION)
-          echo "Image ID: $FULL_IMAGE_ID"
-          echo "FULL_IMAGE_ID=$FULL_IMAGE_ID" >> $GITHUB_ENV
-      
-      - name: Deploy Container to Azure Functions
-        uses: Azure/functions-container-action@v1
-        if: ${{ github.event_name == 'push' && github.ref_name == 'main' }}
-        with:
-          app-name: abbot-skills-python-container-main
-          image: ${{ env.FULL_IMAGE_ID }}
+          gh workflow run deploy.yaml -f environment=production -f label=$COMMIT_LABEL
