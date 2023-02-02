@@ -26,6 +26,9 @@ on:
   # Allow manually scheduling the build too.
   workflow_dispatch:
 
+env:
+  IMAGE_BASE_NAME: abbotimages.azurecr.io/aseriousbiz/abbot-py
+
 jobs:
   build:
     runs-on: ubuntu-latest
@@ -72,7 +75,7 @@ jobs:
       - name: Docker Build
         run: |
           docker build \
-            -t abbotimages.azurecr.io/aseriousbiz/abbot-py/runner-py-functions:$IMAGE_VERSION \
+            -t $IMAGE_BASE_NAME/runner-py-functions:$IMAGE_VERSION \
             --build-arg "BUILD_BRANCH=${{ github.ref_name }}" \
             --build-arg "BUILD_SHA=${{ github.sha }}" \
             --label "github.sha=${{ github.sha }}" \
@@ -81,12 +84,12 @@ jobs:
             --label "github.run_id=${{ github.run_id }}" \
             -f functions.Dockerfile \
             .
-            docker tag abbotimages.azurecr.io/aseriousbiz/abbot-py/runner-py-functions:$IMAGE_VERSION abbotimages.azurecr.io/aseriousbiz/abbot-py/runner-py-functions:$COMMIT_LABEL
+            docker tag $IMAGE_BASE_NAME/runner-py-functions:$IMAGE_VERSION abbotimages.azurecr.io/aseriousbiz/abbot-py/runner-py-functions:$COMMIT_LABEL
 
       - name: Docker Build (Standalone)
         run: |
           docker build \
-            -t abbotimages.azurecr.io/aseriousbiz/abbot-py/runner-py:$IMAGE_VERSION \
+            -t $IMAGE_BASE_NAME/runner-py:$IMAGE_VERSION \
             --build-arg "BUILD_BRANCH=${{ github.ref_name }}" \
             --build-arg "BUILD_SHA=${{ github.sha }}" \
             --label "github.sha=${{ github.sha }}" \
@@ -95,7 +98,7 @@ jobs:
             --label "github.run_id=${{ github.run_id }}" \
             -f Dockerfile \
             .
-            docker tag abbotimages.azurecr.io/aseriousbiz/abbot-py/runner-py:$IMAGE_VERSION abbotimages.azurecr.io/aseriousbiz/abbot-py/runner-py:$COMMIT_LABEL
+            docker tag $IMAGE_BASE_NAME/runner-py:$IMAGE_VERSION abbotimages.azurecr.io/aseriousbiz/abbot-py/runner-py:$COMMIT_LABEL
 
       # Push the container to ACR
       # We _do_ run this even on Pull Requests!
@@ -103,15 +106,15 @@ jobs:
       # That makes moving to branch-deployment easier.
       - name: Push the docker image
         run: |
-          docker push abbotimages.azurecr.io/aseriousbiz/abbot-py/runner-py-functions:$IMAGE_VERSION
-          docker push abbotimages.azurecr.io/aseriousbiz/abbot-py/runner-py:$IMAGE_VERSION
-          docker push abbotimages.azurecr.io/aseriousbiz/abbot-py/runner-py-functions:$COMMIT_LABEL
-          docker push abbotimages.azurecr.io/aseriousbiz/abbot-py/runner-py:$COMMIT_LABEL
+          docker push $IMAGE_BASE_NAME/runner-py-functions:$IMAGE_VERSION
+          docker push $IMAGE_BASE_NAME/runner-py:$IMAGE_VERSION
+          docker push $IMAGE_BASE_NAME/runner-py-functions:$COMMIT_LABEL
+          docker push $IMAGE_BASE_NAME/runner-py:$COMMIT_LABEL
 
       - name: Get the image manifest
         run: |
-          docker image inspect "abbotimages.azurecr.io/aseriousbiz/abbot-py/runner-py-functions:$IMAGE_VERSION" > runner-py-functions.manifest.json
-          docker image inspect "abbotimages.azurecr.io/aseriousbiz/abbot-py/runner-py:$IMAGE_VERSION" > runner-py.manifest.json
+          docker image inspect "$IMAGE_BASE_NAME/runner-py-functions:$IMAGE_VERSION" > runner-py-functions.manifest.json
+          docker image inspect "$IMAGE_BASE_NAME/runner-py:$IMAGE_VERSION" > runner-py.manifest.json
       
       - name: Publish image manifest artifact
         uses: actions/upload-artifact@v3
