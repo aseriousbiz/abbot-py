@@ -1,3 +1,5 @@
+from .working_hours import WorkingHours
+
 import json
 
 from .chat_address import ChatAddress, ChatAddressType
@@ -24,6 +26,7 @@ class UserMessageTarget(object):
         """
         return ChatAddress(ChatAddressType.USER, self.id, thread_id)
 
+
 class Mention(UserMessageTarget):
     """
     A user mention.
@@ -36,13 +39,14 @@ class Mention(UserMessageTarget):
     :var timezone: The user's timezone if known
     :var platform_type: The platform type of the user.
     """
-    def __init__(self, id, user_name, name, email, location, platform_type=None):
+    def __init__(self, id, user_name, name, email, location, platform_type=None, working_hours=None):
         super().__init__(id)
         self.user_name = user_name
         self.name = name
         self.email = email
         self.location = location
         self.__platform_type = platform_type
+        self.working_hours = working_hours
 
     def __eq__(self, other):
         return isinstance(other, Mention) and \
@@ -83,13 +87,15 @@ class Mention(UserMessageTarget):
                 location = Location(None, None, timezone)
             else:
                 location.timezone = timezone
+        working_hours = WorkingHours.from_json(mention_json.get('WorkingHours'))
         return cls(
             mention_json.get('Id'),
             mention_json.get('UserName'),
             mention_json.get('Name'),
             mention_json.get('Email'),
             location,
-            platform_type)
+            platform_type,
+            working_hours)
 
     def toJSON(self):
         return json.dumps(self, default=lambda o: o.__dict__,
