@@ -170,6 +170,8 @@ class Mention(UserMessageTarget):
         self.location = location
         self.working_hours = working_hours
 
+        self.working_hours = working_hours
+
     def __eq__(self: 'Mention', other: 'Mention') -> bool:
         return isinstance(other, Mention) and \
             self.id == other.id and \

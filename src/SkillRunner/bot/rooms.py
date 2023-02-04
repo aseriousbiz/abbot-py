@@ -114,7 +114,6 @@ class Rooms(object):
         """
         url = f"{self.__room_url(room)}/details"
         json = self._api_client.get(url)
-        
         return RoomDetails.from_json(json)
 
     def get_coverage(self, room, room_role, tz):
