@@ -110,7 +110,7 @@ class Bot(object):
         self.users = Users()
         self.utils = Utilities(api_client)
         self._signaler = Signaler(api_client, req)
-        self._reply_client = ReplyClient(api_client, runnerInfo.get('ConversationReference'), skillInfo.get('MessagePlatformType'), self.skill_id, self.responses)
+        self._reply_client = ReplyClient(api_client, self.room, thread_id, req.get('PassiveReplies'), runnerInfo.get('ConversationReference'), self.skill_id, self.responses)
         self._tickets_client = TicketsClient(api_client, self)
 
         self.raw = skillInfo
