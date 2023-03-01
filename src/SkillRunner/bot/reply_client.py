@@ -9,13 +9,16 @@ class ReplyClient(object):
     called. Otherwise replies are returned synchrously in the response to the request that
     calls this skill.
     """
-    def __init__(self, api_client, conversation_reference, message_platform_type, skill_id, responses):
+    def __init__(self, api_client, room, thread_id, passive_replies, conversation_reference, skill_id, responses):
         self._api_client = api_client
+        self._room = room
+        self._thread_id = thread_id
         self._conversation_reference = conversation_reference
-        self._message_platform_type = message_platform_type
         self._skill_id = skill_id
         self._reply_url = "/reply"
         self._responses = responses
+        # passive_replies is true if passive_replies is not nil and not false OR conversation_reference is nil
+        self._passive_replies = passive_replies if passive_replies else conversation_reference is None
 
     def reply(self, response, message_options):
         """
@@ -24,14 +27,14 @@ class ReplyClient(object):
         Args:
             response (str): The response to send back to chat.
         """
-        if self._conversation_reference:
+        if not self._passive_replies:
             body = self.__create_reply_payload(response, message_options, [])
             self._api_client.post(self._reply_url, body)
         else:
             self._responses.append(str(response))
 
     def reply_with_image(self, image, response, title, title_url, color, message_options):
-        if self._conversation_reference:
+        if not self._passive_replies:
             body = self.__create_reply_payload(response, message_options, attachments=[
                 {
                     "Buttons": [],
@@ -57,7 +60,7 @@ class ReplyClient(object):
             title (str): A title to render (optional).
             color (str): The color to use for the sidebar (Slack Only) in hex (ex. #3AA3E3) (optional).
         """
-        if self._conversation_reference:
+        if not self._passive_replies:
             body = self.__create_reply_payload(response, message_options, attachments=[
                 {
                     "Buttons": [b.toJSON() for b in buttons],
@@ -79,13 +82,18 @@ class ReplyClient(object):
             response (str): The response to send back to chat.
             delay_in_seconds (int): The number of seconds to delay before sending the response.
         """
-        if self._conversation_reference:
+        if not self._passive_replies:
             body = self.__create_reply_payload(response, message_options, schedule=delay_in_seconds)
             self._api_client.post(self._reply_url, body)
         else:
             self._responses.append(str(response))
 
     def __create_reply_payload(self, response: str, message_options: MessageOptions, attachments: list = [], schedule: int = 0):
+        
+        # if message_options are null, then create a new instance
+        if message_options is None:
+            message_options = self._room.get_thread(self._thread_id)
+
         return {
             "SkillId": self._skill_id,
             "Message": str(response),
@@ -93,5 +101,5 @@ class ReplyClient(object):
             "Options": message_options.toJSON(),
             "Attachments": attachments,
             "Schedule": schedule,
-            "MessagePlatformType": self._message_platform_type
+            "MessagePlatformType": "Slack"
         }
