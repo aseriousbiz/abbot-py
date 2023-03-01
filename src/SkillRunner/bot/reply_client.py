@@ -101,5 +101,5 @@ class ReplyClient(object):
             "Options": message_options.toJSON(),
             "Attachments": attachments,
             "Schedule": schedule,
-            "MessagePlatformType": self._message_platform_type
+            "MessagePlatformType": "Slack"
         }
