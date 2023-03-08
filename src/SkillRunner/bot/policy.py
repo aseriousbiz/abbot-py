@@ -2,9 +2,70 @@ import logging
 import os
 from RestrictedPython import compile_restricted, safe_builtins, utility_builtins
 
-class Policy(object):
+def getpolicy(logger):
+    policy = os.environ.get("ABBOT_SANDBOX_POLICY")
+    if policy is None:
+        if os.environ.get("ABBOT_SANDBOXED") == "false":
+            policy = "permissive"
+        else:
+            policy = "light"
+
+    if policy == "none":
+        return NoPolicy(logger)
+    elif policy == "light":
+        return LightPolicy(logger)
+    elif policy == "restrictive":
+        return RestrictivePolicy(logger)
+    else:
+        # Default to light
+        return LightPolicy(logger)
+
+class NoPolicy(object):
     """
-    Applies sandboxing policy to user skill code
+    Applies a permissive sandboxing policy to user skill code.
+    That is, no sandboxing at all.
+    """
+    def __init__(self, logger=None):
+        self.logger = logger or logging.getLogger("Policy")
+
+    def exec(self, skill_code, locals):
+        # We're running outside a sandboxed environment, so go ahead and run the code directly
+        exec(skill_code, locals)
+
+class LightPolicy(object):
+    """
+    Applies a lightly-restrictive sandboxing policy to user skill code.
+    This restricts _known_ exploitable functions, but there may be unknown ways to exploit the environment.
+    """
+
+    allowed_env_keys = [
+        "PYTHON_VERSION",
+        "LANG",
+        "PATH",
+        "PYTHON_GET_PIP_URL",
+        "HOME",
+        "PYTHON_SETUPTOOLS_VERSION",
+        "PYTHON_PIP_VERSION",
+        "NUM_CORES",
+        "PYTHONPATH"
+    ]
+
+    def __init__(self, logger=None):
+        self.logger = logger or logging.getLogger("Policy")
+
+    def exec(self, skill_code, locals):
+        # Clear out environment variables before calling the skill
+        for key, _ in os.environ.items():
+            if key not in self.allowed_env_keys:
+                del os.environ[key]
+
+        # We're running outside a sandboxed environment, so go ahead and run the code directly
+        exec(skill_code, locals)
+
+class RestrictivePolicy(object):
+    """
+    Applies a fully-restrictive sandboxing policy to user skill code.
+    This restricts skills to only functions "known" (as best we can) to be safe.
     """
 
     allowed_modules = [
@@ -218,8 +279,8 @@ class Policy(object):
     ]
 
     def __init__(self, logger=None):
-        self.script_builtins = safe_builtins.copy()
         self.logger = logger or logging.getLogger("Policy")
+        self.script_builtins = safe_builtins.copy()
 
         # Allow basic utilities (string, math, random, etc.)
         # https://github.com/zopefoundation/RestrictedPython/blob/c1bc989e1fa060273594e39a86d3c4fb3ffe3a4b/src/RestrictedPython/Utilities.py
@@ -309,20 +370,14 @@ class Policy(object):
         Executes the provided python skill code under our restriction policy.
         """
 
-        if os.environ.get('ABBOT_SANDBOXED') == 'false':
-            # We're running outside a sandboxed environment, so go ahead and run the code directly
-            self.logger.info("executing skill code WITHOUT sandbox")
-            exec(skill_code, locals)
-        else:
-            self.logger.info("executing skill code WITH sandbox")
-            # We're running in a sandboxed environment. Run the code through RestrictedPython
-            globals = {
-                **self.script_globals,
-                **locals
-            }
+        # We're running in a sandboxed environment. Run the code through RestrictedPython
+        globals = {
+            **self.script_globals,
+            **locals
+        }
 
-            byte_code = compile_restricted(
-                skill_code,
-                filename='<skill code>',
-                mode='exec')
-            exec(byte_code, globals)
+        byte_code = compile_restricted(
+            skill_code,
+            filename='<skill code>',
+            mode='exec')
+        exec(byte_code, globals)
