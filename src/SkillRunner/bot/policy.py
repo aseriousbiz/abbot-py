@@ -6,7 +6,7 @@ def getpolicy(logger):
     policy = os.environ.get("ABBOT_SANDBOX_POLICY")
     if policy is None:
         if os.environ.get("ABBOT_SANDBOXED") == "false":
-            policy = "permissive"
+            policy = "none"
         else:
             policy = "light"
 
