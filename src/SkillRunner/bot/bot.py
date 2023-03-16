@@ -39,7 +39,7 @@ from .arguments import Argument, MentionArgument, Arguments, RoomArgument
 from types import SimpleNamespace
 from .message_options import MessageOptions
 from .conversations import Conversation
-from .policy import Policy
+from .policy import getpolicy
 
 class Bot(object):
     """
@@ -162,7 +162,8 @@ class Bot(object):
 
             out = None
 
-            policy = Policy(self.logger.getChild("Policy"))
+            policy = getpolicy(self.logger.getChild("Policy"))
+            self.logger.info(f"Running user script under {type(policy).__name__} policy.")
             policy.exec(self.code, script_locals)
 
             return self.responses
