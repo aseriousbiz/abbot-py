@@ -13,7 +13,7 @@ def getpolicy(logger):
     if policy == "none":
         return NoPolicy(logger)
     elif policy == "virtualized":
-        return VirtualizedPolicyu(logger)
+        return VirtualizedPolicy(logger)
     elif policy == "restrictive":
         return RestrictivePolicy(logger)
     else:
