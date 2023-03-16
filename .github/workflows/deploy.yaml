@@ -35,12 +35,22 @@ jobs:
         with:
           creds: '{ "clientId": "${{ secrets.DEPLOYBOT_AZURE_AD_CLIENT_ID }}", "clientSecret": "${{ secrets.DEPLOYBOT_AZURE_AD_CLIENT_SECRET }}", "subscriptionId": "${{ secrets.AZURE_SUBSCRIPTION_ID }}", "tenantId": "${{ secrets.AZURE_TENANT_ID }}" }'
 
+      - name: Login to abbotimages.azurecr.io
+        run: |
+          az acr login -n abbotimages -g abbot-global
+
       - name: Generate a unique Deployment ID
         run: |
           echo "DEPLOYMENT_ID=$(uuidgen)" >> "$GITHUB_ENV"
+
+      - name: Tag the latest-deployed image on ACR
+        run: |
+          docker pull "${{ env.IMAGE_BASE_NAME }}:${{ inputs.label }}"
+          docker tag "${{ env.IMAGE_BASE_NAME }}:${{ inputs.label }}" "${{ env.IMAGE_BASE_NAME }}:deployed-${{ inputs.environment }}"
+          docker push "${{ env.IMAGE_BASE_NAME }}:deployed-${{ inputs.environment }}"
 
       - name: Deploy to Runner
         uses: azure/webapps-deploy@v2
         with:
           app-name: "${{ vars.ABBOT_RUNNER_PY_APP_NAME }}"
-          images: "${{ env.IMAGE_BASE_NAME }}:${{ inputs.label }}"
+          images: "${{ env.IMAGE_BASE_NAME }}:deployed-${{ inputs.environment }}"
