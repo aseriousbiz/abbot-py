@@ -55,14 +55,14 @@ jobs:
         run: |
           if [ "${{ github.event_name }}" == "pull_request" ]; then
             # For a PR, use the head branch.
-            BRANCH_TAG="$(echo "${{ github.head_ref }}" | sed 's@/@.@g')"
+            BRANCH_TAG="branch-$(echo "${{ github.head_ref }}" | sed 's@/@.@g')"
             IMAGE_VERSION="${BRANCH_TAG}"
           else
             # For push or schedule events, we run on main
             IMAGE_VERSION="main"
             if [ "${{ github.ref_name }}" != "main" ]; then
               # For a non-main branch, use the ref_name to generate a tag
-              BRANCH_TAG="$(echo "${{ github.ref_name }}" | sed 's@/@.@g')"
+              BRANCH_TAG="branch-$(echo "${{ github.ref_name }}" | sed 's@/@.@g')"
               IMAGE_VERSION="${BRANCH_TAG}"
             fi
           fi
