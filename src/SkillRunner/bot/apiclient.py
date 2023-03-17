@@ -16,7 +16,7 @@ except AttributeError:
 
 class ApiClient(object):
     """
-    Api Client for the skill runner APIs hosted on abbot-web. This class understands the 
+    Api Client for the skill runner APIs hosted on abbot-web. This class understands the
     authentication mechanism when calling a skill runner API.
     """
     def __init__(self, skill_id, user_id, api_token, timestamp, trace_parent, logger=None):
@@ -39,10 +39,10 @@ class ApiClient(object):
                 'Authorization': f'Bearer {api_token}',
                 'traceparent': trace_parent
             }
-        self.logger.info('ApiClient created with traceparent: %s', trace_parent)
+        self.logger.info("ApiClient created for '%s' with traceparent: %s", base_url, trace_parent)
         
         # In order to prevent users from accessing sensitive data, we encrypt it using Fernet, 
-        # then decrypt in the accessors. 
+        # then decrypt in the accessors.
         obj = json.dumps(header_obj).encode('utf-8')
         cipher = Fernet(safe_key)
         self._request_header = cipher.encrypt(obj)
@@ -90,10 +90,10 @@ class ApiClient(object):
             result = requests.request(method, url, headers=headers, verify=self.verify_ssl, json=data)
             result.raise_for_status()
             return result.json()
-        except Exception as e:
+        except Exception as ex:
             if Environment.is_test():
-                raise e
-            self.logger.exception(f"There was an error {method}ing to {url}", e)
+                raise ex
+            self.logger.exception(f"There was an error {method}ing to {url}: %s", ex)
 
     def delete(self, path):
         """

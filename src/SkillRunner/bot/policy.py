@@ -56,12 +56,18 @@ class VirtualizedPolicy(object):
 
     def exec(self, skill_code, locals):
         # Clear out environment variables before calling the skill
-        for key, _ in os.environ.items():
-            if key not in self.allowed_env_keys:
-                del os.environ[key]
+        new_env = {}
+        for key, value in os.environ.items():
+            if key in self.allowed_env_keys:
+                new_env[key] = value
 
-        # We're running outside a sandboxed environment, so go ahead and run the code directly
-        exec(skill_code, locals)
+        old_env = os.environ
+        os.environ = new_env
+        try:
+            # We're running outside a sandboxed environment, so go ahead and run the code directly
+            exec(skill_code, locals)
+        finally:
+            os.environ = old_env
 
 class RestrictivePolicy(object):
     """
