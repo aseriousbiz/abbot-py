@@ -28,6 +28,7 @@ on:
 
 env:
   IMAGE_BASE_NAME: abbotimages.azurecr.io/aseriousbiz/abbot-py
+  PUBLIC_IMAGE_NAME: abbotpublic.azurecr.io/runners/python
 
 jobs:
   build:
@@ -47,9 +48,10 @@ jobs:
         with:
           creds: '{ "clientId": "${{ secrets.DEPLOYBOT_AZURE_AD_CLIENT_ID }}", "clientSecret": "${{ secrets.DEPLOYBOT_AZURE_AD_CLIENT_SECRET }}", "subscriptionId": "${{ secrets.AZURE_SUBSCRIPTION_ID }}", "tenantId": "${{ secrets.AZURE_TENANT_ID }}" }'
 
-      - name: Login to abbotimages.azurecr.io
+      - name: Login to Container Registries
         run: |
           az acr login -n abbotimages -g abbot-global
+          az acr login -n abbotpublic -g abbot-public
 
       - name: Set environment variables
         run: |
@@ -110,6 +112,12 @@ jobs:
           docker push $IMAGE_BASE_NAME/runner-py:$IMAGE_VERSION
           docker push $IMAGE_BASE_NAME/runner-py-functions:$COMMIT_LABEL
           docker push $IMAGE_BASE_NAME/runner-py:$COMMIT_LABEL
+
+      - name: Tag and push to abbotpublic
+        if: github.event_name == 'push' && github.ref_name == 'main'
+        run: |
+          docker tag $IMAGE_BASE_NAME/runner-py:$COMMIT_LABEL $PUBLIC_IMAGE_NAME:latest
+          docker push $PUBLIC_IMAGE_NAME:latest
 
       - name: Get the image manifest
         run: |
