@@ -12,5 +12,7 @@ COPY ./src /app
 
 RUN echo "${BUILD_BRANCH}\n${BUILD_SHA}" > "/app/build_info.txt"
 ENV AbbotApiBaseUrl=https://app.ab.bot/api
+ENV HOST="0.0.0.0"
+ENV PORT="8080"
 
 ENTRYPOINT [ "python3", "/app/runner.py" ]
