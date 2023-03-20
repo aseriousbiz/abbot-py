@@ -24,7 +24,7 @@ ENV \
     DOTNET_NOLOGO=true \
     FUNCTIONS_EXTENSION_VERSION=~3 \
     ASPNETCORE_URLS=http://+:8080 \
-    AbbotApiBaseUrl=https://ab.bot/api
+    AbbotApiBaseUrl=https://app.ab.bot/api
 
 EXPOSE 8080
 COPY --from=build ./output /home/site/wwwroot
