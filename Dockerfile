@@ -14,5 +14,5 @@ RUN echo "${BUILD_BRANCH}\n${BUILD_SHA}" > "/app/build_info.txt"
 ENV AbbotApiBaseUrl=https://app.ab.bot/api
 ENV HOST="0.0.0.0"
 ENV PORT="80"
-
+ENV ABBOT_SANDBOX_POLICY="permissive"
 ENTRYPOINT [ "python3", "/app/runner.py" ]
