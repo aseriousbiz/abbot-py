@@ -8,12 +8,12 @@ def getpolicy(logger):
         if os.environ.get("ABBOT_SANDBOXED") == "false":
             policy = "none"
         else:
-            policy = "virtualized"
+            policy = "permissive"
 
     if policy == "none":
         return NoPolicy(logger)
-    elif policy == "virtualized":
-        return VirtualizedPolicy(logger)
+    elif policy == "permissive":
+        return PermissivePolicy(logger)
     elif policy == "restrictive":
         return RestrictivePolicy(logger)
     else:
@@ -32,7 +32,7 @@ class NoPolicy(object):
         # We're running outside a sandboxed environment, so go ahead and run the code directly
         exec(skill_code, locals)
 
-class VirtualizedPolicy(object):
+class PermissivePolicy(object):
     """
     Applies a lightly-restrictive sandboxing policy to user skill code.
     Intended for use in environments where the runner is already isolated from the rest of the application.
