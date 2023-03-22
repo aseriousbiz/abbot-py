@@ -24,10 +24,13 @@ class Brain(object):
             The string or object stored in Value. This data is JSON serialized.
         """
         path = self.__get_path(key)
-        output = self._api_client.get(path)
-        if output:
-            return json.loads(output.get("value"))
-        else:
+        try:
+            output = self._api_client.get(path)
+            if output:
+                return json.loads(output.get("value"))
+            else:
+                return None
+        except Exception:
             return None
 
     def read(self, key):
