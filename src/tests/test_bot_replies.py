@@ -261,7 +261,7 @@ class BotRepliesTest(unittest.TestCase):
             },
             status=status)
     
-    def assertReplyCall(self, response: responses.Call, message: Optional[str] = None, skillId: Optional[int]=None, conversationReference: Any=None, options={}, attachments=[], delayInSeconds=0, messagePlatformType = PlatformType.UNIT_TEST):
+    def assertReplyCall(self, response: responses.Call, message: Optional[str] = None, skillId: Optional[int]=None, conversationReference: Any=None, options={}, attachments=[], delayInSeconds=0):
         expected_json = {
             "SkillId": skillId or TEST_SKILL_ID,
             "Message": message,
@@ -269,7 +269,7 @@ class BotRepliesTest(unittest.TestCase):
             "Options": options,
             "Attachments": attachments,
             "Schedule": delayInSeconds,
-            "MessagePlatformType": messagePlatformType,
+            "MessagePlatformType": "Slack",
         }
 
         self.assertEqual(responses.POST, response.request.method)

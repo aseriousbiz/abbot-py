@@ -36,10 +36,9 @@ from .apiclient import ApiClient
 from .trigger_response import TriggerResponse
 from .button import Button
 from .arguments import Argument, MentionArgument, Arguments, RoomArgument
-from types import SimpleNamespace
 from .message_options import MessageOptions
 from .conversations import Conversation
-from .policy import getpolicy
+from .policy import get_policy
 
 class Bot(object):
     """
@@ -162,8 +161,15 @@ class Bot(object):
 
             out = None
 
-            policy = getpolicy(self.logger.getChild("Policy"))
-            self.logger.info(f"Running user script under {type(policy).__name__} policy.")
+            policy_name = os.environ.get("ABBOT_SANDBOX_POLICY")
+            if policy_name is None:
+                if os.environ.get("ABBOT_SANDBOXED") == "false":
+                    policy_name = "none"
+                else:
+                    policy_name = "permissive"
+
+            policy = get_policy(policy_name, self.logger.getChild("Policy"))
+            self.logger.info("Running user script under %s policy.", policy.name())
             policy.exec(self.code, script_locals)
 
             return self.responses
