@@ -25,7 +25,7 @@ done
 
 cd "$ROOTDIR"
 
-source "../.venv/bin/activate"
+source ".venv/bin/activate"
 
 if $fix; then
     echo "Applying security updates..."
