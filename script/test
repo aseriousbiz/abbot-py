@@ -15,5 +15,4 @@ fi
 cd "$ROOTDIR/src"
 
 source "../.venv/bin/activate"
-
 ABBOT_ENV=test python3 -m unittest discover -s "tests" "$@"
