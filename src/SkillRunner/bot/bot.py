@@ -164,9 +164,9 @@ class Bot(object):
             policy_name = os.environ.get("ABBOT_SANDBOX_POLICY")
             if policy_name is None:
                 if os.environ.get("ABBOT_SANDBOXED") == "false":
-                    policy_name = "none"
-                else:
                     policy_name = "permissive"
+                else:
+                    policy_name = "restrictive"
 
             policy = get_policy(policy_name, self.logger.getChild("Policy"))
             self.logger.info("Running user script under %s policy.", policy.name())
