@@ -8,6 +8,16 @@ from SkillRunner.bot.policy import Policy, PermissivePolicy, RestrictivePolicy
 #pylint: disable=missing-docstring,
 
 class PolicyTest(unittest.TestCase):
+    def test_ignores_prints_restricted(self):
+        """
+        Ensures the script can define and use classes and their attributes.
+        """
+        code = """
+print("Foo")
+        """
+        policy = RestrictivePolicy()
+        policy.exec(code, {})
+
     @parameterized.expand([
         ("unrestricted", PermissivePolicy()),
         ("restricted", RestrictivePolicy()),

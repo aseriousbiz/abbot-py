@@ -3,6 +3,7 @@ Defines the RestrictedPolicy, which uses RestrictedPython to strictly limit what
 """
 
 import logging
+import warnings
 from typing import Optional
 
 import RestrictedPython
@@ -196,6 +197,8 @@ class RestrictedEnvironment(object):
         # into calls to well-known functions.
         # Then, we provide implementations of those functions as globals.
         # For example, `import foo` becomes `__import__("foo")`, and `foo.bar`
+
+        # For completeness, we 
         # becomes `_getattr_(foo, "bar")`.
         # So, we build a dictionary of script globals to implement
         # the functionality RestrictedPython depends on.
@@ -209,6 +212,7 @@ class RestrictedEnvironment(object):
 
         self.script_globals = {
             **Guards.safe_globals,
+            '_print_': PrintCollector,
             '_getiter_': delegate.handle_getiter,
             '_getitem_': delegate.handle_getitem,
             'getattr': delegate.handle_getattr,
@@ -233,6 +237,8 @@ class RestrictedEnvironment(object):
         """
 
         # Compile the code with RestrictedPython
-        compiled = RestrictedPython.compile_restricted(code, filename="skill.py", mode="exec")
-
-        exec(compiled, self.script_globals, script_locals) # pylint: disable=exec-used
+        with warnings.catch_warnings():
+            # Ignore warnings when compiling the skill code
+            warnings.filterwarnings("ignore", category=SyntaxWarning)
+            compiled = RestrictedPython.compile_restricted(code, filename="skill.py", mode="exec")
+            exec(compiled, self.script_globals, script_locals) # pylint: disable=exec-used
