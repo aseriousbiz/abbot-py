@@ -33,6 +33,7 @@ def get_policy(name: str, logger: Optional[logging.Logger] = None) -> Policy:
         # Default to "restrictive" with the default set of allowed modules
         policy = RestrictivePolicy(logger)
         policy.allow_modules(DEFAULT_ALLOWED_MODULES)
+        policy.deny_modules(DEFAULT_DENIED_MODULES)
         return policy
 
 DEFAULT_DENIED_MODULES = [
