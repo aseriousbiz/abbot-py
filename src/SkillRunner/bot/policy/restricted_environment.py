@@ -56,6 +56,7 @@ class RestrictedEnvironment(object):
             'hasattr': self._handle_hasattr,
             '_getattr_': self._handle_getattr,
             '_unpack_sequence_': Guards.guarded_unpack_sequence,
+            '_iter_unpack_sequence_': Guards.guarded_iter_unpack_sequence,
             '_write_': _write_,
 
             # Necessary setup for classes to work in RP
