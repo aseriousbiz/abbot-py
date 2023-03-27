@@ -1,17 +1,17 @@
 """
-Defines the Permissive policy, which doesn't restrict the skill code in any way.
+Defines the Unrestricted policy, which doesn't restrict the skill code in any way.
 """
 
 import logging
 from typing import Optional
 
-class PermissivePolicy(object):
+class UnrestrictedPolicy(object):
     """
     A policy that doesn't restrict the skill code in any way.
     """
 
     def __init__(self, logger: Optional[logging.Logger] = None):
-        self.logger = logger or logging.getLogger("PermissivePolicy")
+        self.logger = logger or logging.getLogger("UnrestrictedPolicy")
 
     def name(self):
         """Returns the name of this policy."""

@@ -6,7 +6,7 @@ import logging
 
 from typing import Optional, Protocol
 from .restrictive import RestrictivePolicy
-from .permissive import PermissivePolicy
+from .unrestricted import UnrestrictedPolicy
 
 class Policy(Protocol):
     """
@@ -26,9 +26,10 @@ class Policy(Protocol):
 def get_policy(name: str, logger: Optional[logging.Logger] = None) -> Policy:
     """Retrieves the policy with the provided name."""
     if name == "none":
-        return PermissivePolicy(logger)
+        return UnrestrictedPolicy(logger)
     elif name == "permissive":
-        return PermissivePolicy(logger)
+        # We don't have a permissive policy any more, so just use unrestricted
+        return UnrestrictedPolicy(logger)
     else:
         # Default to "restrictive" with the default set of allowed modules
         policy = RestrictivePolicy(logger)

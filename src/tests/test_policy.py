@@ -3,7 +3,7 @@ import unittest
 import logging
 from parameterized import parameterized
 
-from SkillRunner.bot.policy import Policy, PermissivePolicy, RestrictivePolicy
+from SkillRunner.bot.policy import Policy, UnrestrictedPolicy, RestrictivePolicy
 
 #pylint: disable=missing-docstring,
 
@@ -19,7 +19,7 @@ print("Foo")
         policy.exec(code, {})
 
     @parameterized.expand([
-        ("unrestricted", PermissivePolicy()),
+        ("unrestricted", UnrestrictedPolicy()),
         ("restricted", RestrictivePolicy()),
     ])
     def test_classes_and_attrs(self, _name: str, policy: Policy):
@@ -48,7 +48,7 @@ output.append(hasattr(t, 'deleteme'))
         self.assertEqual([1, 42, 99, True, False], output)
 
     @parameterized.expand([
-        ("unrestricted", PermissivePolicy(), True),
+        ("unrestricted", UnrestrictedPolicy(), True),
         ("restricted", RestrictivePolicy(), False),
     ])
     def test_private_attrs_in_script(self, _name: str, policy: Policy, success: bool):
@@ -79,7 +79,7 @@ output.append(Thing()._value)
                 'Line 5: "_value" is an invalid attribute name because it starts with "_".'))
 
     @parameterized.expand([
-        ("unrestricted", PermissivePolicy(), True),
+        ("unrestricted", UnrestrictedPolicy(), True),
         ("restricted", RestrictivePolicy(), False),
     ])
     def test_private_attrs_in_provided_object(self, _name: str, policy: Policy, success: bool):
@@ -106,7 +106,7 @@ output.append(protected._value)
                 ('Line 2: "_value" is an invalid attribute name because it starts with "_".',))
 
     @parameterized.expand([
-        ("unrestricted", PermissivePolicy()),
+        ("unrestricted", UnrestrictedPolicy()),
         ("restricted", RestrictivePolicy()),
     ])
     def test_private_attrs_within_provided_object(self, _name: str, policy: Policy):
@@ -129,7 +129,7 @@ protected.increment()
         self.assertEqual(protected._counter, 3)
 
     @parameterized.expand([
-        ("unrestricted", PermissivePolicy()),
+        ("unrestricted", UnrestrictedPolicy()),
         ("restricted", RestrictivePolicy()),
     ])
     def test_lists(self, _name: str, policy: Policy):
@@ -151,7 +151,7 @@ output.append(list)
         ])
 
     @parameterized.expand([
-        ("unrestricted", PermissivePolicy()),
+        ("unrestricted", UnrestrictedPolicy()),
         ("restricted", RestrictivePolicy()),
     ])
     def test_dicts(self, _name: str, policy: Policy):
@@ -169,7 +169,7 @@ output.append(dict)
         ])
 
     @parameterized.expand([
-        ("unrestricted", PermissivePolicy()),
+        ("unrestricted", UnrestrictedPolicy()),
         ("restricted", RestrictivePolicy()),
     ])
     def test_list_iteration(self, _name: str, policy: Policy):
@@ -183,7 +183,7 @@ for i in list:
         self.assertEqual(output, [1, 2, 3])
 
     @parameterized.expand([
-        ("unrestricted", PermissivePolicy()),
+        ("unrestricted", UnrestrictedPolicy()),
         ("restricted", RestrictivePolicy()),
     ])
     def test_sequence_unpack(self, _name: str, policy: Policy):
@@ -197,7 +197,7 @@ output.append(f"a={a},b={b},c={c}")
         self.assertEqual(output, ["a=1,b=2,c=3"])
 
     @parameterized.expand([
-        ("unrestricted", PermissivePolicy()),
+        ("unrestricted", UnrestrictedPolicy()),
         ("restricted", RestrictivePolicy()),
     ])
     def test_list_comprehension(self, _name: str, policy: Policy):
@@ -219,7 +219,7 @@ output.append([i*2 for i in [1, 2, 3]])
 import {import_attempt}
 output.append(True)
         """
-        policy = PermissivePolicy()
+        policy = UnrestrictedPolicy()
 
         output = []
         policy.exec(code, { "output" : output })
@@ -291,5 +291,5 @@ output.append(True)
 
         self.assertEqual(output, [True])
         self.assertEqual(context.output, [
-            "WARNING:RestrictivePolicy.Delegate:Skill code is importing module 'os.path'"
+            "WARNING:RestrictivePolicy.RestrictedEnvironment:Skill code is importing module 'os.path'"
         ])
