@@ -45,7 +45,7 @@ class RestrictedEnvironment(object):
             else:
                 raise PermissionError("Attempted to write to an unwritable object.")
 
-        self.script_globals = {
+        self.env_globals = {
             **Guards.safe_globals,
             '_print_': PrintCollector,
             '_getiter_': self._handle_getiter,
@@ -63,9 +63,9 @@ class RestrictedEnvironment(object):
             '__metaclass__': type,
             '__name__': '__abbot_skill__',
         }
-        self.script_globals['__builtins__']['__import__'] = self._handle_import
+        self.env_globals['__builtins__']['__import__'] = self._handle_import
 
-    def exec(self, code: str, script_locals: dict) -> None:
+    def exec(self, code: str, script_globals: dict) -> None:
         """
         Executes the provided Python code in the restricted environment,
         calling back to the delegate to implement Python built-in functionality.
@@ -76,7 +76,15 @@ class RestrictedEnvironment(object):
             # Ignore warnings when compiling the skill code
             warnings.filterwarnings("ignore", category=SyntaxWarning)
             compiled = RestrictedPython.compile_restricted(code, filename="skill.py", mode="exec")
-            exec(compiled, self.script_globals, script_locals) # pylint: disable=exec-used
+
+            # Merge the environment globals with the script globals
+            # Don't allow the provided globals to override our environment globals though.
+            all_globals = {
+                **script_globals,
+                **self.env_globals,
+            }
+
+            exec(compiled, all_globals) # pylint: disable=exec-used
 
     def _denies(self, module: str) -> bool:
         """

@@ -293,3 +293,21 @@ output.append(True)
         self.assertEqual(context.output, [
             "WARNING:RestrictivePolicy.RestrictedEnvironment:Skill code is importing module 'os.path'"
         ])
+
+    @parameterized.expand([
+        ("unrestricted", UnrestrictedPolicy()),
+        ("restricted", RestrictivePolicy()),
+    ])
+    def test_access_locals(self, _name: str, policy: Policy):
+        """
+        Ensures that the script can access locals
+        """
+        code = """
+def method():
+    output.append(2)
+output.append(1)
+method()
+"""
+        output = []
+        policy.exec(code, { "output" : output })
+        self.assertEqual(output, [1, 2])
