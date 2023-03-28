@@ -200,7 +200,7 @@ class Bot(object):
         """
         if direct_message:
             kwargs['to'] = self.from_user
-        options = MessageOptions(**kwargs)
+        options = MessageOptions(self, **kwargs)
 
         self._reply_client.reply(response, options)
 
@@ -219,7 +219,7 @@ class Bot(object):
         Keyword Args:
             to (Union[RoomMessageTarget,UserMessageTarget,ChatAddress]): The recipient of the reply.
         """
-        options = MessageOptions(**kwargs)
+        options = MessageOptions(self, **kwargs)
         self._reply_client.reply_with_buttons(response, buttons, buttons_label, image_url, title, color, options)
 
     def reply_with_image(self, image, response=None, title=None, title_url=None, color=None, **kwargs):
@@ -236,7 +236,7 @@ class Bot(object):
         Keyword Args:
             to (Union[RoomMessageTarget,UserMessageTarget,ChatAddress]): The recipient of the reply.
         """
-        options = MessageOptions(**kwargs)
+        options = MessageOptions(self, **kwargs)
         self._reply_client.reply_with_image(image, response, title, title_url, color, options)
 
     def reply_later(self, response, delay_in_seconds, **kwargs):
@@ -250,7 +250,7 @@ class Bot(object):
         Keyword Args:
             to (Union[RoomMessageTarget,UserMessageTarget,ChatAddress]): The recipient of the reply.
         """
-        options = MessageOptions(**kwargs)
+        options = MessageOptions(self, **kwargs)
         self._reply_client.reply_later(response, delay_in_seconds, options)
 
     def __str__(self):
