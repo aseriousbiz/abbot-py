@@ -89,11 +89,15 @@ class ApiClient(object):
         try:
             result = requests.request(method, url, headers=headers, verify=self.verify_ssl, json=data)
             result.raise_for_status()
-            return result.json()
+            if len(result.text) > 0:
+                return result.json()
+            else:
+                return None
         except Exception as e:
             if Environment.is_test():
                 raise e
-            self.logger.exception(f"There was an error {method}ing to {url}", e)
+            self.logger.exception("There was an error %s ing to %s", method, path)
+            raise Exception("Failed to communicate with Abbot.")
 
     def delete(self, path):
         """
