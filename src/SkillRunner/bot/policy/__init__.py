@@ -71,7 +71,7 @@ DEFAULT_DENIED_MODULES = [
     "syslog", # I/O
     "threading", # threading
     "venv", # no development-time tomfoolery
-   	"warnings", # Why would they need to do this?
+    "warnings", # Why would they need to do this?
     "webbrowser",	# We don't provide access to a browser, for now.
     "winreg", # We don't run on windows.
     "winsound", # We don't run on windows.

@@ -1,5 +1,5 @@
 """
-Defines the RestrictedPolicy, which uses RestrictedPython to strictly limit what the script can do.
+Defines the RestrictivePolicy, which uses RestrictedPython to strictly limit what the script can do.
 """
 
 import logging
