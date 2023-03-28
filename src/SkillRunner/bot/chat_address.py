@@ -23,10 +23,11 @@ class ChatAddressType(IntEnum):
             cls(val)
 
 class ChatAddress(object):
-    def __init__(self, type: ChatAddressType, id: str, thread_id: Optional[str] = None):
+    def __init__(self, type: ChatAddressType, id: str, thread_id: Optional[str] = None, ephemeral_user_id: Optional[str] = None):
         self.type = type
         self.id = id
         self.thread_id = thread_id
+        self.ephemeral_user_id = ephemeral_user_id
     
     def get_chat_address(self):
         return self
@@ -47,4 +48,6 @@ class ChatAddress(object):
         }
         if self.thread_id is not None:
             ret["ThreadId"] = self.thread_id
+        if self.ephemeral_user_id is not None:
+            ret["EphemeralUser"] = self.ephemeral_user_id
         return ret
