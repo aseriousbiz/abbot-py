@@ -12,37 +12,6 @@ else
     OS="Linux"
 fi
 
-echo @"
-         __    __          __ 
-  ____ _/ /_  / /_  ____  / /_
- / __ \`/ __ \\/ __ \\/ __ \\/ __/
-/ /_/ / /_/ / /_/ / /_/ / /_  
-\\__,_/_.___/_.___/\\____/\\__/  
-                              
-";
-echo "";
-echo "This script will setup dependencies necessary to develop Abbot on a Mac."
-echo "It will ensure that brew, azure/functions, and azurite are installed."
-echo "It will create a virtual environment for the Python function runner."
-echo "It will also make sure your system has the correct development client secrets configured."
-echo "If anything is installed or set, it won't try to install them again."
-
-if [[ "${AUTOCONFIRM-}" = "1" ]]; then
-    echo "Auto-confirm enabled!"
-else
-    echo "If you don't want to continue, just hit Enter at the prompt."
-    echo "Otherwise, hit 'y' and then Enter to continue."
-    echo ""
-
-    read -p 'Continue? (y + Enter to continue, or anything else + Enter to stop):' toContinue
-
-    if [[ $toContinue != "Y" && $toContinue != "y" ]]; then
-        echo "No problem, perhaps you want to install all this manually. No hard feelings."
-        echo "Done!"
-        exit 0
-    fi
-fi
-
 if [[ x"$OS" == x"Mac" ]]; then
     if which brew > /dev/null
     then
@@ -63,7 +32,3 @@ python3 -m pip install --upgrade pip
 
 echo "Installing dependencies…"
 python3 -m pip install -r src/requirements.dev.txt
-
-echo "If you run into failures related to clang and openssl or libcrypt, check out this post for ideas: https://gist.github.com/aklap/e885721ef15c8668ed0a1dd64d2ea1a7"
-echo "And we're back to where it all started."
-echo "Done!"

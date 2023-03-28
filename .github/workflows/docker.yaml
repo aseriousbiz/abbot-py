@@ -1,8 +1,5 @@
 name: Publish 'aseriousbiz/abbot/abbot-py/runner-py' image
 
-# The rest of this is basically generic and copy-pastable.
-# The 'env' vars above control which docker file is built and what name the image is published under.
-
 on:
   # Run on every commit to 'main' or 'lab/**'
   push:
@@ -39,9 +36,21 @@ jobs:
         with:
           fetch-depth: 0
 
+      - uses: actions/setup-python@v4
+        with:
+          python-version: '3.10'
+
+      - name: Bootstrap repo
+        run: |
+          script/bootstrap
+
       - name: Run Security Update Audit
         run: |
           script/audit
+      
+      - name: Run Tests
+        run: |
+          script/test
 
       - name: Login to Azure
         uses: azure/login@v1
