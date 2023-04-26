@@ -39,6 +39,7 @@ from .arguments import Argument, MentionArgument, Arguments, RoomArgument
 from .message_options import MessageOptions
 from .conversations import Conversation
 from .policy import get_policy
+from .source_message import SourceMessage
 
 class Bot(object):
     """
@@ -100,6 +101,7 @@ class Bot(object):
         self.message_id = skillInfo.get('MessageId')
         thread_id = skillInfo.get('ThreadId') or self.message_id
         self.thread = self.room.get_thread(thread_id)
+        self.message = SourceMessage.from_json(skillInfo.get('Message'))
 
         # Clients
         api_client = ApiClient(self.skill_id, self.user_id, api_token, self.timestamp, trace_parent, self.logger.getChild("ApiClient"))
