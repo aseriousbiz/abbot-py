@@ -113,7 +113,9 @@ class Rooms(object):
         and contains information about the room if it was successful.
         """
         url = f"{self.__room_url(room)}/details"
+        print(f'Url: {url}')
         json = self._api_client.get(url)
+        print(json)
 
         return RoomDetails.from_json(json)
 
