@@ -109,7 +109,7 @@ class Rooms(object):
 
     def get_details(self, room):
         """
-        Gets extra details about a room a Room by it's ID and returns a ApiResult that indicates whether the operation succeeded or not,
+        Gets extra details about a room a Room by its ID and returns an ApiResult that indicates whether the operation succeeded or not,
         and contains information about the room if it was successful.
         """
         url = f"{self.__room_url(room)}/details"
