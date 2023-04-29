@@ -38,6 +38,7 @@ class Mention(UserMessageTarget):
     :var location: The user's location if known.
     :var timezone: The user's timezone if known
     :var platform_type: The platform type of the user.
+    :var working_hours: The working hours of the user.
     """
     def __init__(self, id, user_name, name, email, location, platform_type=None, working_hours=None):
         super().__init__(id)
