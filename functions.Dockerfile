@@ -1,4 +1,4 @@
-FROM mcr.microsoft.com/azure-functions/python:3.0-python3.9-buildenv as build
+FROM mcr.microsoft.com/azure-functions/python:4-python3.9-buildenv as build
 ARG BUILD_BRANCH=""
 ARG BUILD_SHA=""
 
@@ -14,7 +14,7 @@ RUN pip install --target=./ -r ./requirements.txt
 COPY src/ .
 RUN echo "${BUILD_BRANCH}\n${BUILD_SHA}" > "/output/build_info.txt"
 
-FROM mcr.microsoft.com/azure-functions/python:3.0-python3.9-slim
+FROM mcr.microsoft.com/azure-functions/python:4-python3.9-slim
 
 # Remove jessie from sources.list, it's EOL
 RUN sed -i '/jessie/d' /etc/apt/sources.list
