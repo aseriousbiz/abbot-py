@@ -4,6 +4,8 @@ import urllib.parse
 
 from .chat_address import ChatAddress
 from .room import Room, RoomMessageTarget
+from .room_details import RoomDetails
+from .working_hours import WorkingHours
 
 class Rooms(object):
     """
@@ -104,6 +106,25 @@ class Rooms(object):
             return Result(None)
         else:
             return Result(response.get("error"))
+
+    def get_details(self, room):
+        """
+        Gets extra details about a room a Room by its ID and returns an ApiResult that indicates whether the operation succeeded or not,
+        and contains information about the room if it was successful.
+        """
+        url = f"{self.__room_url(room)}/details"
+        json = self._api_client.get(url)
+        
+        return RoomDetails.from_json(json)
+
+    def get_coverage(self, room, room_role, tz):
+        """
+        Gets the coverage for a room by responders in the room_role
+        """
+        url = f"{self.__room_url(room)}/coverage/{room_role}?tz={tz}"
+        json = self._api_client.get(url)
+
+        return [WorkingHours.from_json(hrs) for hrs in json]
 
     def get_target(self, room_id: str) -> RoomMessageTarget:
         """

@@ -209,6 +209,18 @@ output.append([i*2 for i in [1, 2, 3]])
         self.assertEqual(output, [[2, 4, 6]])
 
     @parameterized.expand([
+        ("unrestricted", UnrestrictedPolicy()),
+        ("restricted", RestrictivePolicy()),
+    ])
+    def test_map_and_list(self, _name: str, policy: Policy):
+        code = """
+output.append(list(map(lambda num : num + 1, [1, 2, 3])))
+        """
+        output = []
+        policy.exec(code, { "output" : output })
+        self.assertEqual(output, [[2, 3, 4]])
+
+    @parameterized.expand([
         ("os"),
     ])
     def test_import_module_unrestricted(self, import_attempt: str):

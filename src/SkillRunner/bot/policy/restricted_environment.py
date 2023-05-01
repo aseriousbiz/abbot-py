@@ -55,6 +55,8 @@ class RestrictedEnvironment(object):
             'delattr': self._handle_delattr,
             'hasattr': self._handle_hasattr,
             '_getattr_': self._handle_getattr,
+            'map': map,
+            'list': list,
             '_unpack_sequence_': Guards.guarded_unpack_sequence,
             '_iter_unpack_sequence_': Guards.guarded_iter_unpack_sequence,
             '_write_': _write_,
