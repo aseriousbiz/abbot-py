@@ -6,7 +6,7 @@ class Threshold(object):
     """
     Represents a warning and deadline threshold.
     """
-    def __init__(self, warning, deadline):
+    def __init__(self, warning: timedelta, deadline: timedelta):
         self.warning = warning
         self.deadline = deadline
 
