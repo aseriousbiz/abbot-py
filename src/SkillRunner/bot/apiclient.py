@@ -31,21 +31,12 @@ class ApiClient(object):
         else:
             self.verify_ssl = True
 
-        header_obj = {
+        self._request_headers = {
                 'Content-Type': 'application/json',
-                'X-Abbot-SkillApiToken': api_token, 
-                'X-Abbot-PlatformUserId': str(user_id),
-                'X-Abbot-Timestamp': str(timestamp),
                 'Authorization': f'Bearer {api_token}',
                 'traceparent': trace_parent
             }
         self.logger.info('ApiClient created with traceparent: %s', trace_parent)
-        
-        # In order to prevent users from accessing sensitive data, we encrypt it using Fernet, 
-        # then decrypt in the accessors. 
-        obj = json.dumps(header_obj).encode('utf-8')
-        cipher = Fernet(safe_key)
-        self._request_header = cipher.encrypt(obj)
 
     def get(self, path):
         """
@@ -82,20 +73,17 @@ class ApiClient(object):
             data: The data to POST.
         """
         url = self.base_url + path
-        cipher = Fernet(safe_key)
-        obj = cipher.decrypt(self._request_header)
-        headers = json.loads(obj)
 
         try:
-            result = requests.request(method, url, headers=headers, verify=self.verify_ssl, json=data)
+            result = requests.request(method, url, headers=self._request_headers, verify=self.verify_ssl, json=data)
             result.raise_for_status()
             if len(result.text) > 0:
                 return result.json()
             else:
                 return None
-        except Exception as e:
+        except Exception as ex:
             if Environment.is_test():
-                raise e
+                raise ex
             self.logger.exception("There was an error %s ing to %s", method, path)
             raise Exception("Failed to communicate with Abbot.")
 
