@@ -26,7 +26,7 @@ class Conversation(object):
         room = Room.from_arg_json(room_arg, platform_type) if room_arg is not None else None
 
         started_by_arg = conversation_json.get('StartedBy')
-        started_by = Mention.from_json(started_by_arg, platform_type) if started_by_arg is not None else None
+        started_by = Mention.from_json(started_by_arg) if started_by_arg is not None else None
 
         created_arg = conversation_json.get('Created')
         created = dateutil.parser.isoparse(created_arg) if created_arg is not None else None
@@ -35,7 +35,7 @@ class Conversation(object):
 
         members_arg = conversation_json.get('Members')
         members = [
-            Mention.from_json(x, platform_type) for x in members_arg
+            Mention.from_json(x) for x in members_arg
         ] if members_arg is not None else None
 
         return cls(

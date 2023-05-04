@@ -51,13 +51,13 @@ class ConversationTest(unittest.TestCase):
         self.assertEqual("Mako Reactor Job", convo.title)
         self.assertEqual("https://ab.bot/conversations/42", convo.web_url)
         self.assertEqual(Room("C001", "avalanche-planning", PlatformType.SLACK), convo.room)
-        self.assertEqual(Mention("U001", "cloud", "Cloud Strife", None, Location(None, None, None), PlatformType.SLACK), convo.started_by)
+        self.assertEqual(Mention("U001", "cloud", "Cloud Strife", None, Location(None, None, None)), convo.started_by)
         self.assertEqual(datetime(2022, 1, 1, 1, 2, 3, tzinfo=tzutc()), convo.created)
         self.assertEqual(datetime(2022, 1, 2, 1, 2, 3, tzinfo=tzutc()), convo.last_message_posted_on)
         self.assertEqual([
-            Mention("U001", "cloud", "Cloud Strife", None, Location(None, None, None), PlatformType.SLACK),
-            Mention("U002", "barret", "Barret Wallace", None, Location(None, None, None), PlatformType.SLACK),
-            Mention("U003", "tifa", "Tifa Lockhart", None, Location(None, None, None), PlatformType.SLACK)
+            Mention("U001", "cloud", "Cloud Strife", None, Location(None, None, None)),
+            Mention("U002", "barret", "Barret Wallace", None, Location(None, None, None)),
+            Mention("U003", "tifa", "Tifa Lockhart", None, Location(None, None, None))
         ], convo.members)
 
         self.assertEqual(ChatAddress(ChatAddressType.ROOM, "C001", "1111.2222"), convo.get_chat_address())

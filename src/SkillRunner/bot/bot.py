@@ -108,7 +108,7 @@ class Bot(object):
         self.brain = Brain(api_client) 
         self.secrets = Secrets(api_client)
         self.rooms = Rooms(api_client, self.platform_type)
-        self.users = Users()
+        self.users = Users(api_client)
         self.utils = Utilities(api_client)
         self._signaler = Signaler(api_client, req)
         self._reply_client = ReplyClient(api_client, self.room, thread_id, req.get('PassiveReplies'), runnerInfo.get('ConversationReference'), self.skill_id, self.responses)
