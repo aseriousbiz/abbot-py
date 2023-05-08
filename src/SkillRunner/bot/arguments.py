@@ -26,7 +26,7 @@ class Argument(object):
         original_text = arg_json.get('OriginalText')
         mentioned_arg = arg_json.get('Mentioned')
         room_arg = arg_json.get('Room')
-        mentioned = Mention.from_json(mentioned_arg, platform_type)
+        mentioned = Mention.from_json(mentioned_arg)
         return MentionArgument(value, original_text, mentioned) if mentioned \
             else RoomArgument(value, original_text, Room.from_arg_json(room_arg, platform_type)) if room_arg \
             else Argument(value, original_text)

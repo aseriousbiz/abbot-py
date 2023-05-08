@@ -7,7 +7,7 @@ from SkillRunner.bot.chat_address import ChatAddress, ChatAddressType
 
 class RoomsTest(unittest.TestCase):
     def test_get_target(self):
-        users = Users()
+        users = Users(ApiClient(42, None, None, None, None))
         user = users.get_target("U1234")
         self.assertEqual("U1234", user.id)
         self.assertEqual(

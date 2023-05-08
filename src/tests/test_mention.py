@@ -2,10 +2,10 @@ import unittest
 
 from parameterized import parameterized
 
-from SkillRunner.bot.mention import Mention, TimeZone
+from SkillRunner.bot.mention import Mention, TimeZone, Location, Coordinate
 from SkillRunner.bot.chat_address import ChatAddress, ChatAddressType
 
-TEST_SEND_USER = Mention(1, "cloud", "Cloud Strife", "cstrife@ava.lanche", "Midgar", TimeZone("MST"))
+TEST_SEND_USER = Mention(1, "cloud", "Cloud Strife", "cstrife@ava.lanche", Location(Coordinate(0, 0), "Midgar", TimeZone("America/Los_Angeles")))
 
 class MentionTest(unittest.TestCase):
     def test_get_chat_address(self):
