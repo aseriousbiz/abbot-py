@@ -2,7 +2,7 @@ import unittest
 
 from SkillRunner.bot.platform_type import PlatformType
 from SkillRunner.bot.bot import Bot
-from SkillRunner.bot.mention import Mention, TimeZone
+from SkillRunner.bot.mention import Mention, TimeZone, Location, Coordinate
 from SkillRunner.bot.room import Room
 
 TEST_SKILL_ID = 42
@@ -16,7 +16,7 @@ TEST_CONV_REFERENCE = {
     }
 }
 
-TEST_SEND_USER = Mention("U777", "cloud", "Cloud Strife", "cstrife@ava.lanche", "Midgar", TimeZone("MST"))
+TEST_SEND_USER = Mention("U777", "cloud", "Cloud Strife", "cstrife@ava.lanche", Location(Coordinate(0, 0), "Midgar", TimeZone("America/Los_Angeles")))
 TEST_SEND_ROOM = Room("C777", "#midgar")
 
 class BotInitTest(unittest.TestCase):
