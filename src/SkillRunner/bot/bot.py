@@ -30,6 +30,7 @@ from . import signal_event
 from .signaler import Signaler
 from .utils import obj
 from .reply_client import ReplyClient
+from .customers_client import CustomerRequest, CustomersClient
 from .tickets_client import TicketsClient
 from . import exceptions
 from .apiclient import ApiClient
@@ -113,6 +114,7 @@ class Bot(object):
         self._signaler = Signaler(api_client, req)
         self._reply_client = ReplyClient(api_client, self.room, thread_id, req.get('PassiveReplies'), runnerInfo.get('ConversationReference'), self.skill_id, self.responses)
         self._tickets_client = TicketsClient(api_client, self)
+        self.customers = CustomersClient(api_client)
 
         self.raw = skillInfo
 
@@ -155,6 +157,7 @@ class Bot(object):
                 "bot": self,
                 "args": self.args,
                 "Button": Button,
+                "CustomerRequest": CustomerRequest,
                 "PatternType": pattern.PatternType,
                 "Argument": Argument,
                 "MentionArgument": MentionArgument,
