@@ -22,6 +22,9 @@ class Argument(object):
 
     @staticmethod
     def load_argument(arg_json, platform_type=None):
+        """
+        Loads an argument from JSON.
+        """
         value = arg_json.get('Value')
         original_text = arg_json.get('OriginalText')
         mentioned_arg = arg_json.get('Mentioned')
@@ -77,9 +80,8 @@ class Arguments(Sequence):
 
     @classmethod
     def from_json(cls, args_json, arguments, platform_type):
+        """
+        Loads arguments from JSON.
+        """
         args = [Argument.load_argument(arg, platform_type) for arg in args_json]
         return cls(args, arguments)
-
-
-
-
