@@ -44,7 +44,7 @@ kubernetes==23.6.0
 lazy-object-proxy==1.6.0
 mccabe==0.6.1
 msal-extensions==0.3.1
-msal==1.20.0
+msal==1.22.0
 msrest==0.7.1
 mysql-connector-python==8.0.25
 nltk==3.6.6
