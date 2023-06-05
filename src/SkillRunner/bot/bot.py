@@ -12,7 +12,6 @@ import numpy
 import bs4
 import soupsieve
 import boto3
-import octokit
 
 # End of user skill imports
 
