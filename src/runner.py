@@ -6,7 +6,9 @@
 import json
 import os
 import logging
+
 from SkillRunner.bot.bot import Bot
+from SkillRunner.bot import exceptions
 
 from flask import Flask,redirect,request,Response
 
@@ -110,9 +112,16 @@ def execute():
 
     bot = Bot(body, api_token, trace_parent, app.logger.getChild('Bot'))
     app.logger.debug("Running user skill")
-    bot.run_user_script()
 
     response = SkillRunResponse()
+
+    try:
+        bot.run_user_script()
+    except exceptions.InterpreterError as e:
+        response.add_error(e)
+    except Exception as e: 
+        logging.error(e)
+        response.add_error({ "errorId": type(e).__name__, "description": str(e) })
 
     app.logger.debug(f"Received {len(bot.responses)} responses")
     for reply in bot.responses:
