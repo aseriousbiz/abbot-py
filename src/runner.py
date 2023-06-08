@@ -6,9 +6,31 @@
 import json
 import os
 import logging
+
 from SkillRunner.bot.bot import Bot
+from SkillRunner.bot import exceptions
 
 from flask import Flask,redirect,request,Response
+
+class SkillRunResponse:
+    def __init__(self):
+        self.contentType = None
+        self.content = None
+        self.success = True
+        self.errors = []
+        self.replies = []
+        self.headers = None
+
+    def add_reply(self, message):
+        self.replies.append(message)
+
+    def add_error(self, error):
+        self.errors.append(error)
+        self.success = False
+    
+    def toJSON(self):
+        # Serialize the dict version of ourselves, since all the keys are intended for serialization
+        return json.dumps(self.__dict__)
 
 secret = os.environ.get("ABBOT_SKILL_RUNNER_TOKEN")
 if secret is None:
@@ -90,11 +112,21 @@ def execute():
 
     bot = Bot(body, api_token, trace_parent, app.logger.getChild('Bot'))
     app.logger.debug("Running user skill")
-    bot.run_user_script()
 
-    response = {
-        "success": True,
-    }
+    response = SkillRunResponse()
+
+    try:
+        bot.run_user_script()
+    except exceptions.InterpreterError as e:
+        response.add_error(e)
+    except Exception as e: 
+        logging.error(e)
+        response.add_error({ "errorId": type(e).__name__, "description": str(e) })
+
+    app.logger.debug(f"Received {len(bot.responses)} responses")
+    for reply in bot.responses:
+        response.add_reply(reply)
+
     if bot.is_request:
         response.Content = bot.response.raw_content
         response.ContentType = bot.response.content_type
@@ -103,7 +135,9 @@ def execute():
             headers[key] = [value]
         response.Headers = headers
 
-    return Response(json.dumps(response), mimetype="application/vnd.abbot.v1+json")
+    response_str = response.toJSON()
+    app.logger.debug(f"Responding with: '{response_str}'")
+    return Response(response_str, mimetype="application/vnd.abbot.v1+json")
 
 if __name__ == "__main__":
     port = int(os.environ.get("PORT", 9001))
