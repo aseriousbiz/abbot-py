@@ -6,7 +6,7 @@ ARG BUILD_SHA=""
 RUN sed -i '/jessie/d' /etc/apt/sources.list
 
 # Upgrade any OS packages with outstanding upgrades, to ensure we've got security fixes.
-RUN apt-get update && apt-get upgrade -qyy && rm -rf /var/lib/apt/lists/*
+RUN apt-get --allow-releaseinfo-change update && apt-get upgrade -qyy && rm -rf /var/lib/apt/lists/*
 
 WORKDIR output
 COPY src/requirements.txt .
@@ -20,10 +20,13 @@ FROM mcr.microsoft.com/azure-functions/python:4-python3.9-slim
 RUN sed -i '/jessie/d' /etc/apt/sources.list
 
 # Upgrade any OS packages with outstanding upgrades, to ensure we've got security fixes.
-RUN apt-get update && apt-get upgrade -qyy && rm -rf /var/lib/apt/lists/*
+RUN apt-get --allow-releaseinfo-change update && apt-get upgrade -qyy && rm -rf /var/lib/apt/lists/*
 
 # Remove jessie from sources.list, it's EOL
 RUN sed -i '/jessie/d' /etc/apt/sources.list
+
+# Run a pip upgrade of a few packages in the "root" Python environment to make the scanner happier
+RUN pip install --upgrade pip setuptools wheel
 
 ENV \
     # Enable detection of running in a container
