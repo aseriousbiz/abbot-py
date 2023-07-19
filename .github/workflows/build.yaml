@@ -1,0 +1,116 @@
+name: Build Python Runner
+
+on:
+  # Run on every commit to 'main' or 'lab/**'
+  push:
+    branches:
+      - main
+      - lab/**
+
+  # And on every PR to 'main'
+  pull_request:
+    branches:
+      - main
+
+  # Make sure images are built at least once a week.
+  schedule:
+    # https://crontab.guru/#22_16_*_*_1
+    # "At 16:22 UTC (09:22 PT) every Monday"
+    # GitHub recommends avoiding the top of the hour because it's commonly used by other actions.
+    # Scheduled actions may be skipped if there's high load.
+    - cron: '22 16 * * 1'
+
+  # Allow manually scheduling the build too.
+  workflow_dispatch:
+
+jobs:
+  audit:
+    runs-on: ubuntu-latest
+    steps:
+      - name: Checkout branch
+        uses: actions/checkout@v3.1.0
+        with:
+          fetch-depth: 0
+
+      - uses: actions/setup-python@v4
+        with:
+          python-version: '3.10'
+
+      - name: Bootstrap repo
+        run: |
+          script/bootstrap
+
+      - name: Run Security Update Audit
+        run: |
+          script/audit
+  
+  test:
+    runs-on: ubuntu-latest
+    steps:
+      - name: Checkout branch
+        uses: actions/checkout@v3.1.0
+        with:
+          fetch-depth: 0
+
+      - uses: actions/setup-python@v4
+        with:
+          python-version: '3.10'
+
+      - name: Bootstrap repo
+        run: |
+          script/bootstrap
+      
+      - name: Run Tests
+        run: |
+          script/test
+
+  build:
+    runs-on: ubuntu-latest
+    steps:
+      - name: Checkout branch
+        uses: actions/checkout@v3.1.0
+        with:
+          fetch-depth: 0
+
+      - name: Login to Azure
+        uses: azure/login@v1
+        with:
+          creds: '{ "clientId": "${{ secrets.DEPLOYBOT_AZURE_AD_CLIENT_ID }}", "clientSecret": "${{ secrets.DEPLOYBOT_AZURE_AD_CLIENT_SECRET }}", "subscriptionId": "${{ secrets.AZURE_SUBSCRIPTION_ID }}", "tenantId": "${{ secrets.AZURE_TENANT_ID }}" }'
+
+      - name: Build abbotimages.azurecr.io/aseriousbiz/abbot-py/runner-py
+        env:
+          image_registry: abbotimages
+          image_repository: aseriousbiz/abbot-py/runner-py
+          dockerfile: Dockerfile
+          push: 1
+        run: |
+          script/ci/docker-build
+
+      - name: Build abbotimages.azurecr.io/aseriousbiz/abbot-py/runner-py-functions
+        env:
+          image_registry: abbotimages
+          image_repository: aseriousbiz/abbot-py/runner-py-functions
+          dockerfile: functions.Dockerfile
+          push: 1
+        run: |
+          script/ci/docker-build
+
+      - name: Build abbotpublic.azurecr.io/runners/python
+        env:
+          image_registry: abbotpublic
+          image_repository: runners/python
+          dockerfile: Dockerfile
+          push: 1
+        run: |
+          script/ci/docker-build
+
+      - name: Display image tag
+        run: |
+          echo "Ready to deploy aseriousbiz/abbot-py/runner-py:commit-${{ github.sha }}"  
+
+      - name: Trigger deployment workflow (Main only)
+        if: github.event_name == 'push' && github.ref_name == 'main'
+        env:
+          GH_TOKEN: ${{ github.token }}
+        run: |
+          gh workflow run deploy.yaml -R "${{github.repository}}" -f environment=production -f label="commit-${{ github.sha }}"
