@@ -77,19 +77,19 @@ jobs:
         with:
           creds: '{ "clientId": "${{ secrets.DEPLOYBOT_AZURE_AD_CLIENT_ID }}", "clientSecret": "${{ secrets.DEPLOYBOT_AZURE_AD_CLIENT_SECRET }}", "subscriptionId": "${{ secrets.AZURE_SUBSCRIPTION_ID }}", "tenantId": "${{ secrets.AZURE_TENANT_ID }}" }'
 
-      - name: Build abbotimages.azurecr.io/aseriousbiz/abbot-py/abbot-py
+      - name: Build abbotimages.azurecr.io/aseriousbiz/abbot-py/runner-py
         env:
           image_registry: abbotimages
-          image_repository: aseriousbiz/abbot-py/abbot-py
+          image_repository: aseriousbiz/abbot-py/runner-py
           dockerfile: Dockerfile
           push: 1
         run: |
           script/ci/docker-build
 
-      - name: Build abbotimages.azurecr.io/aseriousbiz/abbot-py/abbot-py-functions
+      - name: Build abbotimages.azurecr.io/aseriousbiz/abbot-py/runner-py-functions
         env:
           image_registry: abbotimages
-          image_repository: aseriousbiz/abbot-py/abbot-py-functions
+          image_repository: aseriousbiz/abbot-py/runner-py-functions
           dockerfile: functions.Dockerfile
           push: 1
         run: |
