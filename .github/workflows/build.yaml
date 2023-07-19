@@ -82,6 +82,7 @@ jobs:
           image_registry: abbotimages
           image_repository: aseriousbiz/abbot-py/abbot-py
           dockerfile: Dockerfile
+          push: 1
         run: |
           script/ci/docker-build
 
@@ -90,6 +91,7 @@ jobs:
           image_registry: abbotimages
           image_repository: aseriousbiz/abbot-py/abbot-py-functions
           dockerfile: functions.Dockerfile
+          push: 1
         run: |
           script/ci/docker-build
 
@@ -98,6 +100,7 @@ jobs:
           image_registry: abbotpublic
           image_repository: runners/python
           dockerfile: Dockerfile
+          push: 1
         run: |
           script/ci/docker-build
 
