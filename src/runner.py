@@ -12,7 +12,12 @@ from SkillRunner.bot import exceptions
 
 from flask import Flask,redirect,request,Response
 
+
 class SkillRunResponse:
+    """
+    Body of the response when calling a skill via the skill editor or the abbot cli.
+    This maps to the C# SkillRunResponse class.
+    """
     def __init__(self):
         self.contentType = None
         self.content = None
@@ -20,15 +25,25 @@ class SkillRunResponse:
         self.errors = []
         self.replies = []
         self.headers = None
+        self.outputs = None
 
     def add_reply(self, message):
+        """
+        Adds a reply to the response
+        """
         self.replies.append(message)
 
     def add_error(self, error):
+        """
+        Adds an error to the response
+        """
         self.errors.append(error)
         self.success = False
     
     def toJSON(self):
+        """
+        Returns a JSON representation of the response
+        """
         # Serialize the dict version of ourselves, since all the keys are intended for serialization
         return json.dumps(self.__dict__)
 
@@ -126,6 +141,10 @@ def execute():
     app.logger.debug(f"Received {len(bot.responses)} responses")
     for reply in bot.responses:
         response.add_reply(reply)
+
+    response.outputs = {}
+    for key, value in bot.outputs.items():
+        response.outputs[key] = value
 
     if bot.is_request:
         response.Content = bot.response.raw_content

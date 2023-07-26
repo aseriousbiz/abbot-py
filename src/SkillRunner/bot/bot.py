@@ -78,6 +78,7 @@ class Bot(object):
     :var request: The request that triggered the skill, if any.
     :var response: The response that will be sent to the sender of the HTTP request, if any.
     :var conversation: The conversation this skill was invoked within, if any.
+    :var outputs: A dictionary of outputs to send back to the skill runner for playbook calls.
     """
     def __init__(self, req, api_token, trace_parent=None, logger=None):
         self.responses = []
@@ -135,6 +136,8 @@ class Bot(object):
         self.is_interaction = skillInfo.get('IsInteraction')
         self.is_request = skillInfo.get('IsRequest')
         self.is_chat = not self.is_request
+        self.is_playbook = skillInfo.get('IsPlaybook')
+        self.outputs = {}
         
         if self.is_request:
             self.request = TriggerEvent(skillInfo.get('Request'))
